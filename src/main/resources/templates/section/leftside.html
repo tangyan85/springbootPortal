@@ -1,0 +1,43 @@
+<aside class="main-sidebar" th:fragment="leftside">
+  <!-- sidebar: style can be found in sidebar.less -->
+  <script th:inline="javascript">
+    var portalUrlPrefix = /*[[${PORTAL_SERVER.urlPrefix}]]*/ null;
+    var jiraUrlPrefix = /*[[${JIRA_SERVER.loginUrl}]]*/ null;
+    var confUrlPrefix = /*[[${CONFLUENCE_SERVER.loginUrl}]]*/ null;
+    var confUrlContext = /*[[${CONFLUENCE_SERVER.urlContext}]]*/ null;
+    var testlinkUrlPrefix = /*[[${TESTLINK_SERVER.loginUrl}]]*/ null;
+    var jenkinsUrlPrefix = /*[[${JENKINS_SERVER.loginUrl}]]*/ null;
+    var svnLoginUrl = /*[[${SVN_SERVER.loginUrl}]]*/ null;
+    var svnUrlPrefix = /*[[${SVN_SERVER.urlPrefix}]]*/ null;
+    var portalServerRoot = /*[[${PORTAL_SERVER.serverRoot}]]*/ null;
+    var sonarUrlContext = /*[[${SONAR_SERVER.urlContext}]]*/ null;
+    //alert(svnLoginUrl);
+  </script>
+  <section class="sidebar">
+    <!-- sidebar menu: : style can be found in sidebar.less -->
+    <ul class="sidebar-menu" data-widget="tree">
+
+
+    </ul>
+  </section>
+
+  <script type="text/javascript">
+    $(function () {
+   
+      $('.sidebar').on('click', function (event) {
+        event.preventDefault();
+        var target = $(event.target);
+        var targetUrl = target.data("url");
+        target.parent().siblings().removeClass('active');
+        target.parent().addClass('active');
+        if (typeof (targetUrl) != "undefined" && targetUrl != null) {
+          //if ($("#mainframe", parent.document.body).attr('src') == targetUrl) return;
+          $("#loading", parent.document.body).show();
+         // $("#mainframe", parent.document.body).hide();
+          $("#mainframe", parent.document.body).attr("src", targetUrl);
+          
+        }
+      });
+    })
+  </script>
+</aside>

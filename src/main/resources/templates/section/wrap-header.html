@@ -1,0 +1,104 @@
+<header class="main-header" th:fragment="wrap-header">
+  <!-- Logo -->
+  <a href="#" class="logo" style="padding-left: 0px; padding-right: 0px;">
+    <span class="logo-mini">
+      <img th:src="@{/img/logo36.png}">
+    </span>
+    <span class="logo-lg">
+      <img th:src="@{/img/logo.png}">ADLM</span>
+  </a>
+  <!-- Header Navbar: style can be found in header.less -->
+  <nav class="navbar navbar-static-top">
+    <!-- Sidebar toggle button-->
+    <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+      <span class="sr-only">Toggle navigation</span>
+    </a>
+
+    <div class="navbar-custom-menu">
+      <ul class="nav navbar-nav">
+        <li role="presentation">
+          <a th:href="${PORTAL_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px" data-url-top="true">全生命周期管理</a>
+        </li>
+        <li role="presentation">
+          <a th:href="${JIRA_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px">任务跟踪</a>
+        </li>
+        <li role="presentation">
+          <a th:href="${CONFLUENCE_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px">文档协同</a>
+        </li>
+        <li role="presentation">
+          <a th:href="${TESTLINK_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px">测试管理</a>
+        </li>
+        <li role="presentation">
+          <a th:href="${JENKINS_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px">持续集成</a>
+        </li>
+        <li role="presentation">
+          <a th:href="${ARTIFACT_SERVER.urlContext}" style="padding-left: 10px;padding-right: 10px">软件仓库</a>
+        </li>
+        <li role="presentation">
+          <a th:href="${SVN_SERVER.urlContext}" style="padding-left: 10px;padding-right: 10px">代码管理</a>
+        </li>
+        <li role="presentation">
+          <a th:href="${SONAR_SERVER.urlContext}" style="padding-left: 10px;padding-right: 10px">静态分析</a>
+        </li>
+        <li role="presentation">
+          <a href="http://10.214.178.66/zabbix/" style="padding-left: 10px;padding-right: 10px">监控管理</a>
+        </li>
+        <li role="presentation">
+          <a href="http://10.214.169.130/itopzh2/web/pages/UI.php" style="padding-left: 10px;padding-right: 10px">运维管理</a>
+        </li>
+
+
+        <li class="dropdown user user-menu">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <img src="dist/img/user2-160x160.jpg" class="user-image" alt="User Image">
+            <span class="hidden-xs" th:text="${currentUser.username}"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <!-- User image -->
+            <li class="user-header">
+              <img src="dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+              <p>
+                Web Developer
+                <small>Member since Nov. 2012</small>
+              </p>
+            </li>
+            <!-- Menu Footer-->
+            <li class="user-footer">
+              <div class="pull-right">
+                <a th:href="@{/logout}" class="btn btn-default btn-flat">Sign out</a>
+              </div>
+            </li>
+          </ul>
+        </li>
+        <!-- Control Sidebar Toggle Button -->
+        <li>
+          <a href="#" data-toggle="control-sidebar">
+            <i class="fa fa-gears"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <script type="text/javascript">
+    $('.navbar-nav').on('click', function (event) {
+      event.preventDefault();
+      var target = $(event.target);
+      var targetUrl = target[0].href;
+      var pathname=target[0].pathname||"";
+      var targetClass = target[0].className;
+      //var isHidden = target.data("leftbarVisible");
+      var isTop = target.data("urlTop");
+      target.parent().siblings().removeClass('active');
+      target.parent().addClass('active');
+
+      if (typeof (targetUrl) != "undefined" && targetUrl != null&&pathname!='/login') {
+        debugger;
+        if (targetClass.indexOf("dropdown") != -1) {
+          //下面框不跳转
+        } else {
+          $("#mainframe", parent.document.body).attr("src", targetUrl);
+        }
+      }
+    });
+  </script>
+</header>

@@ -1,0 +1,57 @@
+# 自定义的配置请在myprops下配置，不要自立门户(例如aa: bb)，
+# 否则会有奇异的bug(实测发现单元测试可以跑，但tomcat启动后找不到配置的值)
+##10.214.170.64 crowd.wanda-fg.local
+#10.214.170.64 sso-uat.wanda-fg.local
+#10.214.170.65 svn-uat.wanda-fg.local
+#10.214.170.66 jira-uat.wanda-fg.local
+##10.214.170.67 ldap-uat.wanda-fg.local
+#10.214.170.67 adlm-uat.wanda-fg.local
+#10.214.170.68 conf-uat.wanda-fg.local
+#10.214.170.70 ci-uat.wanda-fg.local
+#10.214.170.71 sonar-uat.wanda-fg.local
+#10.214.170.65 phab-uat.wanda-fg.local
+#10.15.116.175 portal.wanda-fg.local
+
+myprops:
+  whoami: uat # 环境
+  confluence: # confluence相关
+    username: admin
+    password: admin@123
+    pureIp: conf-uat.wanda-fg.local
+    urlHead: http://conf-uat.wanda-fg.local:8080
+  jenkins: # jenkins相关
+    username: admin
+    password: admin@123
+    urlHead: http://ci-uat.wanda-fg.local:8080
+    pureIp: ci-uat.wanda-fg.local
+  jira: # jira相关
+    username: admin
+    password: admin@123
+    pureIp: jira-uat.wanda-fg.local
+    urlHead: http://jira-uat.wanda-fg.local:8080
+  scm: # scm相关
+    svn: 
+      username: admin
+      password: admin@123
+      pureIp: svn-uat.wanda-fg.local
+      urlHead: https://svn-uat.wanda-fg.local:4434
+  ldap: # ldap相关
+    enable: false
+    url: ldap://adlm-uat.wanda-fg.local:389/dc=wanda,dc=cn
+                      
+spring:
+  datasource: 
+    password: Wanda@2017
+    url: jdbc:mysql://10.214.170.70:3306/portal2?useSSL=false
+    username: portal
+  redis: 
+    database: 0
+    host: 10.214.170.115
+    port: 6379
+    password:
+
+logging:
+  level:
+    root: ERROR
+    org.springframework.web: DEBUG
+    org.hibernate: ERROR

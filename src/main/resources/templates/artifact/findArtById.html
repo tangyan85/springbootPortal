@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="section/header :: head"></head>
+<link rel="stylesheet" th:href="@{/css/wizard.css}" />
+
+<body>
+	<div th:fragment="dashboard">
+		<div>
+			<div class="row">
+				<div class="col-lg-12">
+					<h1 class="page-header">nexus列表</h1>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="panel panel-default">
+						<div class="panel-heading">nexus信息</div>
+						<div class="panel-body" style="min-height:500px">
+							<div class="row">
+								<div class="col-sm-offset-1 col-lg-10" style="padding-bottom: 15px;">
+									<table class="table">
+										<thead>
+											<tr>
+												<th>#</th>
+												<th>项目id</th>
+												<th>操作类型</th>
+												<th>创建时间</th>
+												<th>路径</th>
+												<th>操作</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr th:each="art ,artStat : ${artifacts}">
+												<td th:text="${artStat.count}"></td>
+												<td th:text="${art.artifactId}"></td>
+												<td th:text="${art.aritifactType.value}"></td>
+												<td th:text="${#dates.format(art.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+												<td th:text="${art.rootPath}"></td>
+												<td>
+													<a th:href="|javascript:toViewArt('${art.rootPath}')|">
+														<span class="glyphicon glyphicon-search" aria-hidden="true" title="查看"></span>
+													</a>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script th:inline="javascript">
+		//var artLoginUrl = /*[[${ARTIFACT_SERVER.loginUrl}]]*/ null;
+		var artUrlPrefix = /*[[${ARTIFACT_SERVER.urlPrefix}]]*/ null;
+	</script>
+	<script>
+		function toViewArt(rootPath) {
+			debugger;
+			var path = rootPath.replace(/\./g, "/");
+			var url = artUrlPrefix + "/service/siesta/repository/browse/COMMON_GROUP/" + path;
+			window.open(url)
+		}
+	</script>
+</body>
+
+<footer th:include="section/footer :: footer"></footer>
+
+
+</html>

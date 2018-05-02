@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+
+<head th:replace="section/header :: head"></head>
+<link rel="stylesheet" th:href="@{/css/login.css}" />
+<style type="text/css">
+    body {
+        background: #F5F5F5;
+    }
+</style>
+
+<body>
+    <div class="login-form">
+        <form id="loginForm" th:action="@{/login}" method="post">
+            <div class="top">
+                <h1>登录</h1>
+                <h4>请输入用户名与密码</h4>
+            </div>
+            <div class="form-area">
+                <div th:if="${loginError}" class="group">
+                    用户名或密码
+                </div>
+                <div th:if="${successLogout}" class="group">
+                    您已注销成功
+                </div>
+                <div class="group">
+                    <input class="form-control" placeholder="username" name="username" type="text" value="admin">
+                    <i class="fa fa-user"></i>
+                </div>
+                <div class="group">
+                    <input class="form-control" placeholder="password" name="password" type="password" value="123456">
+                    <i class="fa fa-envelope-o"></i>
+                </div>
+                <button type="submit" class="btn btn-default btn-block">确定</button>
+            </div>
+        </form>
+        <div class="footer-links row">
+            <div class="col-xs-offset-6 col-xs-6 text-right">
+                <a href="http://10.214.170.67/password/">
+                    <i class="fa fa-external-link"></i>重置密码</a>
+            </div>
+        </div>
+    </div>
+</body>
+<footer th:include="section/footer :: footer"></footer>
+<script th:src="@{/js/common/objectUtil.js}"></script>
+<script>
+    $(function () {
+        //logout时存在问题，暂时坐在login页面强制跳转登录
+        var parent = $("#wrapper", window.parent.document);
+        if (!isEmpty(parent)) {
+            var wrapper = parent[0];
+            if (!isEmpty(wrapper)) {
+                top.location.href = "/";
+            }
+        }
+
+    });
+</script>
+
+</html>

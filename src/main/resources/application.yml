@@ -1,0 +1,63 @@
+#entitymanager:
+#  packagesToScan: com.wanda.portal
+myprops: 
+  confluence: # confluence相关通用配置
+    genericApi: /rest/api/
+  jenkins: # jenkins相关通用配置
+    jsonQueryJobsApi: "/api/json?depth=1&tree=jobs[name,displayName]&pretty=true"
+    createItem: /createItem
+  jira: # jira相关通用配置
+    genericApi: /rest/api/2/
+    oldCreateApi: /rest/project-templates/1.0/createshared/   
+  scm:
+    svn:
+      genericApi: /csvn/api/1/ 
+         
+server:
+  port: '8083'
+  
+spring:
+  profiles:
+    active: dev2
+  datasource: 
+    driver-class-name: com.mysql.jdbc.Driver
+#    type: com.alibaba.druid.pool.DruidDataSource
+    hikari:
+      maximumPoolSize: 40
+
+#    filters: stat
+#    maxActive: 20
+#    initialSize: 1
+#    maxWait: 60000
+#    minIdle: 1
+#    timeBetweenEvictionRunsMillis: 60000
+#    minEvictableIdleTimeMillis: 300000
+#    validationQuery: select 'x'
+#    testWhileIdle: true
+#    testOnBorrow: false
+#    testOnReturn: false
+#    poolPreparedStatements: true
+#    maxOpenPreparedStatements: 20
+  jpa:
+    properties:
+      hibernate:
+        show_sql: 'fasle'
+        format_sql: 'true' 
+        dialect: org.hibernate.dialect.MySQL5Dialect
+        hbm2ddl:
+          auto: update
+  thymeleaf:  
+    cache: false  
+    prefix: classpath:/templates/
+    suffix: .html  
+    encoding: UTF-8  
+    servlet:
+      content-type: text/html  
+    mode: HTML5  
+  redis:
+    jedis:
+      pool.max-active: 8
+      pool.max-wait: -1
+      pool.max-idle: 8
+      pool.min-idle: 0
+    timeout: 100000

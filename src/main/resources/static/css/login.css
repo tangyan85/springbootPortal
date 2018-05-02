@@ -1,0 +1,145 @@
+body {
+    background: #3d464d;
+    color: #58666e;
+    margin: 0;
+    line-height: 1.7em;
+    font-size: 13px;
+    font-family: 'Open Sans', sans-serif;
+    outline: 0;
+    text-Shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+          padding-top: 90px;
+  }
+
+#top {
+    height: 60px;
+    background: #399bff;
+    color: #fff;
+    width: 100%;
+    position: fixed;
+    z-index: 900;
+    top: 0;
+  }
+
+  /* =================================================================================
+Login Pages
+================================================================================= */
+.login-form {
+    width: 360px;
+    padding-top: 100px;
+    margin: 0px auto;
+    text-shadow: none;
+  }
+  .login-form form {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+  }
+  .login-form form img {
+    margin-bottom: 18px;
+  }
+  .login-form form .profile {
+    border-radius: 999px;
+  }
+  .login-form form .top {
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+    padding: 30px 0;
+  }
+  .login-form form .top .icon {
+    width: 100px;
+    height: 100px;
+  }
+  .login-form form .top h1,
+  .login-form form .top h4 {
+    margin: 0;
+  }
+  .login-form form .top h1 {
+    color: #37363E;
+    font-size: 30px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    margin-top: -14px;
+  }
+  .login-form form .top h4 {
+    font-weight: normal;
+    color: #76757B;
+    font-size: 15px;
+  }
+  .login-form form .form-area {
+    padding: 40px;
+  }
+  .login-form form .form-area .group {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .login-form form .form-area .form-control {
+    padding-left: 38px;
+    height: 40px;
+  }
+  .login-form form .form-area .fa {
+    position: absolute;
+    top: 11px;
+    left: 13px;
+    font-size: 16px;
+    color: #C3C3C3;
+  }
+  .login-form form .form-area .btn {
+    height: 42px;
+    font-weight: 600;
+  }
+  .login-form form .form-area .checkbox {
+    margin-bottom: 20px;
+  }
+  .login-form .footer-links {
+    color: #76757B;
+    padding: 10px 5px;
+  }
+  .login-form .footer-links a {
+    color: #76757B;
+  }
+  .login-form .footer-links a:hover {
+    color: #37363e;
+  }
+  /* Form Control */
+.form-control {
+    height: 34px;
+    border-radius: 3px;
+    padding-left: 10px;
+    font-size: 14px;
+    background: #fff;
+    border: 1px solid #BDC4C9;
+    display: block;
+    box-shadow: inset 0px 1px 0px #F1F0F1;
+  }
+  .form-control:focus {
+    background: #f7f7f7;
+    border-color: #BDC4C9;
+    box-shadow: none;
+    border-top: 1px solid #B7B7B7;
+  }
+  .form-label {
+    font-weight: 500;
+  }
+  /* Fieldset Form */
+  .fieldset-form fieldset {
+    padding: 20px;
+    margin: 0 2px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    padding-top: 10px;
+  }
+  .fieldset-form legend {
+    width: auto;
+    padding: 0px 10px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    line-height: inherit;
+    color: #333;
+    border: 0;
+    font-weight: 600;
+    border-bottom: none;
+  }
+  .btn-default {
+    background-color: #399bff;
+    color: #fff;
+  }

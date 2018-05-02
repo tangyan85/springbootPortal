@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="section/header :: head"></head>
+<link rel="stylesheet" th:href="@{/css/wizard.css}" />
+
+<body>
+	<div th:fragment="dashboard">
+		<div>
+			<div class="row">
+				<div class="col-lg-12">
+					<h1 class="page-header">svn列表</h1>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="panel panel-default">
+						<div class="panel-heading">svn信息</div>
+						<div class="panel-body" style="min-height:500px">
+							<div class="row">
+								<div class="col-sm-offset-1 col-lg-10" style="padding-bottom: 15px;">
+									<table class="table">
+										<thead>
+											<tr>
+												<th>#</th>
+												<th id="serverId">服务器地址</th>
+												<th id="repoType">服务器类型</th>
+												<th id="repoId">ID</th>
+												<th id="repoName">名称</th>
+												<th id="createTime">创建时间</th>
+												<th id="repoType">类型</th>
+												<th>操作</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr th:each="art ,artStat : ${svns}">
+												<td th:text="${artStat.count}"></td>
+												<td th:text="${art.server.outerServerIpAndPort}"></td>
+												<td th:text="${art.repoType.value}"></td>
+												<td th:text="${art.repoId}"></td>
+												<td th:text="${art.repoName}"></td>
+												<td th:text="${#dates.format(art.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+												<td th:text="${art.repoType.value}"></td>
+												<td>
+													<a th:href="|javascript:toViewSvn('${art.repoName}')|">
+														<span class="glyphicon glyphicon-search" aria-hidden="true" title="查看"></span>
+													</a>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script th:inline="javascript">
+			var svnUrlPrefix = /*[[${VIEWVC_SERVER.urlPrefix}]]*/ null;
+		</script>
+		<script>
+			function toViewSvn(repoName) {
+				debugger;
+				var url = svnUrlPrefix + "/viewvc/" + repoName;
+				window.open(url)
+			}
+		</script>
+	</div>
+</body>
+
+<footer th:include="section/footer :: footer"></footer>
+
+
+</html>

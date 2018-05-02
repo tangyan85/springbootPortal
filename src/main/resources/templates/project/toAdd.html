@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="section/header :: head"></head>
+<link rel="stylesheet" th:href="@{/css/wizard.css}" />
+
+<body>
+	<div th:fragment="dashboard">
+		<div>
+			<div class="row" style="margin:0">
+				<div class="col-lg-12">
+					<h1 class="page-header">新建项目</h1>
+				</div>
+			</div>
+
+			<div class="row" style="margin:0">
+				<section>
+					<div class="wizard">
+						<div class="wizard-inner" id="project">
+							<div class="connecting-line"></div>
+							<ul class="nav nav-tabs" role="tablist">
+								<li role="presentation" class="active">
+									<a href="#projectStep" data-toggle="tab" aria-controls="projectStep" role="tab" title="项目详情">
+										<span class="round-tab">
+											<i class="glyphicon glyphicon-folder-open"></i>
+										</span>
+									</a>
+								</li>
+								<li role="presentation" class="disabled">
+									<a href="#projectMemberStep" data-toggle="tab" aria-controls="projectMemberStep" role="tab" title="项目团队">
+										<span class="round-tab">
+											<i class="glyphicon glyphicon-knight"></i>
+										</span>
+									</a>
+								</li>
+								<li role="presentation" class="disabled">
+									<a href="#jiraStep" data-toggle="tab" aria-controls="jiraStep" role="tab" title="任务跟踪">
+										<span class="round-tab">
+											<i class="glyphicon glyphicon-road"></i>
+										</span>
+									</a>
+								</li>
+								<li role="presentation" class="disabled">
+									<a href="#confluenceStep" data-toggle="tab" aria-controls="confluenceStep" role="tab" title="文档协同">
+										<span class="round-tab">
+											<i class="glyphicon glyphicon-magnet"></i>
+										</span>
+									</a>
+								</li>
+								<li role="presentation" class="disabled">
+									<a href="#SCMRepoStep" data-toggle="tab" aria-controls="SCMRepoStep" role="tab" title="源代码管理">
+										<span class="round-tab">
+											<i class="glyphicon glyphicon-send"></i>
+										</span>
+									</a>
+								</li>
+								<li role="presentation" class="disabled">
+									<a href="#jenkinsStep" data-toggle="tab" aria-controls="jenkinsStep" role="tab" title="持续集成">
+										<span class="round-tab">
+											<i class="glyphicon glyphicon-book"></i>
+										</span>
+									</a>
+								</li>
+								<li role="presentation" class="disabled">
+									<a href="#ArtifactsStep" data-toggle="tab" aria-controls="ArtifactsStep" role="tab" title="产出物管理">
+										<span class="round-tab">
+											<i class="glyphicon glyphicon-education"></i>
+										</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+
+						<form role="form">
+							<div class="tab-content">
+								<!-- project  start -->
+								<div class="tab-pane active" role="tabpanel" id="projectStep">
+									<div class="step33">
+										<h5>
+											<strong>项目详情</strong>
+										</h5>
+										<hr>
+										<div class="row mar_ned">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>项目英文简称</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<input type="input" class="dropselectsec" id="projectKey" name="projectKey" placeholder="项目英文简称" required="required" onkeyup="this.value=this.value.toUpperCase()">
+											</div>
+										</div>
+										<div class="row mar_ned">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>项目名称</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<input type="input" class="dropselectsec" id="projectName" name="projectName" placeholder="项目名称" required="required">
+											</div>
+										</div>
+										
+										<div class="row mar_ned">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>项目状态</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<select class="dropselectsec" id="status" name="status" disabled>
+													<option th:each="status : ${projectStatus}" th:value="${status.key}" th:text="${status.value}" th:selected="${status.key=='START'}"
+													/>
+												</select>
+											</div>
+										</div>
+										<div class="row mar_ned">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>优先级</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<input type="number" class="dropselectsec" id="rank" name="rank" value="1" min="0" max="10" required="required" />
+											</div>
+										</div>
+										<div class="row mar_ned">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>项目描述</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<input type="input" class="dropselectsec" id="description" name="description" placeholder="项目描述">
+											</div>
+										</div>
+										<div class="row mar_ned">
+
+										</div>
+									</div>
+									<ul class="list-inline pull-right">
+										<li>
+											<button type="button" class="btn btn-primary next-step">下一步</button>
+										</li>
+									</ul>
+								</div>
+								<!-- project  end -->
+								<!-- ProjectMember start-->
+								<div class="tab-pane" role="tabpanel" id="projectMemberStep">
+									<div class="step33">
+										<h5>
+											<strong>项目团队</strong>
+											<button class="btn btn-primary pull-right add" type="button">新增</button>
+										</h5>
+										<hr>
+										<div class="row mar_ned">
+											<table class="table table-bordered " id="projectMemberTable" data-target="projectMembers">
+												<thead>
+													<tr>
+														<th id="projectMemberId" style="display:none">projectMemberId</th>
+														<th id="role">项目角色</th>
+														<th id="username">项目成员</th>
+														<th data-ingore="true">操作</th>
+													</tr>
+												</thead>
+												<tbody class="list-item_copy">
+													<tr data-ingore-target="username">
+														<td style="display:none">
+															<input class="form-control" type="hidden" name="projectMemberId" id="projectMemberId" th:value="*{projectMemberId}" />
+														</td>
+														<td>
+															<select class="form-control select" id="role" name="role">
+																<option th:each="type : ${projectMemberRoles}" th:value="${type.key}" th:text="${type.value}" />
+															</select>
+														</td>
+														<td>
+															<input class="form-control" type="text" name="username" id="username" required="required" />
+														</td>
+
+														<td>
+															<a href="#" class="del">
+																<span class="glyphicon glyphicon-remove" aria-hidden="true" title="删除"></span>
+															</a>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+										<div class="row mar_ned"></div>
+									</div>
+									<ul class="list-inline pull-right">
+										<li>
+											<button type="button" class="btn btn-default prev-step">上一步</button>
+										</li>
+										<li>
+											<button type="button" class="btn btn-primary btn-info-full next-step" id="btnProjectMember">下一步</button>
+										</li>
+									</ul>
+								</div>
+								<!-- ProjectMember end-->
+
+								<!-- JiraProject start-->
+								<div class="tab-pane" role="tabpanel" id="jiraStep" data-ingore-target="jiraProjectKey">
+									<div class="step33">
+										<h5>
+											<strong>任务跟踪</strong>
+										</h5>
+										<hr>
+										<div class="row mar_ned">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>操作类型</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<select class="dropselectsec actionJira" id="inputActionType" name="inputActionType">
+													<option value="-1">------请选择------ </option>
+													<option th:each="optype : ${inputActionTypes}" th:value="${optype.key}" th:text="${optype.value}" th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"
+													/>
+												</select>
+											</div>
+										</div>
+										<div class="row mar_ned">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>服务器地址</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<select class="dropselectsec" id="serverId" name="serverId">
+													<option th:each="ip : ${serverIPs}" th:value="${ip.serverId}" th:text="${ip.outerServerIpAndPort}" th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'jira')}? none:all"
+													/>
+												</select>
+											</div>
+										</div>
+										<div class="row mar_ned">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>请选择模板</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<select class="dropselectsec selectJira" id="selectJira" name="selectJira" data-ingore="true">
+													<option value="-1">------请选择------ </option>
+													<option th:each="jira : ${existJiras}" th:value="${jira.referJiraId}" th:text="${jira.jiraProjectName}" />
+												</select>
+											</div>
+										</div>
+										<div class="row mar_ned" style="display:none">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>jiraProjectId</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<input class="dropselectsec selectChange" type="text" name="jiraProjectId" id="jiraProjectId" th:value="*{jiraProjectId}"
+												/>
+											</div>
+										</div>
+										<div class="row mar_ned" style="display:none">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>referJiraId</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<input class="dropselectsec selectChange" type="text" name="referJiraId" id="referJiraId" th:value="*{referJiraId}" />
+											</div>
+										</div>
+										<div class="row mar_ned" style="display:none">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>teamleader</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<input class="dropselectsec selectChange" type="text" name="teamleader" id="teamleader" th:value="*{teamleader}" />
+											</div>
+										</div>
+										<div class="row mar_ned">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>Jira项目英文简称</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<input class="dropselectsec selectChange" type="text" name="jiraProjectKey" id="jiraProjectKey" disabled/>
+											</div>
+										</div>
+										<div class="row mar_ned">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>Jira项目名称</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<input class="dropselectsec selectChange" type="text" name="jiraProjectName" id="jiraProjectName" required="required" disabled/>
+											</div>
+										</div>
+										<div class="row mar_ned">
+											<div class="col-md-4 col-xs-3">
+												<p align="right">
+													<stong>描述</stong>
+												</p>
+											</div>
+											<div class="col-md-8 col-xs-9">
+												<input class="dropselectsec selectChange" type="text" name="jiraProjectDescription" id="jiraProjectDescription" />
+											</div>
+										</div>
+										<div class="row mar_ned"></div>
+									</div>
+									<ul class="list-inline pull-right">
+										<li>
+											<button type="button" class="btn btn-default prev-step">上一步</button>
+										</li>
+										<li>
+											<button type="button" class="btn btn-primary next-step">下一步</button>
+										</li>
+									</ul>
+								</div>
+
+								<!-- JiraProject end-->
+								<!-- ConfluenceSpace start-->
+								<div class="tab-pane" role="tabpanel" id="confluenceStep">
+									<div class="step33">
+										<h5>
+											<strong>文档协同</strong>
+											<button class="btn btn-primary pull-right add" type="button">新增</button>
+										</h5>
+										<hr>
+										<div class="row mar_ned">
+											<table class="table table-bordered " id="confluenceSpaceTable" data-target="confluenceSpaces">
+												<thead>
+													<tr>
+
+														<th id="inputActionType">操作类型</th>
+														<th id="serverId">服务器地址</th>
+														<th data-ingore="true">请选择模板</th>
+														<th id="spaceId" style="display:none">spaceId</th>
+														<th id="spaceKey">Confluence空间英文简称</th>
+														<th id="spaceName">Confluence空间名称</th>
+														<th id="spaceDescription">描述</th>
+														<th id="pageId" style="display:none">pageId</th>
+														<th data-ingore="true">操作</th>
+													</tr>
+												</thead>
+												<tbody class="list-item_copy">
+													<tr data-ingore-target="spaceKey">
+														<td>
+															<select class="form-control actionConfluence" id="inputActionType" name="inputActionType">
+																<option value="-1">------请选择------ </option>
+																<option th:each="optype : ${inputActionTypes}" th:value="${optype.key}" th:text="${optype.value}" th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"
+																/>
+															</select>
+														</td>
+														<td>
+															<select class="form-control" id="serverId" name="serverId">
+																<option th:each="ip : ${serverIPs}" th:value="${ip.serverId}" th:text="${ip.outerServerIpAndPort}" th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'CONFLUENCE')}? none:all"
+																/>
+															</select>
+														</td>
+														<td>
+															<select class="form-control selectConfluence" id="conf" name="conf" data-ingore="true">
+																<option value="-1">------请选择------ </option>
+																<option th:each="conf : ${existConfs}" th:value="${conf.spaceKey}" th:text="${conf.spaceName}" />
+															</select>
+														</td>
+														<td style="display:none">
+															<input class="form-control selectChange" type="hidden" name="spaceId" id="spaceId" th:value="*{spaceId}" />
+														</td>
+														<td>
+															<input class="form-control selectChange" type="text" name="spaceKey" id="spaceKey" disabled/>
+														</td>
+														<td>
+															<input class="form-control selectChange" type="text" name="spaceName" id="spaceName" disabled/>
+														</td>
+														<td>
+															<input class="form-control" type="text" name="spaceDescription" id="spaceDescription" />
+														</td>
+														<td style="display:none">
+															<input class="form-control selectChange" type="text" name="pageId" id="pageId" disabled/>
+														</td>
+														<td>
+															<a href="#" class="del">
+																<span class="glyphicon glyphicon-remove" aria-hidden="true" title="删除"></span>
+															</a>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+										<div class="row mar_ned"></div>
+									</div>
+									<ul class="list-inline pull-right">
+										<li>
+											<button type="button" class="btn btn-default prev-step">上一步</button>
+										</li>
+										<li>
+											<button type="button" class="btn btn-primary btn-info-full next-step">下一步</button>
+										</li>
+									</ul>
+								</div>
+								<!-- ConfluenceSpace end-->
+								<!-- SCMRepo start-->
+								<div class="tab-pane" role="tabpanel" id="SCMRepoStep">
+									<div class="step33">
+										<h5>
+											<strong>源代码管理</strong>
+											<button class="btn btn-primary pull-right add" type="button">新增</button>
+										</h5>
+										<hr>
+										<div class="row mar_ned">
+											<table class="table table-bordered " id="sCMRepoTable" data-target="scmRepositories">
+												<thead>
+													<tr>
+														<th id="inputActionType">操作类型</th>
+														<th id="serverId">服务器地址</th>
+														<th data-ingore="true">请选择模板</th>
+														<th id="repoType">服务器类型</th>
+														<th id="repoId" style="display:none">repoId</th>
+														<th id="templateId" style="display:none">templateId</th>
+														<th id="repoName">名称</th>
+														<th id="repoRemoteId" style="display:none">repoRemoteId</th>
+														<th id="repoStyle" style="display:none">repoStyle</th>
+														<th data-ingore="true">操作</th>
+													</tr>
+												</thead>
+												<tbody class="list-item_copy">
+													<tr data-ingore-target="repoName">
+														<td>
+															<select class="form-control actionSvns" id="inputActionType" name="inputActionType">
+																<option value="-1">------请选择------ </option>
+																<option th:each="optype : ${inputActionTypes}" th:value="${optype.key}" th:text="${optype.value}" 
+																th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"
+																/>
+															</select>
+														</td>
+														<td>
+															<select class="form-control" id="serverId" name="serverId">
+																<option th:each="ip : ${serverIPs}" th:value="${ip.serverId}" th:text="${ip.outerServerIpAndPort}" 
+																th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'SVN')}? none:all"
+																/>
+															</select>
+														</td>
+														<td>
+															<select class="form-control selectSvns" id="selectSvns" name="selectSvns" data-ingore="true" >
+																<option value="-1">------请选择------ </option>
+																<option th:each="svn : ${existSvns}" th:value="${svn.repoName}" th:text="${svn.repoName}" />
+															</select>
+															<select class="form-control selectSvnTemplats" id="selectSvnTemplats" name="selectSvnTemplats" data-ingore="true" style="display:none">
+																<option value="-1">------请选择------ </option>
+																<option th:each="svn : ${svnTemplates}" th:value="${svn.repoName}" th:text="${svn.repoName}" />
+															</select>
+														</td>
+														<td>
+															<select class="form-control select" id="repoType" name="repoType" disabled>
+																<option th:each="type : ${repoTypes}" th:value="${type.key}" th:text="${type.value}" />
+															</select>
+														</td>
+														<td style="display:none">
+															<input class="form-control selectChange" type="hidden" name="repoId" id="repoId" th:value="*{repoId}" />
+														</td>
+														<td style="display:none">
+															<input class="form-control selectChange" type="hidden" name="templateId" id="templateId" th:value="*{templateId}" />
+														</td>
+														<td>
+															<input class="form-control selectChange" type="text" name="repoName" id="repoName" disabled/>
+														</td>
+														<td style="display:none">
+															<input class="form-control selectChange" type="text" name="repoRemoteId" id="repoRemoteId" disabled/>
+														</td>
+														<td style="display:none">
+															<input class="form-control selectChange" type="repoStyle" name="repoStyle" id="repoStyle" />
+														</td>
+														<td>
+															<a href="#" class="del">
+																<span class="glyphicon glyphicon-remove" aria-hidden="true" title="删除"></span>
+															</a>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+										<div class="row mar_ned"></div>
+									</div>
+									<ul class="list-inline pull-right">
+										<li>
+											<button type="button" class="btn btn-default prev-step">上一步</button>
+										</li>
+										<li>
+											<button type="button" class="btn btn-primary btn-info-full next-step">下一步</button>
+										</li>
+									</ul>
+								</div>
+								<!-- SCMRepo end-->
+								<!-- JenkinsProject start-->
+								<div class="tab-pane" role="tabpanel" id="jenkinsStep">
+									<div class="step33">
+										<h5>
+											<strong>持续集成</strong>
+											<button class="btn btn-primary pull-right add" type="button">新增</button>
+										</h5>
+										<hr>
+										<div class="row mar_ned">
+											<table class="table table-bordered " id="jenkinsProjectTable" data-target="jenkinsProjects">
+												<thead>
+													<tr>
+														<th id="inputActionType">请选择操作类型</th>
+														<th id="serverId">服务器</th>
+														<th data-ingore="true">请选择模板</th>
+														<th id="jenkinsProjectId" style="display:none">jenkinsProjectId</th>
+														<th id="referProj" style="display:none">referProj</th>
+														<th id="jenkinsProjKey">Jenkins Job英文简称</th>
+														<th data-ingore="true">操作</th>
+													</tr>
+												</thead>
+												<tbody class="list-item_copy">
+													<tr data-ingore-target="jenkinsProjKey">
+														<td>
+															<select class="form-control actionJenkins" id="inputActionType" name="inputActionType">
+																<option value="-1">------请选择------ </option>
+																<option th:each="optype : ${inputActionTypes}" th:value="${optype.key}" th:text="${optype.value}" th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"
+																/>
+															</select>
+														</td>
+														<td>
+															<select class="form-control" id="serverId" name="serverId">
+																<option th:each="ip : ${serverIPs}" th:value="${ip.serverId}" th:text="${ip.outerServerIpAndPort}" th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'JENKINS')}? none:all"
+																/>
+															</select>
+														</td>
+														<td>
+															<select class="form-control selectJenkins" id="jenkin" name="jenkin" data-ingore="true">
+																<option value="-1">------请选择------ </option>
+																<option th:each="jenkin : ${existJenkins}" th:value="${jenkin.jenkinsProjKey}" th:text="${jenkin.jenkinsProjKey}" />
+															</select>
+														</td>
+														<td style="display:none">
+															<input class="form-control selectChange" type="hidden" name="jenkinsProjectId" id="jenkinsProjectId" />
+														</td>
+														<td style="display:none">
+															<input class="form-control selectChange" type="hidden" name="referProj" id="referProj" />
+														</td>
+														<td>
+															<input class="form-control selectChange" type="text" name="jenkinsProjKey" id="jenkinsProjKey" disabled/>
+														</td>
+														<td>
+															<a href="#" class="del">
+																<span class="glyphicon glyphicon-remove" aria-hidden="true" title="删除"></span>
+															</a>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+										<div class="row mar_ned"></div>
+									</div>
+									<ul class="list-inline pull-right">
+										<li>
+											<button type="button" class="btn btn-default prev-step">上一步</button>
+										</li>
+										<li>
+											<button type="button" class="btn btn-primary btn-info-full next-step">下一步</button>
+										</li>
+									</ul>
+								</div>
+								<!-- JenkinsProject end-->
+
+								<!-- Artifacts start-->
+								<div class="tab-pane" role="tabpanel" id="ArtifactsStep">
+									<div class="step33">
+										<h5>
+											<strong>产出物管理</strong>
+											<button class="btn btn-primary pull-right add" type="button">新增</button>
+										</h5>
+										<hr>
+										<div class="row mar_ned">
+											<table class="table table-bordered " id="artifactsTable" data-target="artifacts">
+												<thead>
+													<tr>
+														<th id="artifactId" style="display:none">artifactId</th>
+														<th id="serverId">服务器地址</th>
+														<th id="artifactType">类型</th>
+														<th id="rootPath">内容</th>
+														<th data-ingore="true">操作</th>
+													</tr>
+												</thead>
+												<tbody class="list-item_copy">
+													<tr data-ingore-target="rootPath">
+														<td style="display:none">
+															<input class="form-control" type="hidden" name="artifactId" id="artifactId" th:value="*{artifactId}" />
+														</td>
+														<td>
+															<select class="form-control" id="serverId" name="serverId">
+																<option th:each="ip : ${serverIPs}" th:value="${ip.serverId}" th:text="${ip.outerServerIpAndPort}" 
+																th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'ARTIFACT')}? none:all"/>
+															</select>
+														</td>
+														<td>
+															<select class="form-control select" id="artifactType" name="artifactType">
+																<option th:each="type : ${aritifactTypes}" th:value="${type.key}" th:text="${type.value}" />
+															</select>
+														</td>
+														<td>
+															<input class="form-control" type="text" name="rootPath" id="rootPath" />
+														</td>
+														<td>
+															<a href="#" class="del">
+																<span class="glyphicon glyphicon-remove" aria-hidden="true" title="删除"></span>
+															</a>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+										<div class="row mar_ned"></div>
+									</div>
+									<ul class="list-inline pull-right">
+										<li>
+											<button type="button" class="btn btn-default prev-step">上一步</button>
+										</li>
+										<li>
+											<button type="button" class="btn btn-primary btn-info-full next-step" onclick="btnSumbit('addProject')">保存</button>
+										</li>
+									</ul>
+								</div>
+								<!-- Artifacts end-->
+
+								<div class="clearfix"></div>
+							</div>
+						</form>
+					</div>
+				</section>
+			</div>
+		</div>
+	</div>
+</body>
+
+<footer th:include="section/footer :: footer"></footer>
+
+<script th:src="@{/js/common/objectUtil.js}"></script>
+<script th:src="@{/js/common/table2json.js}"></script>
+<script th:src="@{/js/common/wizard.js}"></script>
+<script th:src="@{/js/project/common.js}"></script>
+<script>
+	var teamleader;
+	$(document).on("mousedown", "#btnProjectMember", function () {
+		var flag = false;
+		$("#projectMemberTable>.list-item_copy>tr").each(function () {
+			var role = $(this).find("#role").children('option:selected').val();
+			var username = $(this).find("#username").val();
+			if (!isEmpty(role) && role == 'PM'&&!isEmpty(username)) {
+				teamleader = username;
+				flag = true;
+				return false;
+			}
+			if (flag) {
+				return false;
+			}
+		});
+		if (!flag) {
+			jQuery.alert("至少添加一个项目经理！");
+		}
+		return flag;
+	});
+</script>
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+
+	$(document).on("change", ".actionJira", function () {
+		var action = $(this).children('option:selected').val();
+		jQuery("#selectJira").get(0).options[0].selected = true;
+		jQuery("#teamleader").val(teamleader);
+		if (action == "REMOTE_CREATE") { //导入
+			jQuery("#jiraProjectKey").val($("#projectKey").val());
+			jQuery("#jiraProjectName").val($("#projectName").val());
+		} else if (action == "-1") {
+			jQuery("#jiraStep").find(".selectChange").each(function () {
+				jQuery(this).val('');
+			});
+		} else { //创建
+			jQuery("#jiraStep").find(".selectChange").each(function () {
+				jQuery(this).val('');
+			});
+		}
+	});
+	$(document).on("change", ".selectJira", function () {
+		var index = $(this).children('option:selected').index();
+		var value=$(this).children('option:selected').val();
+		index--;
+		var action = jQuery("#jiraStep").find(".actionJira").children('option:selected').val();
+		jQuery("#jiraStep").find("#referJiraId").val(value);
+		debugger;
+
+		var oo = /*[[${existJiras}]]*/ null;
+		var jira = oo[index];
+		if (!isEmpty(jira)) {
+			if ("ATTACH_OLD" == action) {
+				jQuery("#jiraStep").find("input,textarea").each(function () {
+					jQuery(this).val(jira[this.id]);
+				});
+			}
+		} else {
+			jQuery("#jiraStep").find(".selectChange").each(function () {
+				jQuery(this).val('');
+			});
+		}
+	});
+
+	$(document).on("change", ".actionConfluence", function () {
+		var action = jQuery(this).children('option:selected').val();
+		var parentTr = jQuery(this).parent().parent();
+		parentTr.find(".selectConfluence").get(0).options[0].selected = true;
+
+		if (action == "REMOTE_CREATE") { //创建
+			parentTr.find("input,textarea").each(function () {
+				jQuery(this).val('');
+				jQuery(this).attr("disabled", false);
+			});
+			parentTr.find(".selectConfluence").attr("disabled", true);
+			parentTr.find("#spaceKey").val($("#projectKey").val());
+			parentTr.find("#spaceName").val($("#projectName").val());
+		} else if (action == "-1") {
+			parentTr.find(".selectConfluence").attr("disabled", false);
+			parentTr.find(".selectChange").each(function () {
+				jQuery(this).val('');
+				jQuery(this).attr("disabled", true);
+			});
+		} else { //导入
+			parentTr.find(".selectConfluence").attr("disabled", false);
+			parentTr.find(".selectChange").each(function () {
+				jQuery(this).val('');
+				jQuery(this).attr("disabled", true);
+			});
+		}
+	});
+
+	$(document).on("change", ".selectConfluence", function () {
+		var index = jQuery(this).children('option:selected').index();
+		index--;
+		var parentTr = $(this).parent().parent();
+		var action = parentTr.find(".actionConfluence").children('option:selected').val();
+		var oo = /*[[${existConfs}]]*/ null;
+		var conf = oo[index];
+		if (!isEmpty(conf)) {
+			if ("ATTACH_OLD" == action) {
+				parentTr.find(".selectChange").each(function () {
+					jQuery(this).val(conf[this.id]);
+				});
+			}
+		} else {
+			parentTr.find(".selectChange").each(function () {
+				jQuery(this).val('');
+			});
+		}
+
+	});
+
+	$(document).on("change", ".actionSvns", function () {
+		var index = jQuery(this).children('option:selected').index();
+		var action = jQuery(this).children('option:selected').val();
+		var parentTr = jQuery(this).parent().parent();
+
+		if (action == "REMOTE_CREATE") {
+			parentTr.find(".selectSvns").hide();
+			parentTr.find(".selectSvnTemplats").show();
+			parentTr.find(".selectSvns").get(0).options[0].selected = true;
+			parentTr.find(".selectSvnTemplats").get(0).options[0].selected = true;
+			parentTr.find(".selectChange").each(function () {
+				jQuery(this).val('');
+				jQuery(this).attr("disabled", false);
+			});
+		} else {
+			parentTr.find(".selectSvns").show();
+			parentTr.find(".selectSvnTemplats").hide();
+			parentTr.find(".selectSvns").get(0).options[0].selected = true;
+			parentTr.find(".selectSvnTemplats").get(0).options[0].selected = true;
+			parentTr.find(".selectChange").each(function () {
+				jQuery(this).val('');
+				jQuery(this).attr("disabled", true);
+			});
+		}
+	});
+
+	$(document).on("change", ".selectSvns", function () {
+		var index = $(this).children('option:selected').index();
+		index--;
+		var parentTr = $(this).parent().parent();
+		var oo = /*[[${existSvns}]]*/ null;
+		var svn = oo[index];
+		parentTr.find(".selectChange").each(function () {
+			$(this).val(svn[this.id]);
+		});
+	});
+
+	$(document).on("change", ".selectSvnTemplats", function () {
+		var index = $(this).children('option:selected').index();
+		index--;
+		var parentTr = $(this).parent().parent();
+		var oo = /*[[${svnTemplates}]]*/ null;
+		var svn = oo[index];
+		parentTr.find(".selectChange").each(function () {
+			$(this).val(svn[this.id]);
+		});
+		parentTr.find("#repoName").val('');
+	});
+
+	$(document).on("change", ".actionJenkins", function () {
+		var index = jQuery(this).children('option:selected').index();
+		var action = jQuery(this).children('option:selected').val();
+		var parentTr = jQuery(this).parent().parent();
+
+		if (action == "REMOTE_CREATE") {
+			parentTr.find(".selectJenkins").get(0).options[0].selected = true;
+			parentTr.find(".selectChange").each(function () {
+				jQuery(this).val('');
+				jQuery(this).attr("disabled", false);
+			});
+		} else {
+			parentTr.find(".selectJenkins").get(0).options[0].selected = true;
+			parentTr.find(".selectChange").each(function () {
+				jQuery(this).val('');
+				jQuery(this).attr("disabled", true);
+			});
+		}
+	});
+
+	$(document).on("change", ".selectJenkins", function () {
+		var index = $(this).children('option:selected').index();
+		index--;
+		var parentTr = $(this).parent().parent();
+		var oo = /*[[${existJenkins}]]*/ null;
+		var jenkin = oo[index];
+		parentTr.find("input,textarea").each(function () {
+			$(this).val(jenkin[this.id]);
+		});
+	});
+
+	/*]]>*/
+</script>
+
+</html>

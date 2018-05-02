@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="section/header :: head"></head> 
+
+<body>
+	<div th:fragment="dashboard">
+		<div>
+			<div class="row">
+				<div class="col-lg-12">
+					<h1 class="page-header">项目列表</h1>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="panel panel-default">
+						<div class="panel-heading">项目信息</div>
+						<div class="panel-body" style="min-height:500px">
+							<div class="row">
+								<div class="col-sm-offset-1 col-lg-10" style="padding-bottom: 15px;">
+									<table class="table table-bordered">
+										<thead>
+											<tr>
+												<!-- <th>#</th> -->
+												<th>项目id</th>
+												<th>项目英文名</th>
+												<th>项目名</th>
+												<!-- <th>描述</th>
+												<th>状态</th>
+												<th>优先级</th>
+												<th>备注</th>
+												<th>创建时间</th> -->
+												<th>操作</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr th:each="project ,projectStat : ${projects}">
+												<!-- <td th:text="${projectStat.count}"></td> -->
+												<td th:text="${project.projectId}"></td>
+												<td th:text="${project.projectKey}"></td>
+												<td th:text="${project.projectName}"></td>
+												<!-- <td th:text="${project.description}"></td>
+												<td th:text="${project.status.value}"></td> -->
+												<!-- <td>
+													<select class="dropselectsec" id="status" name="status" disabled>
+														<option th:each="status : ${projectStatus}" th:value="${status.key}" th:text="${status.value}" th:selected="${status.key}==${project.status.key}?selected"
+														/>
+													</select>
+												</td> -->
+												<!-- <td th:text="${project.rank}"></td>
+												<td th:text="${project.remark}"></td>
+												<td th:text="${#dates.format(project.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td> -->
+												<td th:if="${optype=='view'}">
+													<a th:href="@{/project/toViewProject/{projectId}(projectId=${project.projectId})}">
+														<span class="glyphicon glyphicon-camera" aria-hidden="true" title="查看"></span>
+													</a>
+													<a th:href="@{/project/projects/{projectId}/edit(projectId=${project.projectId})}">
+														<span class="glyphicon glyphicon-edit" aria-hidden="true" title="修改"></span>
+													</a>
+												</td>
+												<td th:if="${optype=='end'}">
+													<a th:href="@{/project/toViewProject/{projectId}(projectId=${project.projectId})}">
+														<span class="glyphicon glyphicon-camera" aria-hidden="true" title="查看"></span>
+													</a>
+													<a th:unless="${#strings.equalsIgnoreCase(project.status.key, 'END')}" th:href="|javascript:toEndProject(${project.projectId})|">
+														<span class="glyphicon glyphicon-off" aria-hidden="true" title="终止"></span>
+													</a>
+												</td>
+												<td th:if="${optype=='artifactView'}">
+													<a th:href="@{/artifact/findArtByProjectId/{projectId}/view(projectId=${project.projectId})}">
+														<span class="glyphicon glyphicon-search" aria-hidden="true" title="查看"></span>
+													</a>
+												</td>
+												<td th:if="${optype=='svnView'}">
+													<a th:href="@{/svn/findSvnByProjectId/{projectId}/view(projectId=${project.projectId})}">
+														<span class="glyphicon glyphicon-search" aria-hidden="true" title="查看"></span>
+													</a>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			function toEndProject(projectId) {
+				var url = "/project/toEndProject/" + projectId;
+				jQuery.confirm({
+					title: '请确认',
+					// content: '<div style="text-align:center">确认终止项目？</div>',
+					content: '<div style="text-align:center">确认终止项目？</div>',
+					buttons: {
+						confirm: {
+							text: '确认',
+							action: function () {
+								jQuery.ajax({
+									type: "POST",
+									url: url,
+									success: function (msg) {
+										if (msg.responseCode == "0000") {
+											$("#mainframe", parent.document.body).attr("src", "project/findAllProjects/end");
+										} else {
+											jQuery.alert("错误: " + msg.responseMsg);
+										}
+									}
+								});
+							}
+						},
+						cancel: {
+							text: '取消'
+						}
+					}
+				});
+
+
+			}
+		</script>
+	</div>
+</body>
+<footer th:include="section/footer :: footer"></footer>
+
+</html>

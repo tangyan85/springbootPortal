@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="section/header :: head"></head>
+<link rel="stylesheet" th:href="@{/css/wizard.css}" />
+
+<body>
+    <div th:fragment="dashboard">
+        <div th:object="${project}">
+            <div class="row mar_ned" style="margin:0">
+                <div class="col-md-6">
+                    <h2 class="page-header">项目信息</h2>
+                    <div class="row mar_ned">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>项目英文简称</stong>
+                            </p>
+                        </div>
+                        <input type="hidden" class="form-control" id="projectId" name="projectId" th:value="*{projectId}" />
+                        <div class="col-md-8 col-xs-9">
+                            <input type="input" class="form-control" id="projectKey" name="projectKey" placeholder="项目英文简称" th:value="*{projectKey}"
+                                disabled required="required" />
+                        </div>
+                    </div>
+                    <div class="row mar_ned">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>项目名称</stong>
+                            </p>
+                        </div>
+                        <div class="col-md-8 col-xs-9">
+                            <input type="input" class="form-control" id="projectName" name="projectName" placeholder="项目名称" th:value="*{projectName}"
+                                disabled required="required" />
+                        </div>
+                    </div>
+
+                    <div class="row mar_ned">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>项目状态</stong>
+                            </p>
+                        </div>
+                        <div class="col-md-8 col-xs-9">
+                            <input type="input" class="form-control" id="status" name="status" placeholder="项目状态" th:value="*{status.value}" disabled
+                                required="required" />
+                        </div>
+                    </div>
+                    <div class="row mar_ned">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>优先级</stong>
+                            </p>
+                        </div>
+                        <div class="col-md-8 col-xs-9">
+                            <input type="number" class="form-control" id="rank" name="rank" value="1" min="0" max="100" required="required" th:value="*{rank}"
+                            disabled  />
+                        </div>
+                    </div>
+                    <div class="row mar_ned">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>项目描述</stong>
+                            </p>
+                        </div>
+                        <div class="col-md-8 col-xs-9">
+                            <input type="input" class="form-control" id="description" name="description" placeholder="项目描述" th:value="*{description}"
+                            disabled/>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-6" th:object="${project.jiraProjects[0]}">
+                    <h2 class="page-header">任务跟踪</h2>
+                    <div class="row mar_ned">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>服务器地址</stong>
+                            </p>
+                        </div>
+                        <div class="col-md-8 col-xs-9">
+                            <input class="form-control" type="text" name="serverId" id="serverId" th:value="*{server.outerServerIpAndPort}" disabled/>
+                        </div>
+                    </div>
+                    <div class="row mar_ned" style="display:none">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>jiraProjectId</stong>
+                            </p>
+                        </div>
+                        <div class="col-md-8 col-xs-9">
+                            <input class="form-control selectChange" type="text" name="jiraProjectId" id="jiraProjectId" th:value="*{jiraProjectId}"
+                            />
+                        </div>
+                    </div>
+                    <div class="row mar_ned" style="display:none">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>referJiraId</stong>
+                            </p>
+                        </div>
+                        <div class="col-md-8 col-xs-9">
+                            <input class="form-control selectChange" type="text" name="referJiraId" id="referJiraId" th:value="*{referJiraId}" />
+                        </div>
+                    </div>
+                    <div class="row mar_ned" style="display:none">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>teamleader</stong>
+                            </p>
+                        </div>
+                        <div class="col-md-8 col-xs-9">
+                            <input class="form-control" type="text" name="teamleader" id="teamleader" th:value="*{teamleader}" />
+                        </div>
+                    </div>
+                    <div class="row mar_ned">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>Jira项目英文简称</stong>
+                            </p>
+                        </div>
+                        <div class="col-md-8 col-xs-9">
+                            <input class="form-control" type="text" name="jiraProjectKey" id="jiraProjectKey" th:value="*{jiraProjectKey}" required="required"
+                                disabled/>
+                        </div>
+                    </div>
+                    <div class="row mar_ned">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>Jira项目名称</stong>
+                            </p>
+                        </div>
+                        <div class="col-md-8 col-xs-9">
+                            <input class="form-control" type="text" name="jiraProjectName" id="jiraProjectName" th:value="*{jiraProjectName}" required="required"
+                                disabled/>
+                        </div>
+                    </div>
+                    <div class="row mar_ned" style="display:none" th:if="*{project}!=null">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>projectId</stong>
+                            </p>
+                        </div>
+                        <div class="col-md-8 col-xs-9">
+                            <input class="form-control" type="text" name="projectId" id="projectId" th:value="*{project.projectId}" disabled/>
+                        </div>
+                    </div>
+                    <div class="row mar_ned">
+                        <div class="col-md-3 col-xs-3">
+                            <p align="right">
+                                <stong>描述</stong>
+                            </p>
+                        </div>
+                        <div class="col-md-8 col-xs-9">
+                            <input class="form-control" type="text" name="jiraProjectDescription" th:value="*{jiraProjectDescription}" id="jiraProjectDescription"
+                            disabled/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin:0">
+                <div class="col-md-6">
+                    <h2 class="page-header">文档协同</h2>
+                    <div class="col-md-1 col-xs-3">
+                    </div>
+                    <div class="col-md-10 col-xs-9">
+                        <table class="table table-bordered " id="confluenceSpaceTable" data-target="confluenceSpaces">
+                            <thead>
+                                <tr>
+                                    <th id="serverId">服务器地址</th>
+                                    <th id="spaceId" style="display:none">spaceId</th>
+                                    <th id="spaceKey">Confluence项目英文简称</th>
+                                    <th id="spaceName">Confluence项目名称</th>
+                                    <th id="spaceDescription">描述</th>
+                                    <th id="pageId" style="display:none">pageId</th>
+                                    <th id="projectId" style="display:none">projectId</th>
+                                </tr>
+                            </thead>
+                            <tbody class="list-item_copy" th:unless="${#lists.isEmpty(project.confluenceSpaces)}">
+                                <tr th:each="conf: ${project.confluenceSpaces}" th:object="${conf}" data-ingore-target="spaceKey">
+                                    <td>
+                                        <span th:text="*{server.outerServerIpAndPort}"></span>
+                                    </td>
+                                    <td style="display:none">
+                                        <span th:text="*{spaceId}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="*{spaceKey}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="*{spaceName}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="*{spaceDescription}"></span>
+                                    </td>
+                                    <td style="display:none">
+                                        <span th:text="*{pageId}"></span>
+                                    </td>
+                                    <td style="display:none">
+                                        <span th:text="*{project.projectId}"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h2 class="page-header">源代码管理</h2>
+                    <div class="col-md-1 col-xs-3">
+                    </div>
+                    <div class="col-md-10 col-xs-9">
+                        <table class="table table-bordered " id="sCMRepoTable" data-target="scmRepositories">
+                            <thead>
+                                <tr>
+                                    <th id="serverId">服务器地址</th>
+                                    <th id="repoType">服务器类型</th>
+                                    <th id="repoId" style="display:none">repoId</th>
+                                    <th id="templateId" style="display:none">templateId</th>
+                                    <th id="repoName">名称</th>
+                                    <th id="repoRemoteId" style="display:none">repoRemoteId</th>
+                                    <th id="repoStyle" style="display:none">repoStyle</th>
+                                </tr>
+                            </thead>
+                            <tbody class="list-item_copy" th:unless="${#lists.isEmpty(project.scmRepositories)}">
+                                <tr th:each="repos: ${project.scmRepositories}" th:object="${repos}" data-ingore-target="repoName">
+                                    <td>
+                                        <span th:text="*{server.outerServerIpAndPort}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="*{repoType.value}"></span>
+                                    </td>
+                                    <td style="display:none">
+                                        <span th:text="*{repoId}"></span>
+                                    </td>
+                                    <td style="display:none">
+                                        <span th:text="*{templateId}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="*{repoName}"></span>
+                                    </td>
+                                    <td style="display:none">
+                                        <span th:text="*{repoRemoteId}"></span>
+                                    </td>
+                                    <td style="display:none">
+                                        <span th:text="*{repoStyle}"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row" style="margin:0">
+                <div class="col-md-6">
+                    <h2 class="page-header">持续集成</h2>
+                    <div class="col-md-1 col-xs-3">
+                    </div>
+                    <div class="col-md-10 col-xs-9">
+                        <table class="table table-bordered " id="jenkinsProjectTable" data-target="jenkinsProjects">
+                            <thead>
+                                <tr>
+                                    <th id="serverId">服务器</th>
+                                    <th id="jenkinsProjectId" style="display:none">jenkinsProjectId</th>
+                                    <th id="jenkinsProjKey">Jenkins Job英文简称</th>
+                                </tr>
+                            </thead>
+                            <tbody class="list-item_copy" th:unless="${#lists.isEmpty(project.jenkinsProjects)}">
+                                <tr th:each="jenkins: ${project.jenkinsProjects}" th:object="${jenkins}" data-ingore-target="jenkinsProjKey">
+                                    <td>
+                                        <span th:text="*{server.outerServerIpAndPort}"></span>
+                                    </td>
+                                    <td style="display:none">
+                                        <span th:text="*{jenkinsProjectId}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="*{jenkinsProjKey}"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="col-md-1 col-xs-3">
+                    </div>
+                    <div class="col-md-10 col-xs-9">
+                        <h2 class="page-header">产出物管理</h2>
+                        <table class="table table-bordered " id="artifactsTable" data-target="artifacts">
+                            <thead>
+                                <tr>
+                                    <th id="artifactId" style="display:none">artifactId</th>
+                                    <th id="serverId">服务器地址</th>
+                                    <th id="artifactType">类型</th>
+                                    <th id="rootPath">内容</th>
+                                </tr>
+                            </thead>
+                            <tbody class="list-item_copy" th:unless="${#lists.isEmpty(project.artifacts)}">
+                                <tr th:each="art: ${project.artifacts}" th:object="${art}" data-ingore-target="rootPath">
+                                    <td style="display:none">
+                                        <span th:text="*{artifactId}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="*{server.outerServerIpAndPort}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="*{aritifactType.value}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="*{rootPath}"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row" style="margin:0">
+                <div class="col-md-6">
+
+                    <h2 class="page-header">项目团队</h2>
+                    <div class="col-md-1 col-xs-3">
+                    </div>
+                    <div class="col-md-10 col-xs-9">
+                        <table class="table table-bordered " id="projectMemberTable" data-target="projectMembers">
+                            <thead>
+                                <tr>
+                                    <th id="projectMemberId" style="display:none">projectMemberId</th>
+                                    <th id="role">项目角色</th>
+                                    <th id="username">项目成员</th>
+                                </tr>
+                            </thead>
+                            <tbody class="list-item_copy" th:unless="${#lists.isEmpty(project.projectMembers)}">
+                                <tr th:each="pmrole: ${project.projectMembers}" th:object="${pmrole}" data-ingore-target="username">
+                                    <td style="display:none">
+                                        <span th:text="*{projectMemberId}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="*{role.value}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="*{username}"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+<div class="row" style="margin-bottom: 100px;"></div>
+<footer th:include="section/footer :: footer"></footer>
+
+
+
+</html>
