@@ -3,5 +3,6 @@
 。实现任务创建时，同时与jira、conflence进行联动创建新任务。
 
 
-https://github.com/tangyan85/springbootPortal/blob/master/img/new_task.png
+
+![](https://github.com/tangyan85/springbootPortal/blob/master/img/new_task.png)
 
