@@ -142,12 +142,12 @@
 		</dependency>
 
 		<!--jira读取数据组件 url:https://github.com/rcarz/jira-client -->
-		<dependency>
+<!-- 		<dependency>
 			<groupId>net.rcarz</groupId>
 			<artifactId>jira-client</artifactId>
 			<version>0.5</version>
 			<scope>compile</scope>
-		</dependency>
+		</dependency> -->
 
 
 		<!-- MyBatis提供了拦截器接口，我们可以实现自己的拦截器， 将其作为一个plugin装入到SqlSessionFactory中。 Github上有位开发者写了一个分页插件，我觉得使用起来还可以，挺方便的。 
@@ -187,12 +187,10 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
-			<version>4.1.24.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>io.projectreactor</groupId>
 			<artifactId>reactor-core</artifactId>
-			<version>3.1.4.RELEASE</version>
 		</dependency>
 	</dependencies>
 

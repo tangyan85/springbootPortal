@@ -103,7 +103,14 @@ public class IndexController {
 	@RequestMapping("/loginError")
 	public String loginError(Model model) {
 		model.addAttribute("loginError", true);
-		model.addAttribute("errorMsg", "登陆失败，用户名或者密码错误！");
+		model.addAttribute("loginMsg", "登陆失败，用户名或者密码错误！");
+		return "login";
+	}
+	
+	@RequestMapping("/logoutSuccess")
+	public String logoutSuccess(Model model) {
+		model.addAttribute("successLogout", true);
+		model.addAttribute("loginMsg", "您已注销成功！");
 		return "login";
 	}
 	

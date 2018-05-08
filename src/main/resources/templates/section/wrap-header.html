@@ -48,8 +48,8 @@
         </li>
 
 
-        <li class="dropdown user user-menu">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        <li role="presentation" class="dropdown user user-menu">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-prevent-click="false">
             <img src="dist/img/user2-160x160.jpg" class="user-image" alt="User Image">
             <span class="hidden-xs" th:text="${currentUser.username}"></span>
           </a>
@@ -71,8 +71,8 @@
           </ul>
         </li>
         <!-- Control Sidebar Toggle Button -->
-        <li>
-          <a href="#" data-toggle="control-sidebar">
+        <li role="presentation">
+          <a href="#" data-toggle="control-sidebar" data-prevent-click="false">
             <i class="fa fa-gears"></i>
           </a>
         </li>
@@ -84,18 +84,24 @@
       event.preventDefault();
       var target = $(event.target);
       var targetUrl = target[0].href;
-      var pathname=target[0].pathname||"";
+      //var pathname=target[0].pathname||"";
       var targetClass = target[0].className;
-      //var isHidden = target.data("leftbarVisible");
+      var preventClick = target.data("preventClick");
       var isTop = target.data("urlTop");
       target.parent().siblings().removeClass('active');
       target.parent().addClass('active');
 
-      if (typeof (targetUrl) != "undefined" && targetUrl != null&&pathname!='/login') {
+      if (typeof (targetUrl) != "undefined" && targetUrl != null) {
         debugger;
-        if (targetClass.indexOf("dropdown") != -1) {
-          //下面框不跳转
+        if(isTop===true){
+          $("#loading", parent.document.body).show();
+          $("body").removeClass("sidebar-collapse");
+          top.location.href = targetUrl;
+        }else if (targetClass.indexOf("dropdown") != -1||preventClick===false) {
+          //不跳转
         } else {
+          $("#loading", parent.document.body).show();
+          $("body").addClass("sidebar-collapse");
           $("#mainframe", parent.document.body).attr("src", targetUrl);
         }
       }
