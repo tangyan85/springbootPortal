@@ -1,42 +1,45 @@
 # 自定义的配置请在myprops下配置，不要自立门户(例如aa: bb)，
 # 否则会有奇异的bug(实测发现单元测试可以跑，但tomcat启动后找不到配置的值)
 myprops:
-  whoami: prod # 环境
+  whoami: dev # 环境
   confluence: # confluence相关
     username: admin
     password: admin@123
-    pureIp: 10.215.4.200
-    urlHead: http://10.215.4.200:8090
+    pureIp: conf-uat.wdjr.local
+    urlHead: http://conf-uat.wdjr.local:8080
   jenkins: # jenkins相关
     username: admin
     password: admin@123
-    urlHead: http://10.215.4.154:8080
-    pureIp: 10.215.4.154
+    urlHead: http://ci-uat.wdjr.local:8080
+    pureIp: ci-uat.wdjr.local
   jira: # jira相关
     username: admin
     password: admin@123
-    pureIp: 10.215.4.199
-    urlHead: http://10.215.4.199:8080
+    pureIp: jira-uat.wdjr.local
+    urlHead: http://jira-uat.wdjr.local:8080
   scm: # scm相关
-    svn: 
+    svn:
       username: admin
       password: admin@123
-      pureIp: 10.215.4.165
-      urlHead: http://10.215.4.165:3343
+      pureIp: svn-uat.wdjr.local
+      urlHead: https://svn-uat.wdjr.local:4434
   ldap: # ldap相关
-    enable: true
-    url: ldap://10.214.170.67:389/dc=wanda,dc=cn      
+    enable: false
+    url: ldap://adlm-uat.wdjr.local:389/dc=wanda,dc=cn
   switch: #功能开关
-    enableSso: true  
-                   
+    enableSso: false
+      
 spring:
   datasource:
+#    password: root
+#    url: jdbc:mysql://localhost:3306/portal2?useSSL=false #dev环境切换到local库
+#    username: root
     password: Wanda@2017
-    url: jdbc:mysql://192.168.0.17:3306/portal?useSSL=false
+    url: jdbc:mysql://10.214.170.70:3306/portal2?useSSL=false #dev环境切换到portal2库
     username: portal
   redis:
     database: 0
-    host: 192.168.0.17
+    host: 10.214.170.115
     port: 6379
     password:
 
@@ -46,4 +49,4 @@ logging:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
     com.wanda.portal: INFO
-file: /var/log/portal.log
+  file: C:/Log/portal.log

@@ -2,8 +2,6 @@ package com.wanda.portal.facade.model.input;
 
 import java.io.Serializable;
 import java.util.Date;
-import com.mysql.jdbc.StringUtils;
-import com.wanda.portal.exception.CreateProjectValidationException;
 
 public class JenkinsInputParam extends AbstractInputParam implements Serializable {
 
@@ -80,9 +78,9 @@ public class JenkinsInputParam extends AbstractInputParam implements Serializabl
 
     @Override
     public InputParam validateCreate() throws Exception {
-        if (StringUtils.isNullOrEmpty(this.jenkinsProjKey) || StringUtils.isNullOrEmpty(this.referProj)) {
-            throw new CreateProjectValidationException("jenkinsProjKey or referProj null");
-        }
+//        if (StringUtils.isNullOrEmpty(this.jenkinsProjKey) || StringUtils.isNullOrEmpty(this.referProj)) {
+//            throw new CreateProjectValidationException("jenkinsProjKey or referProj null");
+//        }
         return this;
     }
 

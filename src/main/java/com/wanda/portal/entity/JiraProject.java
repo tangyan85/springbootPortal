@@ -1,13 +1,12 @@
 package com.wanda.portal.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import javax.persistence.*;
-
 import com.alibaba.fastjson.annotation.JSONField;
 import com.wanda.portal.constants.Constants;
 import com.wanda.portal.constants.InputActionType;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
 
 @Entity
 @Table(name = "jira_project")
@@ -40,6 +39,9 @@ public class JiraProject implements Serializable {
     
     @Column(name = "team_leader")
     private String teamleader;
+
+    @Column(name = "web_ui")
+    private String webui;
     
     @Column(name = "refer_jiraId")
     private Long referJiraId; // 参考id
@@ -182,5 +184,11 @@ public class JiraProject implements Serializable {
 //        this.url = Constants.JIRA_BROWSING_PROTOCOL + serverIP + Constants.JIRA_PORT + Constants.JIRA_VIEWPROJ_PREFIX + jiraProjectKey;
 //    }
 
+    public String getWebui() {
+        return webui;
+    }
 
+    public void setWebui(String webui) {
+        this.webui = webui;
+    }
 }

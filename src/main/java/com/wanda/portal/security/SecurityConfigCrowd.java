@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.wanda.portal.config.biz.SwitchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
@@ -59,16 +60,18 @@ public class SecurityConfigCrowd extends WebSecurityConfigurerAdapter {
 	@Autowired
 	IdConfig idConfig;
 	@Autowired
+	SwitchConfig switchConfig;
+	@Autowired
 	private UserDetailsService userService;
 	// 本地测试，屏蔽sso的开关的
-	private boolean IsTest = true;
+	//private boolean IsTest = false;
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		if (ldapConfig.isEnable()) { // 采用ldap
 			auth.ldapAuthentication().userDnPatterns("uid={0},ou=People").groupSearchBase("ou=Group").contextSource()
 					.url(ldapConfig.getUrl());
-		} else if (IsTest) {
+		} else if (!switchConfig.isEnableSso()) {
 			auth.eraseCredentials(false).inMemoryAuthentication().passwordEncoder(new MyPasswordEncoder())
 					.withUser("admin").password("123456").roles("ADMIN");
 			;
@@ -99,7 +102,7 @@ public class SecurityConfigCrowd extends WebSecurityConfigurerAdapter {
 							}
 						}
 					}).permitAll().failureUrl("/loginError").and().logout().deleteCookies("JSESSIONID").permitAll();
-		} else if (IsTest) {
+		} else if (!switchConfig.isEnableSso()) {
 			http.csrf().disable().exceptionHandling().accessDeniedPage("/403").and().authorizeRequests()
 					.antMatchers("/", "/login").permitAll()
 					.antMatchers(new String[] { "/static/**", "/js/**", "/vendor/**", "/css/**", "/img/**",
@@ -107,7 +110,7 @@ public class SecurityConfigCrowd extends WebSecurityConfigurerAdapter {
 							"/bower_components/**","/plugins/**","/dist/**","/data/**"})
 					.permitAll().anyRequest().permitAll().and().headers().frameOptions().disable().and().formLogin()
 					.loginPage("/login").successForwardUrl("/index").permitAll().failureUrl("/loginError").and()
-					.logout().logoutSuccessUrl("/logoutSuccess").permitAll();
+					.logout().permitAll();
 		} else { // 不采用ldap
 			// Not using Spring CSRF here to be able to use plain HTML
 			http.csrf().disable().exceptionHandling().accessDeniedPage("/403").and().authorizeRequests()
@@ -229,10 +232,10 @@ public class SecurityConfigCrowd extends WebSecurityConfigurerAdapter {
 		return filter;
 	}
 
-	
-	   @Override  
-	    public void configure(WebSecurity web) throws Exception {  
-	        web.ignoring().antMatchers("/static/**");  
-	    }  
+
+	   @Override
+	    public void configure(WebSecurity web) throws Exception {
+	        web.ignoring().antMatchers("/static/**");
+	    }
 
 }

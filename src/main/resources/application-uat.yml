@@ -17,28 +17,30 @@ myprops:
   confluence: # confluence相关
     username: admin
     password: admin@123
-    pureIp: conf-uat.wanda-fg.local
-    urlHead: http://conf-uat.wanda-fg.local:8080
+    pureIp: conf-uat.wdjr.local
+    urlHead: http://conf-uat.wdjr.local:8080
   jenkins: # jenkins相关
     username: admin
     password: admin@123
-    urlHead: http://ci-uat.wanda-fg.local:8080
-    pureIp: ci-uat.wanda-fg.local
+    urlHead: http://ci-uat.wdjr.local:8080
+    pureIp: ci-uat.wdjr.local
   jira: # jira相关
     username: admin
     password: admin@123
-    pureIp: jira-uat.wanda-fg.local
-    urlHead: http://jira-uat.wanda-fg.local:8080
+    pureIp: jira-uat.wdjr.local
+    urlHead: http://jira-uat.wdjr.local:8080
   scm: # scm相关
     svn: 
       username: admin
       password: admin@123
-      pureIp: svn-uat.wanda-fg.local
-      urlHead: https://svn-uat.wanda-fg.local:4434
+      pureIp: svn-uat.wdjr.local
+      urlHead: https://svn-uat.wdjr.local:4434
   ldap: # ldap相关
     enable: false
-    url: ldap://adlm-uat.wanda-fg.local:389/dc=wanda,dc=cn
-                      
+    url: ldap://adlm-uat.wdjr.local:389/dc=wanda,dc=cn
+  switch: #功能开关
+    enableSso: true  
+                        
 spring:
   datasource: 
     password: Wanda@2017
@@ -55,3 +57,5 @@ logging:
     root: ERROR
     org.springframework.web: DEBUG
     org.hibernate: ERROR
+    com.wanda.portal: INFO
+  file: /var/log/portal.log

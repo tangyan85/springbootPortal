@@ -1,50 +1,34 @@
 package com.wanda.portal.facade;
 
+import com.alibaba.fastjson.JSON;
+import com.wanda.portal.constants.*;
+import com.wanda.portal.dao.AsyncTaskService;
+import com.wanda.portal.dao.jpa.ProjectRepository;
+import com.wanda.portal.dao.jpa.ServerRepository;
+import com.wanda.portal.dao.remote.*;
+import com.wanda.portal.dto.common.CommonHttpResponseBody;
+import com.wanda.portal.entity.Project;
+import com.wanda.portal.entity.ProjectMember;
+import com.wanda.portal.entity.Server;
+import com.wanda.portal.facade.model.input.*;
+import com.wanda.portal.utils.ConversionUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import com.alibaba.fastjson.JSON;
-import com.wanda.portal.constants.AritifactType;
-import com.wanda.portal.constants.InputActionType;
-import com.wanda.portal.constants.ProjectMemberRole;
-import com.wanda.portal.constants.ProjectStatus;
-import com.wanda.portal.constants.RepoProtocol;
-import com.wanda.portal.constants.RepoType;
-import com.wanda.portal.constants.ServerType;
-import com.wanda.portal.dao.AsyncTaskService;
-import com.wanda.portal.dao.jpa.ProjectRepository;
-import com.wanda.portal.dao.jpa.ServerRepository;
-import com.wanda.portal.dao.remote.ConfluenceService;
-import com.wanda.portal.dao.remote.JenkinsService;
-import com.wanda.portal.dao.remote.JiraService;
-import com.wanda.portal.dao.remote.ProjectService;
-import com.wanda.portal.dao.remote.RepoService;
-import com.wanda.portal.dto.common.CommonHttpResponseBody;
-import com.wanda.portal.entity.Project;
-import com.wanda.portal.entity.Server;
-import com.wanda.portal.facade.model.input.ConfluenceSpaceInputParam;
-import com.wanda.portal.facade.model.input.JenkinsInputParam;
-import com.wanda.portal.facade.model.input.JiraProjectInputParam;
-import com.wanda.portal.facade.model.input.ProjectInputParam;
-import com.wanda.portal.facade.model.input.ScmRepoInputParam;
-import com.wanda.portal.utils.ConversionUtil;
 
 @Controller
 @RequestMapping("/project")
@@ -64,6 +48,8 @@ public class ProjectController {
 	ProjectRepository projectRepository;	
 	@Autowired
     ServerRepository serverRepository;
+	@Autowired
+    ProjectMemberService projectMemberService;
 	
     @Autowired
     AsyncTaskService asyncTaskService;
@@ -75,9 +61,18 @@ public class ProjectController {
 		model=setCommonServerInfoAsync(model);
 		
         return "project/toAdd";
-    } 
-	
-	@RequestMapping("/findAllProjects/{optype}")
+    }
+
+    @RequestMapping("/toAdd2")
+    public String toAdd2(Model model){
+        logger.info("------Current path:/project/toAdd2");
+        model=setModelCommon(model);
+        model=setCommonServerInfoAsync(model);
+
+        return "project/toAdd2";
+    }
+
+    @RequestMapping("/findAllProjects/{optype}")
     public String findAllProjects(Model model,@PathVariable("optype") String optype){   
 		logger.info("------Current path:/project/findAllProjects");
 		List<Project> projects=projectService.findAllByRankDesc();
@@ -88,7 +83,41 @@ public class ProjectController {
 		model.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
 		
         return "project/findAllProjects";
-    }  
+    }
+
+    @RequestMapping("/toList")
+    public String toList(Model model) {
+        logger.info("------Current path:/project/toList");
+        model.addAttribute("projects", projectService.findAll(PageRequest.of(1, 10)));
+        model.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
+        return "project/toList";
+    }
+
+    @RequestMapping(value = "/preview/{projectId}")
+    public String preview(Model model, @PathVariable("projectId") String projectId) {
+        logger.info("------Current path:/project/preview");
+        Project project = new Project();
+        try {
+            project = projectService.getProjectById(Long.valueOf(projectId));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        model.addAttribute("project", project);
+
+        return "project/toDetail";
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/member/{projectMemberId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ProjectMember page(@PathVariable("projectMemberId") Long projectMemberId) {
+        return projectMemberService.findByProjectMemberId(projectMemberId);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/page/{page}/{size}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Page<Project> page(@PathVariable("page") Integer page, @PathVariable("size") Integer size) {
+	    return projectService.findAll(PageRequest.of(page, size));
+    }
 	
 	@RequestMapping("/projects/{projectId}/{optype}") 
     public String toEdit(Model model,@PathVariable("projectId") String projectId,@PathVariable("optype") String optype){   

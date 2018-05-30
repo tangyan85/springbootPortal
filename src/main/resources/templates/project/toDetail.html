@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="section/header :: head"></head>
+
+<body>
+
+<div class="row" th:object="${project}">
+    <div class="col-md-12">
+        <div class="box" style="box-shadow:none;">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="products-list">
+                        <div class="product-img">
+                            <span class="glyphicon glyphicon-tree-conifer" style="font-size:40px;color:#3c763d;"></span>
+                        </div>
+                        <div class="product-info">
+                            <a href="javascript:void(0)" class="product-title" th:text="*{projectKey}"></a>
+                            <span class="product-description text-dark" th:text="*{projectName}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 text-muted">优先级:</div>
+                <div class="col-md-3">
+                    <i class="fa fa-long-arrow-up" style="color:#ea7d24;"></i>&nbsp;<span th:text="*{rank}"></span>
+                </div>
+                <div class="col-md-3 text-muted">状态:</div>
+                <div class="col-md-3">
+                    <small class="label label-success"><span th:text="*{status}"></span></small>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 text-muted">概述:</div>
+                <div class="col-md-9"><span th:text="*{description}"></span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <span class="glyphicon glyphicon-tasks" style="color:#f44336;"></span>&nbsp;任务跟踪</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/task/preview/'+*{project.projectId}+'/true\')'">
+                        <i class="fa fa-external-link"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body no-padding">
+                <tr th:each="jira : ${project.jiraProjects}" th:object="${jira}">
+                    <td>
+                    <td>
+                        <ul class="products-list product-list-in-box">
+                            <li class="item">Jira项目英文简称
+                                <a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
+                                    <span class="pull-right" th:text="*{jiraProjectKey}"></span></a>
+                            </li>
+                            <li class="item">任务情况<span class="pull-right">任务总数（<label class="text-blue">10</label>）&nbsp;/&nbsp;已完成（<label
+                                    class="text-green">5</label>）</span></a>
+                            </li>
+                            <li class="item">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        版本信息
+                                        <!-- ./chart-responsive -->
+                                    </div>
+                                    <!-- /.col -->
+                                    <div class="col-md-4">
+                                        <ul class="chart-legend clearfix pull-right">
+                                            <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.3
+                                                <small class="label-primary" style="margin-left: 30px;">归档</small>
+                                            </li>
+                                            <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.2
+                                                <small class="label-danger" style="margin-left: 30px;">未发布</small>
+                                            </li>
+                                            <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.1
+                                                <small class="label-info" style="margin-left: 30px;">已发布</small>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- /.col -->
+                                </div>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                </table>
+            </div>
+            <!-- /.box-footer -->
+        </div>
+
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <span class="glyphicon glyphicon-duplicate" style="color:#c33625;"></span>&nbsp;持续集成</h3>
+
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/ci/preview/'+*{project.projectId}+'/true\')'">
+                        <i class="fa fa-external-link"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body table-responsive no-padding">
+                <table class="table table-hover">
+                    <tr>
+                        <th>Jenkins任务英文简称</th>
+                        <th>执行情况</th>
+                        <th>操作</th>
+                    </tr>
+                    <tr th:each="jenkins : ${project.jenkinsProjects}" th:object="${jenkins}">
+                        <td th:text="*{jenkinsProjKey}"></td>
+                        <td>成功</td>
+                        <td><i class="fa fa-eye text-blue" th:onclick="'showIframe(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'\')'">任务</i>
+                            <i class="fa fa-eye text-blue" th:onclick="'showIframe(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'/ws\')'" style="margin-left: 10px;">工作空间</i>
+                            <i class="fa fa-play-circle text-blue" th:onclick="'showIframe(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'/build?delay=0sec\')'" style="margin-left: 10px;">任务</i>
+                            <i class="fa fa-cog text-blue" th:onclick="'showIframe(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'/configure\')'" style="margin-left: 10px;">任务</i></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <span class="glyphicon glyphicon-list-alt" style="color:#cd8b51;"></span>&nbsp;源代码</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/code/preview/'+*{project.projectId}+'/true\')'">
+                        <i class="fa fa-external-link"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <ul class="products-list product-list-in-box" th:each="repos: ${project.scmRepositories}"
+                    th:object="${repos}">
+                    <li class="item">
+                        <div class="product-img" style="width: 48px; height: 45px;">
+                            <img th:src="@{/dist/img/subversion.png}" style="width: 48px; height: 45px;"
+                                 alt="Product Image">
+                        </div>
+                        <div class="product-info">
+                            <a data-toggle="tooltip" title="版本库地址">http://10.215.4.165/svn/wdjr_adlm/springbootPortal/trunk</a>
+                            <span class="product-description" data-toggle="tooltip" title="版本库检出命令">
+                                svn checkout http://10.215.4.165/svn/wdjr_adlm/springbootPortal/trunk --username xxx
+                            </span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <span class="glyphicon glyphicon-grain" style="color:#f5db53;"></span>&nbsp;产出物</h3>
+
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/artifact/preview/'+*{project.projectId}+'/true\')'">
+                        <i class="fa fa-external-link"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body table-responsive no-padding">
+                <table class="table table-hover">
+                    <tr>
+                        <th>构件</th>
+                        <th>效验码</th>
+                        <th>签名</th>
+                    </tr>
+                    <tr th:each="artifact: ${project.artifacts}" th:object="${artifact}">
+                        <td><a>adlm.1.0.0.jar</a></td>
+                        <td><a>adlm.1.0.0.jar.sha1</a></td>
+                        <td><a>adlm.1.0.0.jar.asc</a></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <span class="glyphicon glyphicon-user" style="color:#0897ea;"></span>&nbsp;项目团队</h3>
+
+                <div class="box-tools pull-right">
+                    <!--<button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-external-link"></i>
+                    </button>-->
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body table-responsive no-padding">
+                <table class="table table-hover" id="project-member-table">
+                    <tr>
+                        <th>项目角色</th>
+                        <th>项目成员</th>
+                    </tr>
+                    <tr th:each="people: ${project.projectMembers}" th:object="${people}">
+                        <td th:switch="*{role.value}">
+                            <small class="label label-danger" th:case="项目经理" th:text="*{role.value}"></small>
+                            <small class="label label-primary" th:case="开发人员" th:text="*{role.value}"></small>
+                            <small class="label label-info" th:case="测试人员" th:text="*{role.value}"></small>
+                            <small class="label label-warning" th:case="运维人员" th:text="*{role.value}"></small>
+                        </td>
+                        <td th:text="*{username}"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <span class="glyphicon glyphicon-leaf" style="color:#63ba3c;"></span>&nbsp;文档协同</h3>
+
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/doc/preview/'+*{project.projectId}+'/true\')'">
+                        <i class="fa fa-external-link"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body table-responsive no-padding">
+                <table class="table table-hover">
+                    <tr>
+                        <th>Confluence项目英文简称</th>
+                    </tr>
+                    <tr th:each="conf : ${project.confluenceSpaces}" th:object="${conf}">
+                        <td><a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
+                            <span th:text="*{spaceKey}"></span></a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $("#project-member-table tr").not(":eq(0)").click(function () {
+
+        });
+    });
+
+    function showPart(url) {
+        $("#mainframe", parent.document.body).attr("src", url);
+    }
+
+    function showIframe(url) {
+        layer.open({
+            type: 2,
+            area: ['700px', '450px'],
+            fixed: false, //不固定
+            maxmin: true,
+            content: url
+        });
+    }
+</script>
+</body>
+
+</html>

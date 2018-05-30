@@ -10,8 +10,18 @@
                                 iconClass: "fa fa-circle-thin"
                             },
                             {
+                                text: '新建项目2',
+                                url: 'project/toAdd2',
+                                iconClass: "fa fa-circle-thin"
+                            },
+                            /*{
                                 text: '维护项目',
                                 url: 'project/findAllProjects/view',
+                                iconClass: "fa fa-circle-thin"
+                            },*/
+                            {
+                                text: '维护项目',
+                                url: 'project/toList',
                                 iconClass: "fa fa-circle-thin"
                             },
                             {
@@ -36,10 +46,20 @@
                                 iconClass: "fa fa-circle-thin"
                             },
                             {
-                                text: '任务查询',
-                                url: jiraUrlPrefix + '/issues/?filter=10109',
+                                text: '新建任务2',
+                                url: 'task/toAdd',
                                 iconClass: "fa fa-circle-thin"
-                            }, {
+                            },
+                            /*{
+                                text: '任务查询',
+                                url: jiraUrlPrefix + '/issues/?jql=',
+                                iconClass: "fa fa-circle-thin"
+                            },*/
+                            {
+                                text: '任务查询',
+                                url: '/task/toList',
+                                iconClass: "fa fa-circle-thin"
+                            },{
                                 text: '任务修改',
                                 url: 'pages/blank',
                                 iconClass: "fa fa-circle-thin"
@@ -56,8 +76,18 @@
                                 iconClass: "fa fa-circle-thin"
                             },
                             {
+                                text: '新建文档2',
+                                url: 'doc/toAdd',
+                                iconClass: "fa fa-circle-thin"
+                            },
+                            /*{
                                 text: '查询文档',
                                 url: confUrlContext + '/spacedirectory/view.action',
+                                iconClass: "fa fa-circle-thin"
+                            },*/
+                            {
+                                text: '查询文档',
+                                url: 'doc/toList',
                                 iconClass: "fa fa-circle-thin"
                             },
                             {
@@ -68,17 +98,44 @@
                         ]
                     },
                     {
+                        text: '持续集成',
+                        href: '#parent4',
+                        iconClass: "fa fa-copy",
+                        nodes: [
+                            {
+                                text: '新建持续集成任务',
+                                url: 'ci/toAdd',
+                                iconClass: "fa fa-circle-thin"
+                            },
+                            {
+                                text: '查询持续集成任务',
+                                url: 'ci/toList',
+                                iconClass: "fa fa-circle-thin"
+                            }
+                        ]
+                    },
+                    {
                         text: '源代码管理',
                         iconClass: "fa fa-eye",
                         href: '#parent5',
                         nodes: [{
-                                text: '创建软件仓库',
+                                text: '创建代码库',
                                 url: svnLoginUrl + '/repo/index',
                                 iconClass: "fa fa-circle-thin"
                             },
                             {
+                                text: '创建代码库2',
+                                url: 'code/toAdd',
+                                iconClass: "fa fa-circle-thin"
+                            },
+                            /*{
                                 text: '代码库查询',
                                 url: svnLoginUrl + '#browse/browse',
+                                iconClass: "fa fa-circle-thin"
+                            },*/
+                            {
+                                text: '代码库查询',
+                                url: 'code/toList',
                                 iconClass: "fa fa-circle-thin"
                             },
                             {
@@ -159,14 +216,25 @@
                         text: '软件仓库',
                         iconClass: "fa fa-database",
                         href: '#parent5',
-                        nodes: [{
+                        nodes: [
+                            {
+                                text: '新建软件仓库',
+                                url: 'artifact/toAdd',
+                                iconClass: "fa fa-circle-thin"
+                            },
+                            {
                                 text: '软件查询',
                                 url: 'pages/blank',
                                 iconClass: "fa fa-circle-thin"
                             },
-                            {
+                            /*{
                                 text: '查看产出物',
                                 url: 'project/findAllProjects/artifactView',
+                                iconClass: "fa fa-circle-thin"
+                            },*/
+                            {
+                                text: '查看产出物',
+                                url: 'artifact/toList',
                                 iconClass: "fa fa-circle-thin"
                             }
                         ]

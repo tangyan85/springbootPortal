@@ -1,56 +1,29 @@
 package com.wanda.portal.dao.remote.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
 import com.wanda.portal.config.biz.ConfluenceConfig;
 import com.wanda.portal.config.biz.JenkinsConfig;
 import com.wanda.portal.config.biz.JiraConfig;
 import com.wanda.portal.config.biz.SvnConfig;
-import com.wanda.portal.constants.AritifactType;
 import com.wanda.portal.constants.InputActionType.RESULT;
 import com.wanda.portal.constants.ProjectStatus;
-import com.wanda.portal.dao.jpa.ArtifactsRepository;
-import com.wanda.portal.dao.jpa.ConfluenceSpaceRepository;
-import com.wanda.portal.dao.jpa.JenkinsProjectRepository;
-import com.wanda.portal.dao.jpa.JiraProjectRepository;
-import com.wanda.portal.dao.jpa.ProjectMemberRepository;
-import com.wanda.portal.dao.jpa.ProjectRepository;
-import com.wanda.portal.dao.jpa.SCMRepoRepository;
-import com.wanda.portal.dao.jpa.ServerRepository;
-import com.wanda.portal.dao.remote.ConfluenceService;
-import com.wanda.portal.dao.remote.JenkinsService;
-import com.wanda.portal.dao.remote.JiraService;
-import com.wanda.portal.dao.remote.ProjectService;
-import com.wanda.portal.dao.remote.RepoService;
+import com.wanda.portal.dao.jpa.*;
+import com.wanda.portal.dao.remote.*;
 import com.wanda.portal.dto.confluence.CreateConfluenceSpaceParamDTO;
 import com.wanda.portal.dto.svn.SvnTemplateDTO;
 import com.wanda.portal.dto.svn.SvnTemplateWrapperDTO;
-import com.wanda.portal.entity.Artifact;
-import com.wanda.portal.entity.ConfluenceSpace;
-import com.wanda.portal.entity.JenkinsProject;
-import com.wanda.portal.entity.JiraProject;
-import com.wanda.portal.entity.Project;
-import com.wanda.portal.entity.ProjectMember;
-import com.wanda.portal.entity.SCMRepo;
-import com.wanda.portal.entity.Server;
-import com.wanda.portal.facade.model.input.ArtifactInputParam;
-import com.wanda.portal.facade.model.input.ConfluenceSpaceInputParam;
-import com.wanda.portal.facade.model.input.JenkinsInputParam;
-import com.wanda.portal.facade.model.input.JiraProjectInputParam;
-import com.wanda.portal.facade.model.input.ProjectInputParam;
-import com.wanda.portal.facade.model.input.ProjectMemberInputParam;
-import com.wanda.portal.facade.model.input.ScmRepoInputParam;
+import com.wanda.portal.entity.*;
+import com.wanda.portal.facade.model.input.*;
 import com.wanda.portal.utils.ValidationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 @Primary
 @Service("ProjectServiceImpl")
@@ -72,7 +45,7 @@ public class ProjectServiceImpl implements ProjectService {
     ProjectMemberRepository projectMemberRepository;
     @Autowired
     ArtifactsRepository artifactsRepository;
-    
+
     @Autowired
     JiraService jiraService;
     @Autowired
@@ -90,7 +63,7 @@ public class ProjectServiceImpl implements ProjectService {
     JenkinsConfig jenkinsConfig;
     @Autowired
     SvnConfig svnConfig;
-    
+
     @Override
     public Project getProjectByKey(String projectKey) {
         return null;
@@ -110,7 +83,7 @@ public class ProjectServiceImpl implements ProjectService {
     public void createProject(Project project) throws Exception {
         projectRepository.save(project);
     }
-    
+
     @Deprecated
     @Override
     public void updateProject(Project project) {
@@ -127,7 +100,7 @@ public class ProjectServiceImpl implements ProjectService {
         List<String> sorts = new ArrayList<>();
         sorts.add("rank"); // 先rank
         sorts.add("projectKey"); // 再key
-        Sort sort = new Sort(Sort.Direction.DESC, sorts) ;
+        Sort sort = new Sort(Sort.Direction.DESC, sorts);
         return (List<Project>) projectRepository.findAll(sort);
     }
 
@@ -149,6 +122,7 @@ public class ProjectServiceImpl implements ProjectService {
         projectRepository.saveAndFlush(proj);
         return proj;
     }
+
     /*
      * project本身的修改
      * 注意此时不允许修改ProjectKey和ProjectName
@@ -161,19 +135,24 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public String  endProject(Long projectId) {
-    	Project old=projectRepository.findById(projectId).get();
-    	old.setStatus(ProjectStatus.END);
-    	projectRepository.save(old);
+    public String endProject(Long projectId) {
+        Project old = projectRepository.findById(projectId).get();
+        old.setStatus(ProjectStatus.END);
+        projectRepository.save(old);
         return "success";
     }
-    
+
+    @Override
+    public Page<Project> findAll(PageRequest page) {
+        return projectRepository.findAll(page);
+    }
+
     private void executeDetailedTasks(ProjectInputParam projectInputParam, Project proj)
             throws Exception {
         if (proj == null) {
             throw new Exception("null project selected or persisted");
         }
-        packScm(projectInputParam.getScmRepositories(), proj);       
+        packScm(projectInputParam.getScmRepositories(), proj);
         packJira(projectInputParam.getJiraProjects(), proj);
         packConfluence(projectInputParam.getConfluenceSpaces(), proj);
         packJenkins(projectInputParam.getJenkinsProjects(), proj);
@@ -202,7 +181,7 @@ public class ProjectServiceImpl implements ProjectService {
         for (ArtifactInputParam artifact : list) {
             if (artifact.getArtifactId() == null) { // 表明为新建
                 LOGGER.info("开始新建artifact，serverIp= " + artifact.getServerIP() + ", rootPath" + artifact.getRootPath());
-                Artifact art = prepareArtifact(proj, artifact);               
+                Artifact art = prepareArtifact(proj, artifact);
                 persistArtifactOnly(artifact, art);
             } else {
                 LOGGER.info("开始更新artifact，ID=" + artifact.getArtifactId() + ", serverIp= " + artifact.getServerIP()
@@ -215,7 +194,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void persistArtifactOnly(ArtifactInputParam artifact, Artifact art) {
         Server server = serverRepository.findById(artifact.getServerId()).get();
-        art.setServer(server);    
+        art.setServer(server);
         artifactsRepository.saveAndFlush(art);
     }
 
@@ -229,11 +208,11 @@ public class ProjectServiceImpl implements ProjectService {
         art.setServerIP(artifact.getServerIP());
         return art;
     }
-    
+
     private void packProjectMembers(List<ProjectMemberInputParam> list, Project proj) {
         if (list == null || list.size() < 1) {
             return;
-        }  
+        }
         for (ProjectMemberInputParam member : list) {
             if (member.getProjectMemberId() == null) { // 表明为新建
                 LOGGER.info("开始创建member, 用户名为: " + member.getUsername() + ", 角色为: " + member.getRole());
@@ -257,11 +236,11 @@ public class ProjectServiceImpl implements ProjectService {
         pm.setUsername(member.getUsername());
         return pm;
     }
-    
+
     private void packScm(List<ScmRepoInputParam> list, Project project) throws Exception {
         if (list == null || list.size() < 1) {
             return;
-        }                
+        }
         for (ScmRepoInputParam repo : list) {
             Server server = serverRepository.findById(repo.getServerId()).get(); // 查询出对应的Server
             repoService.setServer(server); // 设置server，非常重要！
@@ -270,27 +249,27 @@ public class ProjectServiceImpl implements ProjectService {
             for (SvnTemplateDTO tmp : tmps.getTemplates()) {
                 tmpMap.put(tmp.getId(), tmp.getName());
             }
-            RESULT checkRes = repo.getInputActionType().checkWithMainId(repo.getRepoId());           
+            RESULT checkRes = repo.getInputActionType().checkWithMainId(repo.getRepoId());
             if (checkRes.equals(RESULT.VALID_REMOTE_CREATE)) { // 远程创建
-                LOGGER.info("创建");  
+                LOGGER.info("创建");
                 repoService.createSvnRepo(repo.getRepoName(), repo.getTemplateId(), true);
                 SCMRepo scmRepo = prepareScmRepo(repo);
                 Long tmpId = repo.getTemplateId();
                 String repoStyle = tmpId == null ? "Empty repository"
                         : (tmpMap.get(tmpId) == null ? "Empty repository" : tmpMap.get(tmpId));
-                scmRepo.setRepoStyle(repoStyle);         
-                persistScmOnly(project, scmRepo, server);               
+                scmRepo.setRepoStyle(repoStyle);
+                persistScmOnly(project, scmRepo, server);
             } else if (checkRes.equals(RESULT.VALID_ATTACH_OLD)) { // 添加已有
                 LOGGER.info("添加已有");
                 SCMRepo scmRepo = prepareScmRepo(repo);
-                persistScmOnly(project, scmRepo, server);         
+                persistScmOnly(project, scmRepo, server);
             } else if (checkRes.equals(RESULT.VALID_UPDATE_OR_NOTHING)) { // 更新已有              
                 LOGGER.info("更新已有");
                 SCMRepo scmRepo = prepareScmRepo(repo);
-                persistScmOnly(project, scmRepo, server);              
+                persistScmOnly(project, scmRepo, server);
             } else {
                 LOGGER.warn("illegal input action type and id!");
-            }          
+            }
         }
     }
 
@@ -320,11 +299,11 @@ public class ProjectServiceImpl implements ProjectService {
         if (list == null || list.size() < 1) {
             return;
         }
-        for (JenkinsInputParam jenkins : list) {       
+        for (JenkinsInputParam jenkins : list) {
             Server server = serverRepository.findById(jenkins.getServerId()).get(); // 查询出对应的Server
             jenkinsService.setServer(server); // 设置server，非常重要！
-            
-            RESULT checkRes = jenkins.getInputActionType().checkWithMainId(jenkins.getJenkinsProjectId());            
+
+            RESULT checkRes = jenkins.getInputActionType().checkWithMainId(jenkins.getJenkinsProjectId());
             if (checkRes.equals(RESULT.VALID_REMOTE_CREATE)) { // 远程创建
                 LOGGER.info("创建");
                 jenkinsService.createJenkinsUsingCopy(jenkins.getJenkinsProjKey(), jenkins.getReferProj());
@@ -339,8 +318,8 @@ public class ProjectServiceImpl implements ProjectService {
                 persistJenkins(proj, jenk, server);
             } else {
                 LOGGER.warn("illegal input action type and id!");
-            }            
-            
+            }
+
         }
     }
 
@@ -365,11 +344,11 @@ public class ProjectServiceImpl implements ProjectService {
         if (list == null || list.size() < 1) {
             return;
         }
-        for (ConfluenceSpaceInputParam conf : list) {   
+        for (ConfluenceSpaceInputParam conf : list) {
             Server server = serverRepository.findById(conf.getServerId()).get(); // 查询出对应的Server
             confluenceService.setServer(server); // 设置server，非常重要！            
             RESULT checkRes = conf.getInputActionType().checkWithMainId(conf.getSpaceId());
-            
+
             if (checkRes.equals(RESULT.VALID_REMOTE_CREATE)) { // 远程创建
                 LOGGER.info("创建");
                 CreateConfluenceSpaceParamDTO param = new CreateConfluenceSpaceParamDTO();
@@ -380,18 +359,18 @@ public class ProjectServiceImpl implements ProjectService {
                 String wb = confluenceService.createSpace(param);
                 ConfluenceSpace confluenceSpace = prepareConfluence(conf);
                 confluenceSpace.setWebui(wb);
-                persistConfluenceOnly(proj, confluenceSpace, server);                
+                persistConfluenceOnly(proj, confluenceSpace, server);
             } else if (checkRes.equals(RESULT.VALID_ATTACH_OLD)) { // 添加已有
                 LOGGER.info("添加已有");
                 ConfluenceSpace confluenceSpace = prepareConfluence(conf);
-                persistConfluenceOnly(proj, confluenceSpace, server);           
+                persistConfluenceOnly(proj, confluenceSpace, server);
             } else if (checkRes.equals(RESULT.VALID_UPDATE_OR_NOTHING)) { // 更新已有         
                 LOGGER.info("更新已有");
                 ConfluenceSpace confluenceSpace = prepareConfluence(conf);
-                persistConfluenceOnly(proj, confluenceSpace, server);               
+                persistConfluenceOnly(proj, confluenceSpace, server);
             } else {
                 LOGGER.warn("illegal input action type and id!");
-            }                    
+            }
         }
     }
 
@@ -422,31 +401,25 @@ public class ProjectServiceImpl implements ProjectService {
             Server server = serverRepository.findById(jira.getServerId()).get(); // 查询出对应的Server
             jiraService.setServer(server); // 设置server，非常重要！
             RESULT checkRes = jira.getInputActionType().checkWithMainId(jira.getJiraProjectId());
-            
+
             if (checkRes.equals(RESULT.VALID_REMOTE_CREATE)) { // 远程创建
                 LOGGER.info("创建jira");
                 jiraService.createJiraProjectUsingExistingProject(jira.getReferJiraId(), jira.getJiraProjectKey(),
-                       jira.getTeamleader(), jira.getJiraProjectName(), true);
+                        jira.getTeamleader(), jira.getJiraProjectName(), true);
                 JiraProject jiraProject = prepareJira(jira);
                 persistJiraOnly(proj, jiraProject, server);
             } else if (checkRes.equals(RESULT.VALID_ATTACH_OLD)) { // 添加已有
                 LOGGER.info("添加已有");
                 JiraProject jiraProject = prepareJira(jira);
-                persistJiraOnly(proj, jiraProject, server);            
+                persistJiraOnly(proj, jiraProject, server);
             } else if (checkRes.equals(RESULT.VALID_UPDATE_OR_NOTHING)) { // 更新已有              
                 LOGGER.info("更新已有");
                 JiraProject jiraProject = prepareJira(jira);
-                persistJiraOnly(proj, jiraProject, server);               
+                persistJiraOnly(proj, jiraProject, server);
             } else {
                 LOGGER.warn("illegal input action type and id!");
-            }                
+            }
         }
-    }
-
-    private void persistJiraOnly(Project proj, JiraProject jiraProject, Server server) {
-        jiraProject.setServer(server);
-        jiraProject.setProject(proj);
-        jiraProjectRepository.saveAndFlush(jiraProject);
     }
 
     private static JiraProject prepareJira(JiraProjectInputParam jira) {
@@ -457,8 +430,16 @@ public class ProjectServiceImpl implements ProjectService {
         jiraProject.setJiraProjectKey(jira.getJiraProjectKey());
         jiraProject.setJiraProjectName(jira.getJiraProjectName());
         jiraProject.setJiraProjectDescription(jira.getJiraProjectDescription());
-        jiraProject.setRemark(jira.getRemark());       
+        jiraProject.setRemark(jira.getRemark());
         return jiraProject;
+    }
+
+    private void persistJiraOnly(Project proj, JiraProject jiraProject, Server server) {
+        jiraProject.setServer(server);
+        jiraProject.setProject(proj);
+        String webui = server.getProtocol() + "://" + server.getDomain() + "/browse/" + jiraProject.getJiraProjectKey();
+        jiraProject.setWebui(webui);
+        jiraProjectRepository.saveAndFlush(jiraProject);
     }
 
 }

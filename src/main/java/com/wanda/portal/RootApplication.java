@@ -8,19 +8,20 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.cache.annotation.EnableCaching;
 
 /**
- * Created by chenyuanjun 
+ * Created by chenyuanjun
  */
 @EnableAutoConfiguration
 @EnableCaching
 @SpringBootApplication
-public class RootApplication extends SpringBootServletInitializer{
-    
+public class RootApplication extends SpringBootServletInitializer {
+
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(RootApplication.class);
     }
-    
-    public static void main(String [] args) {
-        SpringApplication.run(RootApplication.class, args); 
+
+    public static void main(String[] args) {
+        SpringApplication.run(RootApplication.class, args);
     }
+
 }

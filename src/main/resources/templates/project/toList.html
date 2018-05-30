@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="section/header :: head"></head>
+
+<body>
+<div th:fragment="dashboard">
+    <section class="content-header">
+        <h1>
+            项目列表
+            <small>preview</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
+            <li><a href="#">项目管理</a></li>
+            <li class="active">维护项目</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="box">
+                    <div class="box-header">
+                        <small>按 优先级 排序</small>
+                        <div class="box-tools" id="project-list-paging">
+
+                        </div>
+                    </div>
+
+                    <!-- /.box-header -->
+                    <div class="box-body no-padding">
+                        <ul class="nav nav-pills nav-stacked" id="project-list-ul">
+                            <li th:each="project ,projectStat : ${projects.content}">
+                                <a href="#" th:onclick="'javascript:showDetail(\''+${project.projectId}+'\');'">
+                                    <i th:class="${project.status != 'START'} ? 'fa fa-fw fa-plus-square text-success' : 'fa fa-fw fa-power-off text-danger'">&nbsp;
+                                        <span th:text="${project.projectKey}"></span></i>
+                                    <p th:text="${project.projectName}" class="text-primary list-group-item-text"></p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-md-9" id="project-detail">
+
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    $(function () {
+        $("#project-list-paging").Page({
+            totalPages: 7,//分页总数
+            liNums: 3,//分页的数字按钮数(建议取奇数)
+            activeClass: 'activP', //active 类样式定义
+            hasFirstPage: false,
+            hasLastPage: false,
+            callBack: function (page) {
+                showPage("/project/page/" + page + "/10");
+            }
+        });
+
+        $("#project-list-ul li:eq(0)").find("a").click();
+    })
+
+    function showPage(url) {
+        jQuery.ajax({
+            type: "POST",
+            url: url,
+            success: function (data) {
+                if (data != null) {
+                    jQuery("#project-list-ul li").remove();
+                    var htm = '';
+                    for (i in data.content) {
+                        htm += '<li><a href="#" onclick="showDetail(' + data.content[i].projectId + ')">';
+                        htm += '<i class="' + (data.content[i].status == 'START' ? 'fa fa-fw fa-plus-square text-success' : 'fa fa-fw fa-power-off text-danger')
+                            + '">&nbsp;<span>' + data.content[i].projectKey + '</span></i>';
+                        htm += '<p class="text-primary list-group-item-text">' + data.content[i].projectName + '</p>';
+                        htm += '</a></li>';
+                    }
+                    jQuery("#project-list-ul").append(htm);
+                }
+            }
+        });
+
+    }
+
+    function showDetail(projectId) {
+        $("#project-detail").load("/project/preview/" + projectId, {}, function () {
+        });
+    }
+
+</script>
+
+</body>
+<footer th:include="section/footer :: footer"></footer>
+
+</html>
