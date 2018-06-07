@@ -7,13 +7,13 @@
 <div th:fragment="dashboard">
     <section class="content-header">
         <h1>
-            查看/维护Confluence空间
+            项目列表
             <small>preview</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
-            <li><a href="#">文档管理</a></li>
-            <li class="active">查看/维护Confluence空间</li>
+            <li><a href="#">项目成员管理</a></li>
+            <li class="active">查看项目成员</li>
         </ol>
     </section>
 
@@ -90,7 +90,7 @@
     }
 
     function showDetail(projectId) {
-        $("#project-detail").load("/doc/preview/" + projectId + "/false", {}, function () {
+        $("#project-detail").load("/member/preview/" + projectId + "/false", {}, function () {
         });
     }
 

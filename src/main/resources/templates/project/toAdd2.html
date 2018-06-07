@@ -8,6 +8,7 @@
 <script th:src="@{/assets/js/jquery.maskedinput.min.js}"></script>
 <script th:src="@{/assets/js/ace-elements.min.js}"></script>
 <script th:src="@{/assets/js/ace.min.js}"></script>
+<script th:src="@{/js/project/editable.js}"></script>
 
 <body style="background: #ffffff">
 <div th:fragment="dashboard">
@@ -24,18 +25,18 @@
     </section>
 
     <section class="content">
-        <form class="form-horizontal">
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="widget-box">
-                        <div class="widget-header widget-header-blue widget-header-flat">
-                            <h4 class="widget-title lighter">
-                                <i class="ace-icon fa fa-hand-o-right icon-animated-hand-pointer blue">创建向导</i>
-                            </h4>
-                        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="widget-box">
+                    <div class="widget-header widget-header-blue widget-header-flat">
+                        <h4 class="widget-title lighter">
+                            <i class="ace-icon fa fa-hand-o-right icon-animated-hand-pointer blue">创建向导</i>
+                        </h4>
+                    </div>
 
-                        <div class="widget-body">
-                            <div class="widget-main">
+                    <div class="widget-body">
+                        <div class="widget-main">
+                            <form class="form-horizontal" id="validation-form">
                                 <div id="fuelux-wizard-container" class="no-steps-container">
                                     <div>
                                         <ul class="steps" style="margin-left: 0">
@@ -79,106 +80,78 @@
                                             </li>
                                         </ul>
                                     </div>
-
                                     <hr>
 
                                     <div class="step-content pos-rel">
                                         <div class="step-pane active" data-step="1">
                                             <h3 class="lighter block green">填写下列信息</h3>
 
-                                            <div class="form-group">
+                                            <div class="form-group fg2">
                                                 <label for="projectKey"
                                                        class="col-xs-12 col-sm-3 control-label no-padding-right">项目英文简称</label>
 
                                                 <div class="col-xs-12 col-sm-5">
-												<span class="block input-icon input-icon-right">
-                                                    <input id="projectKey" name="projectKey" class="width-100"
-                                                           type="text" onkeyup="this.value=this.value.toUpperCase()">
-                                                    <i class="ace-icon fa fa-info-circle"></i>
-												</span>
-                                                </div>
-                                                <div class="help-block col-xs-12 col-sm-reset inline"
-                                                     style="position:absolute;z-index:20;">
-                                                    <ul id="projectKey_tips" style="display:none;">
-                                                        <li>长度为2~16个字符</li>
-                                                        <li>支持字母和-_</li>
-                                                        <li>不允许有空格</li>
-                                                    </ul>
+                                                    <span class="block input-icon input-icon-right">
+                                                        <input id="projectKey" name="projectKey" class="width-100"
+                                                               type="text" onkeyup="this.value=this.value.toUpperCase()">
+                                                        <i class="ace-icon fa fa-info-circle"></i>
+                                                    </span>
                                                 </div>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group fg2">
                                                 <label for="projectName"
                                                        class="col-xs-12 col-sm-3 control-label no-padding-right">项目名称</label>
 
                                                 <div class="col-xs-12 col-sm-5">
                                                     <span class="block input-icon input-icon-right">
                                                         <input id="projectName" name="projectName" class="width-100"
-                                                               type="text" required="required">
+                                                               type="text">
                                                         <i class="ace-icon fa fa-info-circle"></i>
                                                     </span>
                                                 </div>
-                                                <div class="help-block col-xs-12 col-sm-reset inline"
-                                                     style="position:absolute;z-index:20;">
-                                                    <ul id="projectName_tips" style="display:none;">
-                                                        <li>长度为2~25个字符</li>
-                                                        <li>支持汉字，大小写字母和数字</li>
-                                                        <li>不允许有空格和特殊符号</li>
-                                                    </ul>
-                                                </div>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group fg2">
                                                 <label for="status"
                                                        class="col-xs-12 col-sm-3 control-label no-padding-right">项目状态</label>
 
                                                 <div class="col-xs-12 col-sm-5">
-												<span class="block input-icon input-icon-right">
-                                                    <select id="status" name="status" class="width-100" disabled>
-                                                        <option th:each="status : ${projectStatus}"
-                                                                th:value="${status.key}"
-                                                                th:text="${status.value}"
-                                                                th:selected="${status.key=='START'}"/>
-                                                    </select>
-												</span>
+                                                    <span class="block input-icon input-icon-right">
+                                                        <select id="status" name="status" class="width-100 select2"
+                                                                disabled>
+                                                            <option th:each="status : ${projectStatus}"
+                                                                    th:value="${status.key}"
+                                                                    th:text="${status.value}"
+                                                                    th:selected="${status.key=='START'}"/>
+                                                        </select>
+                                                    </span>
                                                 </div>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group fg2">
                                                 <label for="projectName"
                                                        class="col-xs-12 col-sm-3 control-label no-padding-right">优先级</label>
 
                                                 <div class="col-xs-12 col-sm-5">
-												<span class="block input-icon input-icon-right">
-                                                    <input id="rank" name="rank" type="number" class="width-100"
-                                                           value="1" min="0" max="10" required="required"/>
-                                                    <i class="ace-icon fa fa-info-circle"></i>
-												</span>
-                                                </div>
-                                                <div class="help-block col-xs-12 col-sm-reset inline"
-                                                     style="position:absolute;z-index:20;">
-                                                    <ul id="rank_tips" style="display:none;">
-                                                        <li>数字越大优先级越高</li>
-                                                    </ul>
+                                                    <span class="block input-icon input-icon-right">
+                                                        <input id="rank" name="rank" type="number" class="width-100"
+                                                               value="1" min="0" max="10"/>
+                                                        <i class="ace-icon fa fa-info-circle"></i>
+                                                    </span>
                                                 </div>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group fg2">
                                                 <label for="projectName"
                                                        class="col-xs-12 col-sm-3 control-label no-padding-right">项目描述</label>
 
                                                 <div class="col-xs-12 col-sm-5">
-												<span class="block input-icon input-icon-right">
-                                                    <textarea id="description" name="description" class="width-100"
-                                                              rows="3"></textarea>
-                                                    <i class="ace-icon fa fa-info-circle"></i>
-												</span>
-                                                </div>
-                                                <div class="help-block col-xs-12 col-sm-reset inline"
-                                                     style="position:absolute;z-index:20;">
-                                                    <ul id="description_tips" style="display:none;">
-                                                        <li>长度为0~200个字符</li>
-                                                    </ul>
+                                                    <span class="block input-icon input-icon-right">
+                                                        <textarea id="description" name="description" class="width-100"
+                                                                  rows="3"></textarea>
+                                                        <i class="ace-icon fa fa-info-circle"></i>
+                                                    </span>
                                                 </div>
                                             </div>
 
@@ -187,67 +160,102 @@
                                         <div class="step-pane" data-step="2">
                                             <h3 class="lighter block green">填写下列信息</h3>
 
-                                            <table id="table12">
-                                                <tr>
-                                                    <td data-editable="name">Danish</td>
-                                                    <td data-editable="phone">923125511678</td>
-                                                    <td data-editable="age" data-editable-type="number">30</td>
-                                                    <td><!-- Extra column for buttons--></td>
-                                                </tr>
-                                            </table>
+                                            <div class="bs-example" data-example-id="hoverable-table">
+                                                <table class="table table-hover editable" id="editable_pm"
+                                                       data-target="projectMembers">
+                                                    <thead>
+                                                    <tr>
+                                                        <th id="projectMemberId" style="display:none">projectMemberId</th>
+                                                        <th id="role">项目成员</th>
+                                                        <th id="username">担任角色</th>
+                                                        <th data-ingore="true"></th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td scope="row" style="display:none">
+                                                            <input class="form-control" type="hidden"
+                                                                   name="projectMemberId" id="projectMemberId"
+                                                                   th:value="*{projectMemberId}"/>
+                                                        </td>
+                                                        <td>
+                                                            <div class="form-group">
+                                                                <input class="form-control" type="text" name="username"
+                                                                       id="username"/>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2" id="role"
+                                                                        name="role">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="type : ${projectMemberRoles}"
+                                                                            th:value="${type.key}"
+                                                                            th:text="${type.value}"/>
+                                                                </select>
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
 
                                         <div class="step-pane" data-step="3">
                                             <h3 class="lighter block green">填写下列信息</h3>
 
-                                            <div class="row mar_ned">
-                                                <div class="col-md-4 col-xs-3">
-                                                    <p align="right">
-                                                        <stong>操作类型</stong>
-                                                    </p>
-                                                </div>
-                                                <div class="col-md-8 col-xs-9">
-                                                    <select class="dropselectsec actionJira" id="inputActionType"
-                                                            name="inputActionType">
-                                                        <option value="-1">------请选择------</option>
-                                                        <option th:each="optype : ${inputActionTypes}"
-                                                                th:value="${optype.key}" th:text="${optype.value}"
-                                                                th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"
-                                                        />
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="row mar_ned">
-                                                <div class="col-md-4 col-xs-3">
-                                                    <p align="right">
-                                                        <stong>服务器地址</stong>
-                                                    </p>
-                                                </div>
-                                                <div class="col-md-8 col-xs-9">
-                                                    <select class="dropselectsec" id="serverId" name="serverId">
-                                                        <option th:each="ip : ${serverIPs}" th:value="${ip.serverId}"
-                                                                th:text="${ip.outerServerIpAndPort}"
-                                                                th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'jira')}? none:all"
-                                                        />
-                                                    </select>
+                                            <div class="form-group fg2">
+                                                <label for="inputActionType"
+                                                       class="col-xs-12 col-sm-3 control-label no-padding-right">操作类型</label>
+
+                                                <div class="col-xs-12 col-sm-5">
+                                                    <span class="block input-icon input-icon-right">
+                                                        <select class="width-100 select2 actionJira" id="inputActionType"
+                                                                name="inputActionType">
+                                                            <option value="">------请选择------</option>
+                                                            <option th:each="optype : ${inputActionTypes}"
+                                                                    th:value="${optype.key}" th:text="${optype.value}"
+                                                                    th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"
+                                                            />
+                                                        </select>
+                                                    </span>
                                                 </div>
                                             </div>
-                                            <div class="row mar_ned">
-                                                <div class="col-md-4 col-xs-3">
-                                                    <p align="right">
-                                                        <stong>请选择模板</stong>
-                                                    </p>
-                                                </div>
-                                                <div class="col-md-8 col-xs-9">
-                                                    <select class="dropselectsec selectJira" id="selectJira"
-                                                            name="selectJira" data-ingore="true">
-                                                        <option value="-1">------请选择------</option>
-                                                        <option th:each="jira : ${existJiras}"
-                                                                th:value="${jira.referJiraId}"
-                                                                th:text="${jira.jiraProjectName}"/>
-                                                    </select>
+
+                                            <div class="form-group fg2">
+                                                <label for="serverId"
+                                                       class="col-xs-12 col-sm-3 control-label no-padding-right">服务器地址</label>
+
+                                                <div class="col-xs-12 col-sm-5">
+                                                    <span class="block input-icon input-icon-right">
+                                                        <select class="width-100 select2" id="serverId" name="serverId">
+                                                            <option value="">------请选择------</option>
+                                                            <option th:each="ip : ${serverIPs}" th:value="${ip.serverId}"
+                                                                    th:text="${ip.outerServerIpAndPort}"
+                                                                    th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'jira')}? none:all"/>
+                                                        </select>
+                                                    </span>
                                                 </div>
                                             </div>
+
+                                            <div class="form-group fg2">
+                                                <label for="selectJira"
+                                                       class="col-xs-12 col-sm-3 control-label no-padding-right">Jira项目模板</label>
+
+                                                <div class="col-xs-12 col-sm-5">
+                                                    <span class="block input-icon input-icon-right">
+                                                        <select class="width-100 select2 selectJira" id="selectJira"
+                                                                name="selectJira" data-ingore="true">
+                                                            <option value="">------请选择------</option>
+                                                            <option th:each="jira : ${existJiras}"
+                                                                    th:value="${jira.referJiraId}"
+                                                                    th:text="${jira.jiraProjectName}"/>
+                                                        </select>
+                                                    </span>
+                                                </div>
+                                            </div>
+
                                             <div class="row mar_ned" style="display:none">
                                                 <div class="col-md-4 col-xs-3">
                                                     <p align="right">
@@ -257,8 +265,7 @@
                                                 <div class="col-md-8 col-xs-9">
                                                     <input class="dropselectsec selectChange" type="text"
                                                            name="jiraProjectId" id="jiraProjectId"
-                                                           th:value="*{jiraProjectId}"
-                                                    />
+                                                           th:value="*{jiraProjectId}"/>
                                                 </div>
                                             </div>
                                             <div class="row mar_ned" style="display:none">
@@ -285,52 +292,58 @@
                                                            id="teamleader" th:value="*{teamleader}"/>
                                                 </div>
                                             </div>
-                                            <div class="row mar_ned">
-                                                <div class="col-md-4 col-xs-3">
-                                                    <p align="right">
-                                                        <stong>Jira项目英文简称</stong>
-                                                    </p>
-                                                </div>
-                                                <div class="col-md-8 col-xs-9">
-                                                    <input class="dropselectsec selectChange" type="text"
-                                                           name="jiraProjectKey" id="jiraProjectKey" disabled/>
-                                                </div>
-                                            </div>
-                                            <div class="row mar_ned">
-                                                <div class="col-md-4 col-xs-3">
-                                                    <p align="right">
-                                                        <stong>Jira项目名称</stong>
-                                                    </p>
-                                                </div>
-                                                <div class="col-md-8 col-xs-9">
-                                                    <input class="dropselectsec selectChange" type="text"
-                                                           name="jiraProjectName" id="jiraProjectName"
-                                                           required="required"
-                                                           disabled/>
+
+                                            <div class="form-group fg2">
+                                                <label for="jiraProjectKey"
+                                                       class="col-xs-12 col-sm-3 control-label no-padding-right">Jira项目英文简称</label>
+
+                                                <div class="col-xs-12 col-sm-5">
+                                                    <span class="block input-icon input-icon-right">
+                                                        <input class="width-100" type="text"
+                                                               name="jiraProjectKey" id="jiraProjectKey" disabled/>
+                                                        <i class="ace-icon fa fa-info-circle"></i>
+                                                    </span>
                                                 </div>
                                             </div>
-                                            <div class="row mar_ned">
-                                                <div class="col-md-4 col-xs-3">
-                                                    <p align="right">
-                                                        <stong>描述</stong>
-                                                    </p>
-                                                </div>
-                                                <div class="col-md-8 col-xs-9">
-                                                    <input class="dropselectsec selectChange" type="text"
-                                                           name="jiraProjectDescription" id="jiraProjectDescription"/>
+
+                                            <div class="form-group fg2">
+                                                <label for="jiraProjectName"
+                                                       class="col-xs-12 col-sm-3 control-label no-padding-right">Jira项目名称</label>
+
+                                                <div class="col-xs-12 col-sm-5">
+                                                    <span class="block input-icon input-icon-right">
+                                                        <input class="width-100" type="text"
+                                                               name="jiraProjectName" id="jiraProjectName"
+                                                               disabled/>
+                                                        <i class="ace-icon fa fa-info-circle"></i>
+                                                    </span>
                                                 </div>
                                             </div>
+
+                                            <div class="form-group fg2">
+                                                <label for="jiraProjectDescription"
+                                                       class="col-xs-12 col-sm-3 control-label no-padding-right">描述</label>
+
+                                                <div class="col-xs-12 col-sm-5">
+                                                    <span class="block input-icon input-icon-right">
+                                                        <textarea id="jiraProjectDescription" name="jiraProjectDescription"
+                                                                  class="width-100"
+                                                                  rows="3"></textarea>
+                                                        <i class="ace-icon fa fa-info-circle"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+
                                         </div>
 
                                         <div class="step-pane" data-step="4">
                                             <h3 class="lighter block green">填写下列信息</h3>
 
-                                            <div class="row mar_ned">
-                                                <table class="table table-bordered " id="confluenceSpaceTable"
+                                            <div class="bs-example" data-example-id="hoverable-table">
+                                                <table class="table table-hover editable" id="editable_doc"
                                                        data-target="confluenceSpaces">
                                                     <thead>
                                                     <tr>
-
                                                         <th id="inputActionType">操作类型</th>
                                                         <th id="serverId">服务器地址</th>
                                                         <th data-ingore="true">请选择模板</th>
@@ -339,67 +352,78 @@
                                                         <th id="spaceName">Confluence空间名称</th>
                                                         <th id="spaceDescription">描述</th>
                                                         <th id="pageId" style="display:none">pageId</th>
-                                                        <th data-ingore="true">操作</th>
+                                                        <th data-ingore="true"></th>
                                                     </tr>
                                                     </thead>
-                                                    <tbody class="list-item_copy">
-                                                    <tr data-ingore-target="spaceKey">
+                                                    <tbody>
+                                                    <tr>
                                                         <td>
-                                                            <select class="form-control actionConfluence"
-                                                                    id="inputActionType" name="inputActionType">
-                                                                <option value="-1">------请选择------</option>
-                                                                <option th:each="optype : ${inputActionTypes}"
-                                                                        th:value="${optype.key}"
-                                                                        th:text="${optype.value}"
-                                                                        th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"
-                                                                />
-                                                            </select>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2 actionConfluence"
+                                                                        id="inputActionType" name="inputActionType">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="optype : ${inputActionTypes}"
+                                                                            th:value="${optype.key}"
+                                                                            th:text="${optype.value}"
+                                                                            th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"/>
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <select class="form-control" id="serverId" name="serverId">
-                                                                <option th:each="ip : ${serverIPs}"
-                                                                        th:value="${ip.serverId}"
-                                                                        th:text="${ip.outerServerIpAndPort}"
-                                                                        th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'CONFLUENCE')}? none:all"
-                                                                />
-                                                            </select>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2" id="serverId"
+                                                                        name="serverId">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="ip : ${serverIPs}"
+                                                                            th:value="${ip.serverId}"
+                                                                            th:text="${ip.outerServerIpAndPort}"
+                                                                            th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'CONFLUENCE')}? none:all"/>
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <select class="form-control selectConfluence" id="conf"
-                                                                    name="conf" data-ingore="true">
-                                                                <option value="-1">------请选择------</option>
-                                                                <option th:each="conf : ${existConfs}"
-                                                                        th:value="${conf.spaceKey}"
-                                                                        th:text="${conf.spaceName}"/>
-                                                            </select>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2 selectConfluence"
+                                                                        id="conf" name="conf" data-ingore="true">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="conf : ${existConfs}"
+                                                                            th:value="${conf.spaceKey}"
+                                                                            th:text="${conf.spaceName}"/>
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                         <td style="display:none">
-                                                            <input class="form-control selectChange" type="hidden"
-                                                                   name="spaceId" id="spaceId" th:value="*{spaceId}"/>
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange" type="hidden"
+                                                                       name="spaceId" id="spaceId"
+                                                                       th:value="*{spaceId}"/>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <input class="form-control selectChange" type="text"
-                                                                   name="spaceKey" id="spaceKey" disabled/>
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange" type="text"
+                                                                       name="spaceKey" id="spaceKey" disabled/>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <input class="form-control selectChange" type="text"
-                                                                   name="spaceName" id="spaceName" disabled/>
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange" type="text"
+                                                                       name="spaceName" id="spaceName" disabled/>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <input class="form-control" type="text"
-                                                                   name="spaceDescription"
-                                                                   id="spaceDescription"/>
+                                                            <div class="form-group">
+                                                                <input class="form-control" type="text"
+                                                                       name="spaceDescription" id="spaceDescription"/>
+                                                            </div>
                                                         </td>
                                                         <td style="display:none">
-                                                            <input class="form-control selectChange" type="text"
-                                                                   name="pageId" id="pageId" disabled/>
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange" type="text"
+                                                                       name="pageId" id="pageId" disabled/>
+                                                            </div>
                                                         </td>
-                                                        <td>
-                                                            <a href="#" class="del">
-                                                            <span class="glyphicon glyphicon-remove" aria-hidden="true"
-                                                                  title="删除"></span>
-                                                            </a>
-                                                        </td>
+                                                        <td></td>
                                                     </tr>
                                                     </tbody>
                                                 </table>
@@ -409,97 +433,114 @@
                                         <div class="step-pane" data-step="5">
                                             <h3 class="lighter block green">填写下列信息</h3>
 
-                                            <div class="row mar_ned">
-                                                <table class="table table-bordered " id="sCMRepoTable"
+                                            <div class="bs-example" data-example-id="hoverable-table">
+                                                <table class="table table-hover editable" id="editable_repo"
                                                        data-target="scmRepositories">
                                                     <thead>
                                                     <tr>
                                                         <th id="inputActionType">操作类型</th>
                                                         <th id="serverId">服务器地址</th>
-                                                        <th data-ingore="true">请选择模板</th>
                                                         <th id="repoType">服务器类型</th>
+                                                        <th data-ingore="true">请选择模板</th>
                                                         <th id="repoId" style="display:none">repoId</th>
                                                         <th id="templateId" style="display:none">templateId</th>
                                                         <th id="repoName">名称</th>
                                                         <th id="repoRemoteId" style="display:none">repoRemoteId</th>
                                                         <th id="repoStyle" style="display:none">repoStyle</th>
-                                                        <th data-ingore="true">操作</th>
+                                                        <th data-ingore="true"></th>
                                                     </tr>
                                                     </thead>
-                                                    <tbody class="list-item_copy">
-                                                    <tr data-ingore-target="repoName">
+                                                    <tbody>
+                                                    <tr>
                                                         <td>
-                                                            <select class="form-control actionSvns" id="inputActionType"
-                                                                    name="inputActionType">
-                                                                <option value="-1">------请选择------</option>
-                                                                <option th:each="optype : ${inputActionTypes}"
-                                                                        th:value="${optype.key}"
-                                                                        th:text="${optype.value}"
-                                                                        th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"
-                                                                />
-                                                            </select>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2 actionSvns"
+                                                                        id="inputActionType" name="inputActionType">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="optype : ${inputActionTypes}"
+                                                                            th:value="${optype.key}"
+                                                                            th:text="${optype.value}"
+                                                                            th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"/>
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <select class="form-control" id="serverId" name="serverId">
-                                                                <option th:each="ip : ${serverIPs}"
-                                                                        th:value="${ip.serverId}"
-                                                                        th:text="${ip.outerServerIpAndPort}"
-                                                                        th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'SVN')}? none:all"
-                                                                />
-                                                            </select>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2" id="serverId"
+                                                                        name="serverId">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="ip : ${serverIPs}"
+                                                                            th:value="${ip.serverId}"
+                                                                            th:text="${ip.outerServerIpAndPort}"
+                                                                            th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'SVN')}? none:all"/>
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <select class="form-control selectSvns" id="selectSvns"
-                                                                    name="selectSvns" data-ingore="true">
-                                                                <option value="-1">------请选择------</option>
-                                                                <option th:each="svn : ${existSvns}"
-                                                                        th:value="${svn.repoName}"
-                                                                        th:text="${svn.repoName}"/>
-                                                            </select>
-                                                            <select class="form-control selectSvnTemplats"
-                                                                    id="selectSvnTemplats" name="selectSvnTemplats"
-                                                                    data-ingore="true" style="display:none">
-                                                                <option value="-1">------请选择------</option>
-                                                                <option th:each="svn : ${svnTemplates}"
-                                                                        th:value="${svn.repoName}"
-                                                                        th:text="${svn.repoName}"/>
-                                                            </select>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2 selectSvns"
+                                                                        id="selectSvns"
+                                                                        name="selectSvns" data-ingore="true">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="svn : ${existSvns}"
+                                                                            th:value="${svn.repoName}"
+                                                                            th:text="${svn.repoName}"/>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2 selectSvnTemplats"
+                                                                        id="selectSvnTemplats" name="selectSvnTemplats"
+                                                                        data-ingore="true" style="display:none">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="svn : ${svnTemplates}"
+                                                                            th:value="${svn.repoName}"
+                                                                            th:text="${svn.repoName}"/>
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <select class="form-control select" id="repoType"
-                                                                    name="repoType" disabled>
-                                                                <option th:each="type : ${repoTypes}"
-                                                                        th:value="${type.key}"
-                                                                        th:text="${type.value}"/>
-                                                            </select>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2" id="repoType"
+                                                                        name="repoType" disabled>
+                                                                    <option th:each="type : ${repoTypes}"
+                                                                            th:value="${type.key}"
+                                                                            th:text="${type.value}"/>
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                         <td style="display:none">
-                                                            <input class="form-control selectChange" type="hidden"
-                                                                   name="repoId" id="repoId" th:value="*{repoId}"/>
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange" type="hidden"
+                                                                       name="repoId" id="repoId" th:value="*{repoId}"/>
+                                                            </div>
                                                         </td>
                                                         <td style="display:none">
-                                                            <input class="form-control selectChange" type="hidden"
-                                                                   name="templateId" id="templateId"
-                                                                   th:value="*{templateId}"/>
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange" type="hidden"
+                                                                       name="templateId" id="templateId"
+                                                                       th:value="*{templateId}"/>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <input class="form-control selectChange" type="text"
-                                                                   name="repoName" id="repoName" disabled/>
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange" type="text"
+                                                                       name="repoName" id="repoName" disabled/>
+                                                            </div>
                                                         </td>
                                                         <td style="display:none">
-                                                            <input class="form-control selectChange" type="text"
-                                                                   name="repoRemoteId" id="repoRemoteId" disabled/>
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange" type="text"
+                                                                       name="repoRemoteId" id="repoRemoteId" disabled/>
+                                                            </div>
                                                         </td>
                                                         <td style="display:none">
-                                                            <input class="form-control selectChange" type="repoStyle"
-                                                                   name="repoStyle" id="repoStyle"/>
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange"
+                                                                       type="repoStyle"
+                                                                       name="repoStyle" id="repoStyle"/>
+                                                            </div>
                                                         </td>
-                                                        <td>
-                                                            <a href="#" class="del">
-                                                            <span class="glyphicon glyphicon-remove" aria-hidden="true"
-                                                                  title="删除"></span>
-                                                            </a>
-                                                        </td>
+                                                        <td></td>
                                                     </tr>
                                                     </tbody>
                                                 </table>
@@ -509,8 +550,8 @@
                                         <div class="step-pane" data-step="6">
                                             <h3 class="lighter block green">填写下列信息</h3>
 
-                                            <div class="row mar_ned">
-                                                <table class="table table-bordered " id="jenkinsProjectTable"
+                                            <div class="bs-example" data-example-id="hoverable-table">
+                                                <table class="table table-hover editable" id="editable_ci"
                                                        data-target="jenkinsProjects">
                                                     <thead>
                                                     <tr>
@@ -522,59 +563,68 @@
                                                         </th>
                                                         <th id="referProj" style="display:none">referProj</th>
                                                         <th id="jenkinsProjKey">Jenkins Job英文简称</th>
-                                                        <th data-ingore="true">操作</th>
+                                                        <th data-ingore="true"></th>
                                                     </tr>
                                                     </thead>
-                                                    <tbody class="list-item_copy">
-                                                    <tr data-ingore-target="jenkinsProjKey">
+                                                    <tbody>
+                                                    <tr>
                                                         <td>
-                                                            <select class="form-control actionJenkins"
-                                                                    id="inputActionType"
-                                                                    name="inputActionType">
-                                                                <option value="-1">------请选择------</option>
-                                                                <option th:each="optype : ${inputActionTypes}"
-                                                                        th:value="${optype.key}"
-                                                                        th:text="${optype.value}"
-                                                                        th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"
-                                                                />
-                                                            </select>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2 actionJenkins"
+                                                                        id="inputActionType" name="inputActionType">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="optype : ${inputActionTypes}"
+                                                                            th:value="${optype.key}"
+                                                                            th:text="${optype.value}"
+                                                                            th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"
+                                                                    />
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <select class="form-control" id="serverId" name="serverId">
-                                                                <option th:each="ip : ${serverIPs}"
-                                                                        th:value="${ip.serverId}"
-                                                                        th:text="${ip.outerServerIpAndPort}"
-                                                                        th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'JENKINS')}? none:all"
-                                                                />
-                                                            </select>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2" id="serverId"
+                                                                        name="serverId">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="ip : ${serverIPs}"
+                                                                            th:value="${ip.serverId}"
+                                                                            th:text="${ip.outerServerIpAndPort}"
+                                                                            th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'JENKINS')}? none:all"/>
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <select class="form-control selectJenkins" id="jenkin"
-                                                                    name="jenkin" data-ingore="true">
-                                                                <option value="-1">------请选择------</option>
-                                                                <option th:each="jenkin : ${existJenkins}"
-                                                                        th:value="${jenkin.jenkinsProjKey}"
-                                                                        th:text="${jenkin.jenkinsProjKey}"/>
-                                                            </select>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2 selectJenkins"
+                                                                        id="jenkin"
+                                                                        name="jenkin" data-ingore="true">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="jenkin : ${existJenkins}"
+                                                                            th:value="${jenkin.jenkinsProjKey}"
+                                                                            th:text="${jenkin.jenkinsProjKey}"/>
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                         <td style="display:none">
-                                                            <input class="form-control selectChange" type="hidden"
-                                                                   name="jenkinsProjectId" id="jenkinsProjectId"/>
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange" type="hidden"
+                                                                       name="jenkinsProjectId" id="jenkinsProjectId"/>
+                                                            </div>
                                                         </td>
                                                         <td style="display:none">
-                                                            <input class="form-control selectChange" type="hidden"
-                                                                   name="referProj" id="referProj"/>
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange" type="hidden"
+                                                                       name="referProj" id="referProj"/>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <input class="form-control selectChange" type="text"
-                                                                   name="jenkinsProjKey" id="jenkinsProjKey" disabled/>
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange" type="text"
+                                                                       name="jenkinsProjKey" id="jenkinsProjKey"
+                                                                       disabled/>
+                                                            </div>
                                                         </td>
-                                                        <td>
-                                                            <a href="#" class="del">
-                                                            <span class="glyphicon glyphicon-remove" aria-hidden="true"
-                                                                  title="删除"></span>
-                                                            </a>
-                                                        </td>
+                                                        <td></td>
                                                     </tr>
                                                     </tbody>
                                                 </table>
@@ -584,8 +634,8 @@
                                         <div class="step-pane" data-step="7">
                                             <h3 class="lighter block green">填写下列信息</h3>
 
-                                            <div class="row mar_ned">
-                                                <table class="table table-bordered " id="artifactsTable"
+                                            <div class="bs-example" data-example-id="hoverable-table">
+                                                <table class="table table-hover editable" id="editable_art"
                                                        data-target="artifacts">
                                                     <thead>
                                                     <tr>
@@ -593,40 +643,48 @@
                                                         <th id="serverId">服务器地址</th>
                                                         <th id="artifactType">类型</th>
                                                         <th id="rootPath">内容</th>
-                                                        <th data-ingore="true">操作</th>
+                                                        <th data-ingore="true"></th>
                                                     </tr>
                                                     </thead>
-                                                    <tbody class="list-item_copy">
-                                                    <tr data-ingore-target="rootPath">
+                                                    <tbody>
+                                                    <tr>
                                                         <td style="display:none">
-                                                            <input class="form-control" type="hidden" name="artifactId"
-                                                                   id="artifactId" th:value="*{artifactId}"/>
+                                                            <div class="form-group">
+                                                                <input class="form-control" type="hidden"
+                                                                       name="artifactId"
+                                                                       id="artifactId" th:value="*{artifactId}"/>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <select class="form-control" id="serverId" name="serverId">
-                                                                <option th:each="ip : ${serverIPs}"
-                                                                        th:value="${ip.serverId}"
-                                                                        th:text="${ip.outerServerIpAndPort}"
-                                                                        th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'ARTIFACT')}? none:all"/>
-                                                            </select>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2" id="serverId"
+                                                                        name="serverId">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="ip : ${serverIPs}"
+                                                                            th:value="${ip.serverId}"
+                                                                            th:text="${ip.outerServerIpAndPort}"
+                                                                            th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'ARTIFACT')}? none:all"/>
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <select class="form-control select" id="artifactType"
-                                                                    name="artifactType">
-                                                                <option th:each="type : ${aritifactTypes}"
-                                                                        th:value="${type.key}" th:text="${type.value}"/>
-                                                            </select>
+                                                            <div class="form-group">
+                                                                <select class="form-control select2" id="artifactType"
+                                                                        name="artifactType">
+                                                                    <option value="">------请选择------</option>
+                                                                    <option th:each="type : ${aritifactTypes}"
+                                                                            th:value="${type.key}"
+                                                                            th:text="${type.value}"/>
+                                                                </select>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <input class="form-control" type="text" name="rootPath"
-                                                                   id="rootPath"/>
+                                                            <div class="form-group">
+                                                                <input class="form-control" type="text" name="rootPath"
+                                                                       id="rootPath"/>
+                                                            </div>
                                                         </td>
-                                                        <td>
-                                                            <a href="#" class="del">
-                                                            <span class="glyphicon glyphicon-remove" aria-hidden="true"
-                                                                  title="删除"></span>
-                                                            </a>
-                                                        </td>
+                                                        <td></td>
                                                     </tr>
                                                     </tbody>
                                                 </table>
@@ -647,72 +705,72 @@
                                         <i class="ace-icon fa fa-arrow-right icon-on-right"></i>
                                     </button>
                                 </div>
-                            </div><!-- /.widget-main -->
-                        </div><!-- /.widget-body -->
-                    </div>
+                            </form>
+                        </div><!-- /.widget-main -->
+                    </div><!-- /.widget-body -->
+                </div>
 
-                </div><!-- /.col -->
-            </div><!-- /.row -->
-        </form>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+
     </section>
 </div><!-- /.main-container -->
 </body>
 
 <footer th:include="section/footer :: footer"></footer>
+<style type="text/css">
+    .form-horizontal .form-group {
+        margin-left: 0px;
+        margin-right: 0px;
+        margin-bottom: 0px;
+    }
 
+    .form-horizontal .fg2 {
+        margin-bottom: 15px;
+    }
+</style>
 <script th:src="@{/js/common/objectUtil.js}"></script>
 <script th:src="@{/js/common/table2json.js}"></script>
-<script th:src="@{/js/project/common.js}"></script>
 
 <script type="text/javascript">
     jQuery(function ($) {
-        $("input[type=text],select,textarea,input[type=number]").focusin(function () {
-            $("#" + $(this).attr("id") + "_tips").css({"display":"block"});
-        }).focusout(function () {
-            $("#" + $(this).attr("id") + "_tips").css({"display":"none"});
-        });
-
         $('[data-rel=tooltip]').tooltip();
 
-        $('.select2').css('width', '200px').select2({allowClear: true})
-            .on('change', function () {
-                $(this).closest('form').validate().element($(this));
-            });
-
-
-        var $validation = false;
         $('#fuelux-wizard-container')
             .ace_wizard({
-                //step: 2 //optional argument. wizard will jump to step "2" at first
-                //buttons: '.wizard-actions:eq(0)'
+                step: 1
             })
-            .on('actionclicked.fu.wizard', function (e, info) {
-                if (info.step == 1 && $validation) {
-                    if (!$('#validation-form').valid()) e.preventDefault();
-                }
+            .on('actionclicked.fu.wizard', function (e) {
+                // if (!$('#validation-form').valid()) e.preventDefault();
             })
-            //.on('changed.fu.wizard', function() {
-            //})
             .on('finished.fu.wizard', function (e) {
-                bootbox.dialog({
-                    message: "Thank you! Your information was successfully saved!",
-                    buttons: {
-                        "success": {
-                            "label": "OK",
-                            "className": "btn-sm btn-primary"
-                        }
-                    }
-                });
+                if (!$('#validation-form').valid()) {
+                    e.preventDefault();
+                    return;
+                }
+                btnSumbit();
             }).on('stepclick.fu.wizard', function (e) {
-            //e.preventDefault();//this will prevent clicking and selecting steps
+
         });
 
         $.mask.definitions['~'] = '[+-]';
         $('#phone').mask('(999) 999-9999');
 
-        jQuery.validator.addMethod("phone", function (value, element) {
-            return this.optional(element) || /^\(\d{3}\) \d{3}\-\d{4}( x\d{1,6})?$/.test(value);
-        }, "Enter a valid phone number.");
+        jQuery.validator.addMethod("projectKey", function (value, element) {
+            return this.optional(element) || /^[a-zA-Z\d]+$/.test(value);
+        }, "只支持大小写字母和数字");
+
+        jQuery.validator.addMethod("projectName", function (value, element) {
+            return this.optional(element) || /^[a-zA-Z\d\u4e00-\u9fa5]+$/.test(value);
+        }, "只支持汉字，大小写字母和数字");
+
+        jQuery.validator.addMethod("repoName", function (value, element) {
+            return this.optional(element) || /^[a-zA-Z\d-_]+$/.test(value);
+        }, "只支持大小写字母和数字以及-_");
+
+        jQuery.validator.addMethod("noEqualTo",function(value, element, param) {
+            return value != $(param).val();
+        },"不能与模板的名称一样");
 
         $('#validation-form').validate({
             errorElement: 'div',
@@ -720,72 +778,168 @@
             focusInvalid: false,
             ignore: "",
             rules: {
-                email: {
+                projectKey: {
                     required: true,
-                    email: true
+                    rangelength: [2, 16],
+                    projectKey: true
                 },
-                password: {
+                projectName: {
                     required: true,
-                    minlength: 5
+                    rangelength: [2, 25],
+                    projectName: true
                 },
-                password2: {
+                description: {
                     required: true,
-                    minlength: 5,
-                    equalTo: "#password"
+                    maxlength: 200
                 },
-                name: {
+                username: {
+                    required: true,
+                    rangelength: [2, 25],
+                    projectName: true
+                },
+                role: {
                     required: true
                 },
-                phone: {
-                    required: true,
-                    phone: 'required'
-                },
-                url: {
-                    required: true,
-                    url: true
-                },
-                comment: {
+                inputActionType: {
                     required: true
                 },
-                state: {
+                serverId: {
                     required: true
                 },
-                platform: {
+                selectJira: {
                     required: true
                 },
-                subscription: {
-                    required: true
-                },
-                gender: {
+                jiraProjectKey: {
                     required: true,
+                    rangelength: [2, 16],
+                    projectKey: true
                 },
-                agree: {
+                jiraProjectName: {
                     required: true,
+                    rangelength: [2, 25],
+                    projectName: true
+                },
+                jiraProjectDescription: {
+                    required: false,
+                    maxlength: 200
+                },
+                conf: {
+                    required: true,
+                    maxlength: 200
+                },
+                spaceKey: {
+                    required: true,
+                    rangelength: [2, 16],
+                    projectKey: true
+                },
+                spaceName: {
+                    required: true,
+                    rangelength: [2, 25],
+                    projectName: true
+                },
+                spaceDescription: {
+                    required: false,
+                    maxlength: 200
+                },
+                repoType: {
+                    required: true
+                },
+                selectSvns: {
+                    required: false
+                },
+                repoName: {
+                    required: true,
+                    rangelength: [2, 25],
+                    repoName: true
+                },
+                jenkin: {
+                    required: false
+                },
+                jenkinsProjKey: {
+                    required: true,
+                    rangelength: [2, 16],
+                    projectKey: true,
+                    noEqualTo: '#jenkin'
+                },
+                artifactType: {
+                    required: true
+                },
+                rootPath: {
+                    required: true,
+                    maxlength: 50
                 }
             },
 
             messages: {
-                email: {
-                    required: "Please provide a valid email.",
-                    email: "Please provide a valid email."
+                projectKey: {
+                    required: "请输入有效的项目英文简称",
+                    rangelength: "长度为2~16个字符"
                 },
-                password: {
-                    required: "Please specify a password.",
-                    minlength: "Please specify a secure password."
+                projectName: {
+                    required: "请输入有效的项目名称",
+                    rangelength: "长度为2~25个字符"
                 },
-                state: "Please choose state",
-                subscription: "Please choose at least one option",
-                gender: "Please choose gender",
-                agree: "Please accept our policy"
+                description: {
+                    required: "请输入有效的项目描述",
+                    rangelength: "长度为0~200个字符"
+                },
+                username: {
+                    required: "请输入有效的项目成员",
+                    rangelength: "长度为2~25个字符"
+                },
+                role: "请选择担任角色",
+                inputActionType: "请选择操作类型",
+                serverId: "请选择服务器地址",
+                selectJira: "请选择Jira项目模板",
+                jiraProjectKey: {
+                    required: "请输入有效的Jira项目英文简称",
+                    rangelength: "长度为2~16个字符"
+                },
+                jiraProjectName: {
+                    required: "请输入有效的Jira项目名称",
+                    rangelength: "长度为2~25个字符"
+                },
+                jiraProjectDescription: {
+                    rangelength: "长度为0~200个字符"
+                },
+                conf: "请选择Confluence空间模板",
+                spaceKey: {
+                    required: "请输入有效的Confluence空间英文简称",
+                    rangelength: "长度为2~16个字符"
+                },
+                spaceName: {
+                    required: "请输入有效的Confluence空间名称",
+                    rangelength: "长度为2~25个字符"
+                },
+                spaceDescription: {
+                    rangelength: "长度为0~200个字符"
+                },
+                repoType: {
+                    rangelength: "请选择服务器类型"
+                },
+                selectSvns: "请选择代码库模板",
+                repoName: {
+                    required: "请输入有效的代码库名称",
+                    rangelength: "长度为2~25个字符"
+                },
+                jenkin: "请选择Jenkins任务模板",
+                jenkinsProjKey: {
+                    required: "请输入有效的Jenkins任务英文简称",
+                    rangelength: "长度为2~16个字符"
+                },
+                artifactType: "请选择服务器类型",
+                rootPath: {
+                    required: "请输入有效的内容",
+                    maxlength: "长度为0~50个字符"
+                }
             },
-
 
             highlight: function (e) {
                 $(e).closest('.form-group').removeClass('has-info').addClass('has-error');
             },
 
             success: function (e) {
-                $(e).closest('.form-group').removeClass('has-error');//.addClass('has-info');
+                $(e).closest('.form-group').removeClass('has-error');
                 $(e).remove();
             },
 
@@ -801,37 +955,146 @@
                 else if (element.is('.chosen-select')) {
                     error.insertAfter(element.siblings('[class*="chosen-container"]:eq(0)'));
                 }
-                else error.insertAfter(element.parent());
+                else error.insertAfter(element);
             },
 
             submitHandler: function (form) {
             },
+
             invalidHandler: function (form) {
             }
         });
 
-        $('#modal-wizard-container').ace_wizard();
-        $('#modal-wizard .wizard-actions .btn[data-dismiss=modal]').removeAttr('disabled');
+        $('#editable_pm').handleTable({
+            "handleFirst": true,
+            "del": " <span class='glyphicon glyphicon-remove-circle text-red' style='font-size:20px;'></span> ",
+            "add": " <span class='glyphicon glyphicon-ok-circle text-blue' style='font-size:20px;'></span> ",
+            "operatePos": -1
+        });
 
-        /**
-         $('#date').datepicker({autoclose:true}).on('changeDate', function(ev) {
-					$(this).closest('form').validate().element($(this));
-				});
+        $('#editable_repo').handleTable({
+            "handleFirst": true,
+            "del": " <span class='glyphicon glyphicon-remove-circle text-red' style='font-size:20px;'></span> ",
+            "add": " <span class='glyphicon glyphicon-ok-circle text-blue' style='font-size:20px;'></span> ",
+            "operatePos": -1
+        });
 
-         $('#mychosen').chosen().on('change', function(ev) {
-					$(this).closest('form').validate().element($(this));
-				});
-         */
+        $('#editable_doc').handleTable({
+            "handleFirst": true,
+            "del": " <span class='glyphicon glyphicon-remove-circle text-red' style='font-size:20px;'></span> ",
+            "add": " <span class='glyphicon glyphicon-ok-circle text-blue' style='font-size:20px;'></span> ",
+            "operatePos": -1
+        });
 
-        $(document).one('ajaxloadstart.page', function (e) {
-            //in ajax mode, remove remaining elements before leaving page
-            $('[class*=select2]').remove();
+        $('#editable_ci').handleTable({
+            "handleFirst": true,
+            "del": " <span class='glyphicon glyphicon-remove-circle text-red' style='font-size:20px;'></span> ",
+            "add": " <span class='glyphicon glyphicon-ok-circle text-blue' style='font-size:20px;'></span> ",
+            "operatePos": -1
+        });
+
+        $('#editable_art').handleTable({
+            "handleFirst": true,
+            "del": " <span class='glyphicon glyphicon-remove-circle text-red' style='font-size:20px;'></span> ",
+            "add": " <span class='glyphicon glyphicon-ok-circle text-blue' style='font-size:20px;'></span> ",
+            "operatePos": -1
         });
     })
 </script>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
+
+    (function ($) {
+        $.fn.serializeJson = function () {
+            var jsonData = {};
+            var jiraData = [];
+            var jiraStepData = {};
+
+            $("div[data-step='1']").find("input,textarea,select").each(function () {
+                jsonData[this.name] = $(this).val();
+            });
+
+            $("div[data-step='3']").find("input,textarea,select").each(function () {
+                var ingore = $(this).data("ingore");
+                if (!ingore) {
+                    jiraStepData[this.name] = $(this).val();
+                }
+            });
+            jiraData.push(jiraStepData);
+            jsonData["jiraProjects"] = jiraData;
+
+            $("table").each(function (index, domEle) {
+                var target = "" || $(domEle).data("target");
+                var table = tableToJson3($(domEle));
+                jsonData[target] = table;
+            });
+
+            return JSON.stringify(jsonData);
+        };
+    })(jQuery);
+
+    function btnSumbit() {
+        debugger;
+        var flag = false;
+        $("#editable_pm tr").each(function () {
+            var role = jQuery(this).find("#role").children('option:selected').val();
+            var username = jQuery(this).find("#username").val();
+            if (!isEmpty(role) && role == 'PM' && !isEmpty(username)) {
+                teamleader = username;
+                flag = true;
+                return false;
+            }
+            if (flag) {
+                return false;
+            }
+        });
+        if (!flag) {
+            jQuery.alert("至少添加一个项目经理！");
+            return flag;
+        }
+
+
+        $("#teamleader").val(teamleader);
+
+        var jsondata = $("#validation-form").serializeJson(); //自动将form表单封装成json
+
+        var successMsg = "创建成功！";
+
+        var url = "/project/toAddProjectX";
+
+        jQuery.confirm({
+            title: '请确认',
+            content: '<div style="text-align:center">确认是否提交项目信息？</div>',
+            buttons: {
+                confirm: {
+                    text: '确认',
+                    action: function () {
+                        jQuery.ajax({
+                            type: "POST",
+                            url: url,
+                            contentType: 'application/json;charset=utf-8', //设置请求头信息
+                            dataType: "json",
+                            data: jsondata,
+                            success: function (msg) {
+                                if (msg.responseCode == "0000") {
+                                    jQuery.alert(successMsg);
+                                    $("#mainframe", parent.document.body).attr("src", "project/toList");
+                                    //top.location.href = "/index";
+                                } else {
+                                    jQuery.alert("错误: " + msg.responseMsg);
+                                }
+                            }
+                        });
+                    }
+                },
+                cancel: {
+                    text: '取消'
+                }
+            }
+        });
+
+    };
 
     $(document).on("change", ".actionJira", function () {
         var action = $(this).children('option:selected').val();
@@ -841,33 +1104,34 @@
             jQuery("#jiraProjectKey").val($("#projectKey").val());
             jQuery("#jiraProjectName").val($("#projectName").val());
         } else if (action == "-1") {
-            jQuery("#jiraStep").find(".selectChange").each(function () {
+            jQuery("div[data-step='3']").find(".selectChange").each(function () {
                 jQuery(this).val('');
             });
         } else { //创建
-            jQuery("#jiraStep").find(".selectChange").each(function () {
+            jQuery("div[data-step='3']").find(".selectChange").each(function () {
                 jQuery(this).val('');
             });
         }
     });
+
     $(document).on("change", ".selectJira", function () {
         var index = $(this).children('option:selected').index();
         var value = $(this).children('option:selected').val();
         index--;
-        var action = jQuery("#jiraStep").find(".actionJira").children('option:selected').val();
-        jQuery("#jiraStep").find("#referJiraId").val(value);
+        var action = jQuery("div[data-step='3']").find(".actionJira").children('option:selected').val();
+        jQuery("div[data-step='3']").find("#referJiraId").val(value);
         debugger;
 
         var oo = /*[[${existJiras}]]*/ null;
         var jira = oo[index];
         if (!isEmpty(jira)) {
             if ("ATTACH_OLD" == action) {
-                jQuery("#jiraStep").find("input,textarea").each(function () {
+                jQuery("div[data-step='3']").find("input,textarea").each(function () {
                     jQuery(this).val(jira[this.id]);
                 });
             }
         } else {
-            jQuery("#jiraStep").find(".selectChange").each(function () {
+            jQuery("div[data-step='3']").find(".selectChange").each(function () {
                 jQuery(this).val('');
             });
         }
@@ -875,7 +1139,7 @@
 
     $(document).on("change", ".actionConfluence", function () {
         var action = jQuery(this).children('option:selected').val();
-        var parentTr = jQuery(this).parent().parent();
+        var parentTr = jQuery(this).parents('tr');
         parentTr.find(".selectConfluence").get(0).options[0].selected = true;
 
         if (action == "REMOTE_CREATE") { //创建
@@ -904,7 +1168,7 @@
     $(document).on("change", ".selectConfluence", function () {
         var index = jQuery(this).children('option:selected').index();
         index--;
-        var parentTr = $(this).parent().parent();
+        var parentTr = $(this).parents('tr');
         var action = parentTr.find(".actionConfluence").children('option:selected').val();
         var oo = /*[[${existConfs}]]*/ null;
         var conf = oo[index];
@@ -923,9 +1187,8 @@
     });
 
     $(document).on("change", ".actionSvns", function () {
-        var index = jQuery(this).children('option:selected').index();
         var action = jQuery(this).children('option:selected').val();
-        var parentTr = jQuery(this).parent().parent();
+        var parentTr = jQuery(this).parents('tr');
 
         if (action == "REMOTE_CREATE") {
             parentTr.find(".selectSvns").hide();
@@ -951,7 +1214,7 @@
     $(document).on("change", ".selectSvns", function () {
         var index = $(this).children('option:selected').index();
         index--;
-        var parentTr = $(this).parent().parent();
+        var parentTr = $(this).parents('tr');
         var oo = /*[[${existSvns}]]*/ null;
         var svn = oo[index];
         parentTr.find(".selectChange").each(function () {
@@ -962,7 +1225,7 @@
     $(document).on("change", ".selectSvnTemplats", function () {
         var index = $(this).children('option:selected').index();
         index--;
-        var parentTr = $(this).parent().parent();
+        var parentTr = $(this).parents('tr');
         var oo = /*[[${svnTemplates}]]*/ null;
         var svn = oo[index];
         parentTr.find(".selectChange").each(function () {
@@ -972,9 +1235,8 @@
     });
 
     $(document).on("change", ".actionJenkins", function () {
-        var index = jQuery(this).children('option:selected').index();
         var action = jQuery(this).children('option:selected').val();
-        var parentTr = jQuery(this).parent().parent();
+        var parentTr = jQuery(this).parents('tr');
 
         if (action == "REMOTE_CREATE") {
             parentTr.find(".selectJenkins").get(0).options[0].selected = true;
@@ -991,16 +1253,16 @@
         }
     });
 
-    $(document).on("change", ".selectJenkins", function () {
+/*    $(document).on("change", ".selectJenkins", function () {
         var index = $(this).children('option:selected').index();
         index--;
-        var parentTr = $(this).parent().parent();
-        var oo = /*[[${existJenkins}]]*/ null;
+        var parentTr = $(this).parents('tr');
+        var oo = /!*[[${existJenkins}]]*!/ null;
         var jenkin = oo[index];
         parentTr.find("input,textarea").each(function () {
             $(this).val(jenkin[this.id]);
         });
-    });
+    });*/
 
     /*]]>*/
 </script>

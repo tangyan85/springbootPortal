@@ -19,24 +19,28 @@
         <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title">
-                    <span class="glyphicon glyphicon-grain" style="color:#f5db53;"></span>&nbsp;产出物</h3>
+                    <span class="glyphicon glyphicon-user" style="color:#0897ea;"></span>&nbsp;项目团队</h3>
             </div>
             <!-- /.box-header -->
             <div class="box-body table-responsive no-padding">
-                <table class="table table-hover">
+                <table class="table table-hover" id="project-member-table">
                     <tr>
-                        <th>构件</th>
-                        <th>效验码</th>
-                        <th>签名</th>
+                        <th>项目角色</th>
+                        <th>项目成员</th>
                     </tr>
-                    <tr th:each="artifact: ${project.artifacts}" th:object="${artifact}">
-                        <td><a>adlm.1.0.0.jar</a></td>
-                        <td><a>adlm.1.0.0.jar.sha1</a></td>
-                        <td><a>adlm.1.0.0.jar.asc</a></td>
+                    <tr th:each="people: ${project.projectMembers}" th:object="${people}">
+                        <td th:switch="*{role.value}">
+                            <small class="label label-danger" th:case="项目经理" th:text="*{role.value}"></small>
+                            <small class="label label-primary" th:case="开发人员" th:text="*{role.value}"></small>
+                            <small class="label label-info" th:case="测试人员" th:text="*{role.value}"></small>
+                            <small class="label label-warning" th:case="运维人员" th:text="*{role.value}"></small>
+                        </td>
+                        <td th:text="*{username}"></td>
                     </tr>
                 </table>
             </div>
         </div>
+
     </div>
 </div>
 

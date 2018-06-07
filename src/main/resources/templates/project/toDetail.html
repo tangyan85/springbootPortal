@@ -51,8 +51,8 @@
                     <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/task/preview/'+*{project.projectId}+'/true\')'">
                         <i class="fa fa-external-link"></i>
                     </button>
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                        <i class="fa fa-minus"></i>
+                    <button type="button" class="btn btn-box-tool" onclick="showPart('/task/toAdd/true')">
+                        <i class="fa fa-plus"></i>
                     </button>
                 </div>
             </div>
@@ -109,8 +109,8 @@
                     <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/ci/preview/'+*{project.projectId}+'/true\')'">
                         <i class="fa fa-external-link"></i>
                     </button>
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                        <i class="fa fa-minus"></i>
+                    <button type="button" class="btn btn-box-tool" onclick="showPart('/ci/toAdd/true')">
+                        <i class="fa fa-plus"></i>
                     </button>
                 </div>
             </div>
@@ -142,8 +142,8 @@
                     <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/code/preview/'+*{project.projectId}+'/true\')'">
                         <i class="fa fa-external-link"></i>
                     </button>
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                        <i class="fa fa-minus"></i>
+                    <button type="button" class="btn btn-box-tool" onclick="showPart('/code/toAdd/true')">
+                        <i class="fa fa-plus"></i>
                     </button>
                 </div>
             </div>
@@ -157,10 +157,8 @@
                                  alt="Product Image">
                         </div>
                         <div class="product-info">
-                            <a data-toggle="tooltip" title="版本库地址">http://10.215.4.165/svn/wdjr_adlm/springbootPortal/trunk</a>
-                            <span class="product-description" data-toggle="tooltip" title="版本库检出命令">
-                                svn checkout http://10.215.4.165/svn/wdjr_adlm/springbootPortal/trunk --username xxx
-                            </span>
+                            版本库地址:<br/><a data-toggle="tooltip" title="版本库地址" target="_blank" th:href="*{webui}" th:text="*{webui}"></a><br/>
+                            版本库检出命令:<br/><span class="product-description" data-toggle="tooltip" title="版本库检出命令" th:text="*{checkout}"></span>
                         </div>
                     </li>
                 </ul>
@@ -176,8 +174,8 @@
                     <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/artifact/preview/'+*{project.projectId}+'/true\')'">
                         <i class="fa fa-external-link"></i>
                     </button>
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                        <i class="fa fa-minus"></i>
+                    <button type="button" class="btn btn-box-tool" onclick="showPart('/artifact/toAdd/true')">
+                        <i class="fa fa-plus"></i>
                     </button>
                 </div>
             </div>
@@ -207,11 +205,11 @@
                     <span class="glyphicon glyphicon-user" style="color:#0897ea;"></span>&nbsp;项目团队</h3>
 
                 <div class="box-tools pull-right">
-                    <!--<button type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/member/preview/'+*{project.projectId}+'/true\')'">
                         <i class="fa fa-external-link"></i>
-                    </button>-->
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                        <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" onclick="showPart('/member/toAdd/true')">
+                        <i class="fa fa-plus"></i>
                     </button>
                 </div>
             </div>
@@ -244,8 +242,8 @@
                     <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/doc/preview/'+*{project.projectId}+'/true\')'">
                         <i class="fa fa-external-link"></i>
                     </button>
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                        <i class="fa fa-minus"></i>
+                    <button type="button" class="btn btn-box-tool" onclick="showPart('/doc/toAdd/true')">
+                        <i class="fa fa-plus"></i>
                     </button>
                 </div>
             </div>
@@ -268,12 +266,6 @@
 </div>
 
 <script>
-    $(function () {
-        $("#project-member-table tr").not(":eq(0)").click(function () {
-
-        });
-    });
-
     function showPart(url) {
         $("#mainframe", parent.document.body).attr("src", url);
     }
@@ -281,13 +273,13 @@
     function showIframe(url) {
         layer.open({
             type: 2,
-            area: ['700px', '450px'],
+            area: ['70%', '60%'],
             fixed: false, //不固定
             maxmin: true,
             content: url
         });
     }
-</script>
+</script><div id="aaa"></div>
 </body>
 
 </html>

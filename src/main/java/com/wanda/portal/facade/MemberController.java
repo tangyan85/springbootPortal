@@ -1,15 +1,10 @@
 package com.wanda.portal.facade;
 
-import com.wanda.portal.constants.InputActionType;
+import com.wanda.portal.constants.ProjectMemberRole;
 import com.wanda.portal.constants.ProjectStatus;
-import com.wanda.portal.constants.ServerType;
-import com.wanda.portal.dao.AsyncTaskService;
-import com.wanda.portal.dao.jpa.ServerRepository;
 import com.wanda.portal.dao.remote.ProjectService;
 import com.wanda.portal.dto.common.CommonHttpResponseBody;
 import com.wanda.portal.entity.Project;
-import com.wanda.portal.entity.Server;
-import com.wanda.portal.facade.model.input.ConfluenceSpaceInputParam;
 import com.wanda.portal.facade.model.input.ProjectInputParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -19,25 +14,26 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.EnumSet;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
+@RequestMapping("/member")
 @Controller
-@RequestMapping("/doc")
-public class DocController {
+public class MemberController {
     @Autowired
     ProjectService projectService;
-    @Autowired
-    AsyncTaskService asyncTaskService;
-    @Autowired
-    ServerRepository serverRepository;
 
     @RequestMapping("/toList")
     public String toList(Model model) {
         model.addAttribute("projects", projectService.findAll(PageRequest.of(0, 10)));
         model.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
-        return "doc/toList";
+        return "member/toList";
+    }
+
+    @RequestMapping("/toAdd/{returnBtn}")
+    public String toAdd(Model model, @PathVariable("returnBtn") Boolean returnBtn) {
+        setModelCommon(model);
+        setCommonServerInfoAsync(model);
+        model.addAttribute("returnBtn", returnBtn);
+        return "member/toAdd";
     }
 
     @RequestMapping(value = "/preview/{projectId}/{returnBtn}")
@@ -52,33 +48,7 @@ public class DocController {
         model.addAttribute("project", project);
         model.addAttribute("returnBtn", returnBtn);
 
-        return "doc/toDetail";
-    }
-
-    @RequestMapping("/toAdd/{returnBtn}")
-    public String toAdd(Model model, @PathVariable("returnBtn") Boolean returnBtn) {
-        setModelCommon(model);
-        setCommonServerInfoAsync(model);
-        model.addAttribute("returnBtn", returnBtn);
-        return "doc/toAdd";
-    }
-
-    private void setModelCommon(Model model) {
-        model.addAttribute("inputActionTypes", EnumSet.allOf(InputActionType.class));
-        model.addAttribute("serverIPs", serverRepository.findAll());
-    }
-
-    private void setCommonServerInfoAsync(Model model) {
-        try {
-            // 先从db中获取confluence的所有Server
-            List<Server> confServers = serverRepository.findByServerType(ServerType.CONFLUENCE);
-            // 再轮询外部confluence，过滤
-            Future<List<ConfluenceSpaceInputParam>> existConfs = asyncTaskService.fetchAllConfluences(confServers);
-
-            model.addAttribute("existConfs", existConfs.get());
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        return "member/toDetail";
     }
 
     @RequestMapping(value = "/save", method = RequestMethod.POST)
@@ -89,7 +59,7 @@ public class DocController {
         Project project;
         try {
             project = projectService.findById(projectInputParam.getProjectId());
-            projectService.createConfluence(projectInputParam.getConfluenceSpaces(), project);
+            projectService.createProjectMember(projectInputParam.getProjectMembers(), project);
         } catch (Exception e) {
             response.setResponseCode(CommonHttpResponseBody.FAIL_CODE);
             response.setResponseMsg(e.getMessage());
@@ -97,5 +67,13 @@ public class DocController {
         }
         redirectAttributes.addFlashAttribute("message", "操作成功");
         return response;
+    }
+
+    private void setModelCommon(Model model) {
+        model.addAttribute("projectMemberRoles", EnumSet.allOf(ProjectMemberRole.class));
+    }
+
+    private void setCommonServerInfoAsync(Model model) {
+
     }
 }

@@ -20,13 +20,13 @@
 
     <section class="content-header" th:style="'display:'+ @{${returnBtn} ? 'none' : 'block'}+''">
         <h1>
-            新建项目产出物
+            新建Jenkins Job
             <small>preview</small>
         </h1>
         <ol class="breadcrumb" style="margin:0px;">
             <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
-            <li><a href="#">软件仓库</a></li>
-            <li class="active">新建项目产出物</li>
+            <li><a href="#">持续集成</a></li>
+            <li class="active">新建Jenkins Job</li>
         </ol>
     </section>
 
@@ -57,51 +57,74 @@
                             <div class="widget-main">
                                 <h3 class="lighter block green">填写下列信息</h3>
                                 <div class="bs-example" data-example-id="hoverable-table">
-                                    <table class="table table-hover editable" id="editable_art"
-                                           data-target="artifacts">
+                                    <table class="table table-hover editable" id="editable_ci"
+                                           data-target="jenkinsProjects">
                                         <thead>
                                         <tr>
-                                            <th id="artifactId" style="display:none">artifactId</th>
-                                            <th id="serverId">服务器地址</th>
-                                            <th id="artifactType">类型</th>
-                                            <th id="rootPath">内容</th>
+                                            <th id="inputActionType">请选择操作类型</th>
+                                            <th id="serverId">服务器</th>
+                                            <th data-ingore="true">请选择模板</th>
+                                            <th id="jenkinsProjectId" style="display:none">
+                                                jenkinsProjectId
+                                            </th>
+                                            <th id="referProj" style="display:none">referProj</th>
+                                            <th id="jenkinsProjKey">Jenkins Job英文简称</th>
                                             <th></th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         <tr>
-                                            <td style="display:none">
+                                            <td>
                                                 <div class="form-group">
-                                                    <input class="form-control" type="hidden" name="artifactId"
-                                                           id="artifactId" th:value="*{artifactId}"/>
+                                                    <select class="form-control select2 actionJenkins"
+                                                            id="inputActionType"
+                                                            name="inputActionType">
+                                                        <option value="">------请选择------</option>
+                                                        <option th:each="optype : ${inputActionTypes}"
+                                                                th:value="${optype.key}"
+                                                                th:text="${optype.value}"
+                                                                th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"/>
+                                                    </select>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="form-group">
-                                                    <select class="form-control select2" id="serverId"
-                                                            name="serverId">
+                                                    <select class="form-control select2" id="serverId" name="serverId">
                                                         <option value="">------请选择------</option>
                                                         <option th:each="ip : ${serverIPs}"
                                                                 th:value="${ip.serverId}"
                                                                 th:text="${ip.outerServerIpAndPort}"
-                                                                th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'ARTIFACT')}? none:all"/>
+                                                                th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'JENKINS')}? none:all"/>
                                                     </select>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="form-group">
-                                                    <select class="form-control select2" id="artifactType"
-                                                            name="artifactType">
+                                                    <select class="form-control select2 selectJenkins" id="jenkin"
+                                                            name="jenkin" data-ingore="true">
                                                         <option value="">------请选择------</option>
-                                                        <option th:each="type : ${aritifactTypes}"
-                                                                th:value="${type.key}" th:text="${type.value}"/>
+                                                        <option th:each="jenkin : ${existJenkins}"
+                                                                th:value="${jenkin.jenkinsProjKey}"
+                                                                th:text="${jenkin.jenkinsProjKey}"/>
                                                     </select>
+                                                </div>
+                                            </td>
+                                            <td style="display:none">
+                                                <div class="form-group">
+                                                    <input class="form-control selectChange" type="hidden"
+                                                           name="jenkinsProjectId" id="jenkinsProjectId"/>
+                                                </div>
+                                            </td>
+                                            <td style="display:none">
+                                                <div class="form-group">
+                                                    <input class="form-control selectChange" type="hidden"
+                                                           name="referProj" id="referProj"/>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="form-group">
-                                                    <input class="form-control" type="text" name="rootPath"
-                                                           id="rootPath"/>
+                                                    <input class="form-control selectChange" type="text"
+                                                           name="jenkinsProjKey" id="jenkinsProjKey" disabled/>
                                                 </div>
                                             </td>
                                             <td></td>
@@ -117,6 +140,7 @@
                                         <i class="ace-icon fa fa-arrow-right icon-on-right"></i>
                                     </button>
                                 </div>
+
                             </div><!-- /.widget-main -->
                         </div><!-- /.widget-body -->
                     </form>
@@ -171,7 +195,6 @@
 
         $("#finished").click(function () {
             if (!$('#validation-form').valid()) {
-                e.preventDefault();
                 return;
             }
             btnSumbit();
@@ -185,6 +208,10 @@
             return this.optional(element) || /^[a-zA-Z\d\u4e00-\u9fa5]+$/.test(value);
         }, "只支持汉字，大小写字母和数字");
 
+        jQuery.validator.addMethod("noEqualTo",function(value, element, param) {
+            return value != $(param).val();
+        },"不能与模板的名称一样");
+
         $('#validation-form').validate({
             errorElement: 'div',
             errorClass: 'help-block',
@@ -194,25 +221,31 @@
                 projectId: {
                     required: true
                 },
+                inputActionType: {
+                    required: true
+                },
                 serverId: {
                     required: true
                 },
-                artifactType: {
-                    required: true
+                jenkin: {
+                    required: false
                 },
-                rootPath: {
+                jenkinsProjKey: {
                     required: true,
-                    maxlength: 50
+                    rangelength: [2, 16],
+                    projectKey: true,
+                    noEqualTo: '#jenkin'
                 }
             },
 
             messages: {
                 projectId: "请选择项目",
+                inputActionType: "请选择操作类型",
                 serverId: "请选择服务器地址",
-                artifactType: "请选择服务器类型",
-                rootPath: {
-                    required: "请输入有效的内容",
-                    maxlength: "长度为0~50个字符"
+                jenkin: "请选择Jenkins任务模板",
+                jenkinsProjKey: {
+                    required: "请输入有效的Jenkins任务英文简称",
+                    rangelength: "长度为2~16个字符"
                 }
             },
 
@@ -247,7 +280,7 @@
             }
         });
 
-        $('#editable_art').handleTable({
+        $('#editable_ci').handleTable({
             "handleFirst": true,
             "del": " <span class='glyphicon glyphicon-remove-circle text-red' style='font-size:20px;'></span> ",
             "add": " <span class='glyphicon glyphicon-ok-circle text-blue' style='font-size:20px;'></span> ",
@@ -280,7 +313,7 @@
 
         var successMsg = "创建成功！";
 
-        var url = "/artifact/save";
+        var url = "/ci/save";
 
         jQuery.confirm({
             title: '请确认',
@@ -299,7 +332,7 @@
                                 if (msg.responseCode == "0000") {
                                     jQuery.alert(successMsg);
                                     let returnBtn = /*[[${returnBtn}]]*/ false;
-                                    let url = "artifact/toList";
+                                    let url = "ci/toList";
                                     if (returnBtn) {
                                         url = "project/toList";
                                     }
@@ -319,6 +352,36 @@
         });
 
     };
+
+    $(document).on("change", ".actionJenkins", function () {
+        var action = jQuery(this).children('option:selected').val();
+        var parentTr = jQuery(this).parents('tr');
+
+        if (action == "REMOTE_CREATE") {
+            parentTr.find(".selectJenkins").get(0).options[0].selected = true;
+            parentTr.find(".selectChange").each(function () {
+                jQuery(this).val('');
+                jQuery(this).attr("disabled", false);
+            });
+        } else {
+            parentTr.find(".selectJenkins").get(0).options[0].selected = true;
+            parentTr.find(".selectChange").each(function () {
+                jQuery(this).val('');
+                jQuery(this).attr("disabled", true);
+            });
+        }
+    });
+
+/*    $(document).on("change", ".selectJenkins", function () {
+        var index = $(this).children('option:selected').index();
+        index--;
+        var parentTr = $(this).parents('tr');
+        var oo = /!*[[${existJenkins}]]*!/ null;
+        var jenkin = oo[index];
+        parentTr.find("input,textarea").each(function () {
+            $(this).val(jenkin[this.id]);
+        });
+    });*/
 
     /*]]>*/
 </script>

@@ -5,24 +5,24 @@ myprops:
   confluence: # confluence相关
     username: admin
     password: admin@123
-    pureIp: 10.215.4.200
-    urlHead: http://10.215.4.200:8090
+    pureIp: conf.wdjr.local
+    urlHead: http://conf.wdjr.local
   jenkins: # jenkins相关
     username: admin
     password: admin@123
-    urlHead: http://10.215.4.154:8080
-    pureIp: 10.215.4.154
+    pureIp: ci.wdjr.local
+    urlHead: http://ci.wdjr.local
   jira: # jira相关
     username: admin
     password: admin@123
-    pureIp: 10.215.4.199
-    urlHead: http://10.215.4.199:8080
+    pureIp: jira.wdjr.local
+    urlHead: http://jira.wdjr.local
   scm: # scm相关
     svn: 
       username: admin
       password: admin@123
-      pureIp: 10.215.4.165
-      urlHead: http://10.215.4.165:3343
+      pureIp: svn.wdjr.local
+      urlHead: http://svn.wdjr.local
   ldap: # ldap相关
     enable: true
     url: ldap://10.214.170.67:389/dc=wanda,dc=cn      

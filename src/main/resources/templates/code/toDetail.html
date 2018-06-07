@@ -20,11 +20,6 @@
             <div class="box-header with-border">
                 <h3 class="box-title">
                     <span class="glyphicon glyphicon-list-alt" style="color:#cd8b51;"></span>&nbsp;源代码</h3>
-                <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                        <i class="fa fa-minus"></i>
-                    </button>
-                </div>
             </div>
             <!-- /.box-header -->
             <div class="box-body">
@@ -36,10 +31,8 @@
                                  alt="Product Image">
                         </div>
                         <div class="product-info">
-                            <a data-toggle="tooltip" title="版本库地址">http://10.215.4.165/svn/wdjr_adlm/springbootPortal/trunk</a>
-                            <span class="product-description" data-toggle="tooltip" title="版本库检出命令">
-                                svn checkout http://10.215.4.165/svn/wdjr_adlm/springbootPortal/trunk --username xxx
-                            </span>
+                            版本库地址:<br/><a data-toggle="tooltip" title="版本库地址" target="_blank" th:href="*{webui}" th:text="*{webui}"></a><br/>
+                            版本库检出命令:<br/><span class="product-description" data-toggle="tooltip" title="版本库检出命令" th:text="*{checkout}"></span>
                         </div>
                     </li>
                 </ul>

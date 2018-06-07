@@ -1,10 +1,3 @@
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8 */;
-/*!50503 SET NAMES utf8mb4 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-
-
 -- 导出 portal 的数据库结构
 DROP DATABASE IF EXISTS `portal`;
 CREATE DATABASE IF NOT EXISTS `portal` /*!40100 DEFAULT CHARACTER SET utf8 */;
@@ -29,9 +22,8 @@ CREATE TABLE IF NOT EXISTS `confluence_space` (
   UNIQUE KEY `UK_gac78vthjfhsre0bgvvyhuntg` (`space_key`),
   KEY `FK9m3ccub605rd13433e3qt5ja` (`project_id`),
   KEY `FK2eluhp2y9805fwn6ftrj3xpmr` (`server_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
--- 数据导出被取消选择。
 -- 导出  表 portal.jenkins_project 结构
 DROP TABLE IF EXISTS `jenkins_project`;
 CREATE TABLE IF NOT EXISTS `jenkins_project` (
@@ -47,9 +39,8 @@ CREATE TABLE IF NOT EXISTS `jenkins_project` (
   UNIQUE KEY `UK_o7l9ukx8yf8aisf0taaw2gkka` (`jenkins_proj_key`),
   KEY `FKpckcxqdcwyt7s234t1wo4hmv7` (`project_id`),
   KEY `FK1em3mlqxeqiu1styffrrg0ald` (`server_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
--- 数据导出被取消选择。
 -- 导出  表 portal.jira_project 结构
 DROP TABLE IF EXISTS `jira_project`;
 CREATE TABLE IF NOT EXISTS `jira_project` (
@@ -65,13 +56,13 @@ CREATE TABLE IF NOT EXISTS `jira_project` (
   `input_action_type` int(11) DEFAULT NULL,
   `refer_jira_id` bigint(20) DEFAULT NULL,
   `team_leader` varchar(255) DEFAULT NULL,
+  `web_ui` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`jira_proj_id`),
   UNIQUE KEY `UK_15s110e3065tq0klur7uoyb2n` (`jira_proj_key`),
   KEY `FK3slmejtg6y3097i41xgpuwuw9` (`project_id`),
   KEY `FK65thwbgvn6g2ty6wwmr3by0w5` (`server_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=42 DEFAULT CHARSET=utf8;
 
--- 数据导出被取消选择。
 -- 导出  表 portal.nexus_artifacts 结构
 DROP TABLE IF EXISTS `nexus_artifacts`;
 CREATE TABLE IF NOT EXISTS `nexus_artifacts` (
@@ -85,9 +76,8 @@ CREATE TABLE IF NOT EXISTS `nexus_artifacts` (
   PRIMARY KEY (`artifact_id`),
   KEY `FKyj4pg3v03c9n99y35vlnjv03` (`project_id`),
   KEY `FKesd24xgxj2iso27klq9iragbk` (`server_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
 
--- 数据导出被取消选择。
 -- 导出  表 portal.project 结构
 DROP TABLE IF EXISTS `project`;
 CREATE TABLE IF NOT EXISTS `project` (
@@ -101,9 +91,8 @@ CREATE TABLE IF NOT EXISTS `project` (
   `status` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`project_id`),
   UNIQUE KEY `UK_6nmhlci6jh2k2fv7ipcfv1drm` (`project_key`)
-) ENGINE=MyISAM AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
--- 数据导出被取消选择。
 -- 导出  表 portal.project_member 结构
 DROP TABLE IF EXISTS `project_member`;
 CREATE TABLE IF NOT EXISTS `project_member` (
@@ -114,9 +103,8 @@ CREATE TABLE IF NOT EXISTS `project_member` (
   `project_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`project_member_id`),
   KEY `FK103dwxad12nbaxtmnwus4eft2` (`project_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=107 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=122 DEFAULT CHARSET=utf8;
 
--- 数据导出被取消选择。
 -- 导出  表 portal.project_scm_repositories 结构
 DROP TABLE IF EXISTS `project_scm_repositories`;
 CREATE TABLE IF NOT EXISTS `project_scm_repositories` (
@@ -126,7 +114,6 @@ CREATE TABLE IF NOT EXISTS `project_scm_repositories` (
   KEY `FKqdhs138vj5j5gsdw21nxjplba` (`project_project_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
--- 数据导出被取消选择。
 -- 导出  表 portal.scm_repository 结构
 DROP TABLE IF EXISTS `scm_repository`;
 CREATE TABLE IF NOT EXISTS `scm_repository` (
@@ -146,12 +133,13 @@ CREATE TABLE IF NOT EXISTS `scm_repository` (
   `input_action_type` int(11) DEFAULT NULL,
   `repo_remote_id` bigint(20) DEFAULT NULL,
   `template_id` bigint(20) DEFAULT NULL,
+  `web_ui` varchar(100) DEFAULT NULL,
+  `check_out` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`repo_id`),
   KEY `FKmixtabyicf1122us8wlqo4hlr` (`project_id`),
   KEY `FKsyn5yjxljjat3g3twhaj8076d` (`server_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
--- 数据导出被取消选择。
 -- 导出  表 portal.server 结构
 DROP TABLE IF EXISTS `server`;
 CREATE TABLE IF NOT EXISTS `server` (
@@ -168,22 +156,6 @@ CREATE TABLE IF NOT EXISTS `server` (
   PRIMARY KEY (`server_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 
--- 正在导出表  portal.server 的数据：10 rows
-/*!40000 ALTER TABLE `server` DISABLE KEYS */;
-INSERT INTO `server` (`server_id`, `inner_server_ip`, `outer_server_ip`, `remark`, `server_type`, `protocol`, `reserved`, `server_root`, `login_suffix`, `domain`) VALUES
-	(1, 'jira.wdjr.local:8080', 'jira.wdjr.local:8080', 'jira的url', 'JIRA', 'http', NULL, NULL, '', 'jira.wdjr.local:8080'),
-	(7, 'sonar.wdjr.local:9000', 'sonar.wdjr.local:9000', 'sonarqube的url', 'SONAR', 'http', NULL, NULL, '/sessions/new', 'sonar.wdjr.local:9000'),
-	(3, 'ci.wdjr.local:8080', 'ci.wdjr.local:8080', 'jenkins master的url', 'JENKINS', 'http', NULL, NULL, '', 'ci.wdjr.local:8080'),
-	(4, 'conf.wdjr.local:8080', 'conf.wdjr.local:8080', 'confluence的url', 'CONFLUENCE', 'http', NULL, NULL, '/dashboard.action#all-updates', 'conf.wdjr.local:8080'),
-	(5, 'svn.wdjr.local:4434', 'svn.wdjr.local:4434', 'svn的url,对外展现端口是80', 'SVN', 'https', NULL, '', '/csvn', 'svn.wdjr.local:4434'),
-	(6, 'nexus.wdjr.local:8081', 'nexus.wdjr.local:8081', 'nexus的url', 'ARTIFACT', 'http', NULL, NULL, NULL, 'nexus.wdjr.local:8081'),
-	(8, 'git.wdjr.local', 'git.wdjr.local', 'git的url', 'GIT', 'https', 'not applied', NULL, NULL, NULL),
-	(9, 'adlm.wdjr.local:8080', 'adlm.wdjr.local:8080', 'portal的url', 'PORTAL', 'http', NULL, '', '/index', 'adlm.wdjr.local:8080'),
-	(10, 'test.wdjr.local', 'test.wdjr.local', 'testlink的url', 'TESTLINK', 'http', NULL, 'testlink', '/login.php', NULL),
-	(11, 'svn.wdjr.local:4434', 'svn.wdjr.local:4434', 'viewvc的url', 'VIEWVC', 'https', NULL, '', '', 'svn.wdjr.local');
-/*!40000 ALTER TABLE `server` ENABLE KEYS */;
-
--- 数据导出被取消选择。
 -- 导出  表 portal.stat_task_record 结构
 DROP TABLE IF EXISTS `stat_task_record`;
 CREATE TABLE IF NOT EXISTS `stat_task_record` (
@@ -195,7 +167,6 @@ CREATE TABLE IF NOT EXISTS `stat_task_record` (
   PRIMARY KEY (`task_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=457 DEFAULT CHARSET=utf8;
 
--- 数据导出被取消选择。
 -- 导出  表 portal.user 结构
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE IF NOT EXISTS `user` (
@@ -206,7 +177,3 @@ CREATE TABLE IF NOT EXISTS `user` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
--- 数据导出被取消选择。
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

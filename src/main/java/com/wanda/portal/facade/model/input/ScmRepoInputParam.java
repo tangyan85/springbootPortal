@@ -1,11 +1,11 @@
 package com.wanda.portal.facade.model.input;
 
-import java.io.Serializable;
-import java.util.Date;
 import com.mysql.jdbc.StringUtils;
-import com.wanda.portal.constants.RepoProtocol;
 import com.wanda.portal.constants.RepoType;
 import com.wanda.portal.exception.CreateProjectValidationException;
+
+import java.io.Serializable;
+import java.util.Date;
 
 public class ScmRepoInputParam extends AbstractInputParam implements Serializable {
 
@@ -29,7 +29,11 @@ public class ScmRepoInputParam extends AbstractInputParam implements Serializabl
 
     private String repoStyle = "default";
     
-    private Long serverId;  
+    private Long serverId;
+
+    private String webui;
+
+    private String checkout;
 
     public Long getServerId() {
         return serverId;
@@ -109,6 +113,22 @@ public class ScmRepoInputParam extends AbstractInputParam implements Serializabl
 
     public void setRepoStyle(String repoStyle) {
         this.repoStyle = repoStyle;
+    }
+
+    public String getWebui() {
+        return webui;
+    }
+
+    public void setWebui(String webui) {
+        this.webui = webui;
+    }
+
+    public String getCheckout() {
+        return checkout;
+    }
+
+    public void setCheckout(String checkout) {
+        this.checkout = checkout;
     }
 
     @Override

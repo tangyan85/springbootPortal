@@ -6,17 +6,17 @@ myprops:
     username: admin
     password: admin@123
     pureIp: conf-uat.wdjr.local
-    urlHead: http://conf-uat.wdjr.local:8080
+    urlHead: http://conf-uat.wdjr.local
   jenkins: # jenkins相关
     username: admin
     password: admin@123
-    urlHead: http://ci-uat.wdjr.local:8080
     pureIp: ci-uat.wdjr.local
+    urlHead: http://ci-uat.wdjr.local
   jira: # jira相关
     username: admin
     password: admin@123
     pureIp: jira-uat.wdjr.local
-    urlHead: http://jira-uat.wdjr.local:8080
+    urlHead: http://jira-uat.wdjr.local
   scm: # scm相关
     svn:
       username: admin
@@ -24,22 +24,21 @@ myprops:
       pureIp: svn-uat.wdjr.local
       urlHead: https://svn-uat.wdjr.local:4434
   ldap: # ldap相关
-    enable: false
+    enable: true
     url: ldap://adlm-uat.wdjr.local:389/dc=wanda,dc=cn
   switch: #功能开关
-    enableSso: false
+    enableSso: true
       
 spring:
+  jpa:
+    show-sql: true
   datasource:
-#    password: root
-#    url: jdbc:mysql://localhost:3306/portal2?useSSL=false #dev环境切换到local库
-#    username: root
-    password: Wanda@2017
-    url: jdbc:mysql://10.214.170.70:3306/portal2?useSSL=false #dev环境切换到portal2库
-    username: portal
+    password: root
+    url: jdbc:mysql://localhost:3306/portal?useSSL=false #dev环境切换到local库
+    username: root
   redis:
     database: 0
-    host: 10.214.170.115
+    host: 10.215.4.111
     port: 6379
     password:
 
@@ -47,6 +46,7 @@ logging:
   level:
     root: ERROR
     org.springframework.web: DEBUG
-    org.hibernate: ERROR
+    org.hibernate: DEBUG
     com.wanda.portal: INFO
   file: C:/Log/portal.log
+  

@@ -1,7 +1,7 @@
 package com.wanda.portal.dao.remote;
 
 import com.wanda.portal.entity.Project;
-import com.wanda.portal.facade.model.input.ProjectInputParam;
+import com.wanda.portal.facade.model.input.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -29,4 +29,20 @@ public interface ProjectService {
 	String endProject(Long projectId);
 
     Page<Project> findAll(PageRequest page);
+
+    List<Project> findByProjectNameLike(String projectName);
+
+    void createScm(List<ScmRepoInputParam> list, Project proj) throws Exception;
+
+    void createJira(List<JiraProjectInputParam> list, Project proj) throws Exception;
+
+    void createConfluence(List<ConfluenceSpaceInputParam> list, Project proj) throws Exception;
+
+    void createJenkins(List<JenkinsInputParam> list, Project proj) throws Exception;
+
+    void createProjectMember(List<ProjectMemberInputParam> list, Project proj) throws Exception ;
+
+    void createArtifact(List<ArtifactInputParam> list, Project proj) throws Exception;
+
+    Project findById(Long projectId);
 }

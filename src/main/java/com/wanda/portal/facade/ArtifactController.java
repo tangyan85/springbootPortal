@@ -1,20 +1,23 @@
 package com.wanda.portal.facade;
 
+import com.wanda.portal.constants.AritifactType;
 import com.wanda.portal.constants.ProjectStatus;
 import com.wanda.portal.constants.ServerType;
 import com.wanda.portal.dao.jpa.ServerRepository;
 import com.wanda.portal.dao.remote.ArtifactService;
 import com.wanda.portal.dao.remote.ProjectService;
+import com.wanda.portal.dto.common.CommonHttpResponseBody;
 import com.wanda.portal.entity.Artifact;
 import com.wanda.portal.entity.Project;
 import com.wanda.portal.entity.Server;
+import com.wanda.portal.facade.model.input.ProjectInputParam;
 import com.wanda.portal.utils.ConversionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -34,7 +37,7 @@ public class ArtifactController {
 
     @RequestMapping("/toList")
     public String toList(Model model) {
-        model.addAttribute("projects", projectService.findAll(PageRequest.of(1, 10)));
+        model.addAttribute("projects", projectService.findAll(PageRequest.of(0, 10)));
         model.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
         return "artifact/toList";
     }
@@ -54,9 +57,21 @@ public class ArtifactController {
         return "artifact/toDetail";
     }
 
-    @RequestMapping("/toAdd")
-    public String toAdd(Model model){
+    @RequestMapping("/toAdd/{returnBtn}")
+    public String toAdd(Model model, @PathVariable("returnBtn") Boolean returnBtn) {
+        setModelCommon(model);
+        setCommonServerInfoAsync(model);
+        model.addAttribute("returnBtn", returnBtn);
         return "artifact/toAdd";
+    }
+
+    private void setModelCommon(Model model) {
+        model.addAttribute("aritifactTypes", EnumSet.allOf(AritifactType.class));
+        model.addAttribute("serverIPs", serverRepository.findAll());
+    }
+
+    private void setCommonServerInfoAsync(Model model) {
+
     }
 
     @RequestMapping(value = "/findArtByProjectId/{projectId}/{optype}")
@@ -79,6 +94,24 @@ public class ArtifactController {
         }
 
         return m;
+    }
+
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonHttpResponseBody save(@RequestBody ProjectInputParam projectInputParam,
+                                       RedirectAttributes redirectAttributes) {
+        CommonHttpResponseBody response = CommonHttpResponseBody.packSuccess();
+        Project project;
+        try {
+            project = projectService.findById(projectInputParam.getProjectId());
+            projectService.createArtifact(projectInputParam.getArtifacts(), project);
+        } catch (Exception e) {
+            response.setResponseCode(CommonHttpResponseBody.FAIL_CODE);
+            response.setResponseMsg(e.getMessage());
+            return response;
+        }
+        redirectAttributes.addFlashAttribute("message", "操作成功");
+        return response;
     }
 
 }

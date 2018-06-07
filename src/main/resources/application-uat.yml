@@ -1,34 +1,22 @@
 # 自定义的配置请在myprops下配置，不要自立门户(例如aa: bb)，
 # 否则会有奇异的bug(实测发现单元测试可以跑，但tomcat启动后找不到配置的值)
-##10.214.170.64 crowd.wanda-fg.local
-#10.214.170.64 sso-uat.wanda-fg.local
-#10.214.170.65 svn-uat.wanda-fg.local
-#10.214.170.66 jira-uat.wanda-fg.local
-##10.214.170.67 ldap-uat.wanda-fg.local
-#10.214.170.67 adlm-uat.wanda-fg.local
-#10.214.170.68 conf-uat.wanda-fg.local
-#10.214.170.70 ci-uat.wanda-fg.local
-#10.214.170.71 sonar-uat.wanda-fg.local
-#10.214.170.65 phab-uat.wanda-fg.local
-#10.15.116.175 portal.wanda-fg.local
-
 myprops:
   whoami: uat # 环境
   confluence: # confluence相关
     username: admin
     password: admin@123
     pureIp: conf-uat.wdjr.local
-    urlHead: http://conf-uat.wdjr.local:8080
+    urlHead: http://conf-uat.wdjr.local
   jenkins: # jenkins相关
     username: admin
     password: admin@123
-    urlHead: http://ci-uat.wdjr.local:8080
     pureIp: ci-uat.wdjr.local
+    urlHead: http://ci-uat.wdjr.local
   jira: # jira相关
     username: admin
     password: admin@123
     pureIp: jira-uat.wdjr.local
-    urlHead: http://jira-uat.wdjr.local:8080
+    urlHead: http://jira-uat.wdjr.local
   scm: # scm相关
     svn: 
       username: admin
@@ -44,11 +32,11 @@ myprops:
 spring:
   datasource: 
     password: Wanda@2017
-    url: jdbc:mysql://10.214.170.70:3306/portal2?useSSL=false
+    url: jdbc:mysql://10.215.4.111:3306/portal?useSSL=false
     username: portal
   redis: 
     database: 0
-    host: 10.214.170.115
+    host: 10.215.4.111
     port: 6379
     password:
 

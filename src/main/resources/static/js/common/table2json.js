@@ -77,3 +77,40 @@ function tableToJson2(table) {
 
     return data;
 }
+
+function tableToJson3(table) {
+    var table = $(table);
+    var data = [];
+
+    for (var i = 1; i < table[0].rows.length; i++) {
+        var tableRow = table[0].rows[i];
+        var ingoreTarget=tableRow.dataset.ingoreTarget;
+
+        if (ingoreTarget == null || ingoreTarget == "" || ingoreTarget == "undefind") {
+
+        }else{
+            var target=$(tableRow).find("#"+ingoreTarget).val();
+            if (target == null || target == "" || target == "undefind") {
+                continue;
+            }
+        }
+
+        var rowData = {};
+        for (var j = 0; j < tableRow.cells.length; j++) {
+            if (tableRow.cells[j].children[0].children && tableRow.cells[j].children[0].children.length > 0) {
+                var ingore = tableRow.cells[j].children[0].children[0].dataset.ingore;
+                var name = tableRow.cells[j].children[0].children[0].name;
+                if (ingore && ingore == "true") {
+                    continue;
+                }
+                if (name == null || name == "" || name == "undefind") {
+                    continue;
+                }
+                rowData[name] = tableRow.cells[j].children[0].children[0].value || "";
+            }
+        }
+        data.push(rowData);
+    }
+
+    return data;
+}

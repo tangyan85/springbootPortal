@@ -20,13 +20,13 @@
 
     <section class="content-header" th:style="'display:'+ @{${returnBtn} ? 'none' : 'block'}+''">
         <h1>
-            新建项目产出物
+            新建项目成员
             <small>preview</small>
         </h1>
         <ol class="breadcrumb" style="margin:0px;">
             <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
-            <li><a href="#">软件仓库</a></li>
-            <li class="active">新建项目产出物</li>
+            <li><a href="#">项目成员管理</a></li>
+            <li class="active">新建项目成员</li>
         </ol>
     </section>
 
@@ -57,51 +57,38 @@
                             <div class="widget-main">
                                 <h3 class="lighter block green">填写下列信息</h3>
                                 <div class="bs-example" data-example-id="hoverable-table">
-                                    <table class="table table-hover editable" id="editable_art"
-                                           data-target="artifacts">
+                                    <table class="table table-hover editable" id="editable_pm"
+                                           data-target="projectMembers">
                                         <thead>
                                         <tr>
-                                            <th id="artifactId" style="display:none">artifactId</th>
-                                            <th id="serverId">服务器地址</th>
-                                            <th id="artifactType">类型</th>
-                                            <th id="rootPath">内容</th>
-                                            <th></th>
+                                            <th id="projectMemberId" style="display:none">projectMemberId</th>
+                                            <th id="role">项目成员</th>
+                                            <th id="username">担任角色</th>
+                                            <th data-ingore="true"></th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         <tr>
-                                            <td style="display:none">
+                                            <td scope="row" style="display:none">
+                                                <input class="form-control" type="hidden"
+                                                       name="projectMemberId" id="projectMemberId"
+                                                       th:value="*{projectMemberId}"/>
+                                            </td>
+                                            <td>
                                                 <div class="form-group">
-                                                    <input class="form-control" type="hidden" name="artifactId"
-                                                           id="artifactId" th:value="*{artifactId}"/>
+                                                    <input class="form-control" type="text" name="username"
+                                                           id="username"/>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="form-group">
-                                                    <select class="form-control select2" id="serverId"
-                                                            name="serverId">
+                                                    <select class="form-control select2" id="role"
+                                                            name="role">
                                                         <option value="">------请选择------</option>
-                                                        <option th:each="ip : ${serverIPs}"
-                                                                th:value="${ip.serverId}"
-                                                                th:text="${ip.outerServerIpAndPort}"
-                                                                th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'ARTIFACT')}? none:all"/>
+                                                        <option th:each="type : ${projectMemberRoles}"
+                                                                th:value="${type.key}"
+                                                                th:text="${type.value}"/>
                                                     </select>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="form-group">
-                                                    <select class="form-control select2" id="artifactType"
-                                                            name="artifactType">
-                                                        <option value="">------请选择------</option>
-                                                        <option th:each="type : ${aritifactTypes}"
-                                                                th:value="${type.key}" th:text="${type.value}"/>
-                                                    </select>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="form-group">
-                                                    <input class="form-control" type="text" name="rootPath"
-                                                           id="rootPath"/>
                                                 </div>
                                             </td>
                                             <td></td>
@@ -117,6 +104,7 @@
                                         <i class="ace-icon fa fa-arrow-right icon-on-right"></i>
                                     </button>
                                 </div>
+
                             </div><!-- /.widget-main -->
                         </div><!-- /.widget-body -->
                     </form>
@@ -171,15 +159,10 @@
 
         $("#finished").click(function () {
             if (!$('#validation-form').valid()) {
-                e.preventDefault();
                 return;
             }
             btnSumbit();
         });
-
-        jQuery.validator.addMethod("projectKey", function (value, element) {
-            return this.optional(element) || /^[a-zA-Z-_]+$/.test(value);
-        }, "只支持字母和-_");
 
         jQuery.validator.addMethod("projectName", function (value, element) {
             return this.optional(element) || /^[a-zA-Z\d\u4e00-\u9fa5]+$/.test(value);
@@ -194,26 +177,23 @@
                 projectId: {
                     required: true
                 },
-                serverId: {
-                    required: true
-                },
-                artifactType: {
-                    required: true
-                },
-                rootPath: {
+                username: {
                     required: true,
-                    maxlength: 50
+                    rangelength: [2, 25],
+                    projectName: true
+                },
+                role: {
+                    required: true
                 }
             },
 
             messages: {
                 projectId: "请选择项目",
-                serverId: "请选择服务器地址",
-                artifactType: "请选择服务器类型",
-                rootPath: {
-                    required: "请输入有效的内容",
-                    maxlength: "长度为0~50个字符"
-                }
+                username: {
+                    required: "请输入有效的项目成员",
+                    rangelength: "长度为2~25个字符"
+                },
+                role: "请选择担任角色"
             },
 
             highlight: function (e) {
@@ -247,7 +227,7 @@
             }
         });
 
-        $('#editable_art').handleTable({
+        $('#editable_pm').handleTable({
             "handleFirst": true,
             "del": " <span class='glyphicon glyphicon-remove-circle text-red' style='font-size:20px;'></span> ",
             "add": " <span class='glyphicon glyphicon-ok-circle text-blue' style='font-size:20px;'></span> ",
@@ -280,7 +260,7 @@
 
         var successMsg = "创建成功！";
 
-        var url = "/artifact/save";
+        var url = "/member/save";
 
         jQuery.confirm({
             title: '请确认',
@@ -299,7 +279,7 @@
                                 if (msg.responseCode == "0000") {
                                     jQuery.alert(successMsg);
                                     let returnBtn = /*[[${returnBtn}]]*/ false;
-                                    let url = "artifact/toList";
+                                    let url = "member/toList";
                                     if (returnBtn) {
                                         url = "project/toList";
                                     }

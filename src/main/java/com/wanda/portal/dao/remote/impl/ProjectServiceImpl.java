@@ -9,6 +9,7 @@ import com.wanda.portal.constants.ProjectStatus;
 import com.wanda.portal.dao.jpa.*;
 import com.wanda.portal.dao.remote.*;
 import com.wanda.portal.dto.confluence.CreateConfluenceSpaceParamDTO;
+import com.wanda.portal.dto.svn.SubversionRepoDTO;
 import com.wanda.portal.dto.svn.SvnTemplateDTO;
 import com.wanda.portal.dto.svn.SvnTemplateWrapperDTO;
 import com.wanda.portal.entity.*;
@@ -114,6 +115,59 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public void createScm(List<ScmRepoInputParam> list, Project proj) throws Exception {
+        if (proj == null) {
+            throw new Exception("null project selected or persisted");
+        }
+        packScm(list, proj);
+    }
+
+    @Override
+    public void createJira(List<JiraProjectInputParam> list, Project proj) throws Exception {
+        if (proj == null) {
+            throw new Exception("null project selected or persisted");
+        }
+        packJira(list, proj);
+    }
+
+    @Override
+    public void createConfluence(List<ConfluenceSpaceInputParam> list, Project proj) throws Exception {
+        if (proj == null) {
+            throw new Exception("null project selected or persisted");
+        }
+        packConfluence(list, proj);
+    }
+
+    @Override
+    public void createJenkins(List<JenkinsInputParam> list, Project proj) throws Exception {
+        if (proj == null) {
+            throw new Exception("null project selected or persisted");
+        }
+        packJenkins(list, proj);
+    }
+
+    @Override
+    public void createProjectMember(List<ProjectMemberInputParam> list, Project proj) throws Exception {
+        if (proj == null) {
+            throw new Exception("null project selected or persisted");
+        }
+        packProjectMembers(list, proj);
+    }
+
+    @Override
+    public void createArtifact(List<ArtifactInputParam> list, Project proj) throws Exception {
+        if (proj == null) {
+            throw new Exception("null project selected or persisted");
+        }
+        packArtifact(list, proj);
+    }
+
+    @Override
+    public Project findById(Long projectId) {
+        return projectRepository.findById(projectId).get();
+    }
+
+    @Override
     public Project updateProject(ProjectInputParam projectInputParam) throws Exception {
         projectInputParam.validateModify();
         Project proj = projectRepository.findById(projectInputParam.getProjectId()).get(); // 因为是edit，需要查找之后再执行操作
@@ -145,6 +199,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Page<Project> findAll(PageRequest page) {
         return projectRepository.findAll(page);
+    }
+
+    @Override
+    public List<Project> findByProjectNameLike(String projectName) {
+        return projectRepository.findByProjectNameLike(projectName);
     }
 
     private void executeDetailedTasks(ProjectInputParam projectInputParam, Project proj)
@@ -252,8 +311,10 @@ public class ProjectServiceImpl implements ProjectService {
             RESULT checkRes = repo.getInputActionType().checkWithMainId(repo.getRepoId());
             if (checkRes.equals(RESULT.VALID_REMOTE_CREATE)) { // 远程创建
                 LOGGER.info("创建");
-                repoService.createSvnRepo(repo.getRepoName(), repo.getTemplateId(), true);
+                SubversionRepoDTO srdto = repoService.createSvnRepo(repo.getRepoName(), repo.getTemplateId(), true);
                 SCMRepo scmRepo = prepareScmRepo(repo);
+                scmRepo.setWebui(srdto.getViewvcUrl());
+                scmRepo.setCheckout("svn co " + srdto.getSvnUrl() + " " + srdto.getName() +" --username=***");
                 Long tmpId = repo.getTemplateId();
                 String repoStyle = tmpId == null ? "Empty repository"
                         : (tmpMap.get(tmpId) == null ? "Empty repository" : tmpMap.get(tmpId));

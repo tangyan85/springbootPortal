@@ -1,26 +1,13 @@
 package com.wanda.portal.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import com.alibaba.fastjson.annotation.JSONField;
 import com.wanda.portal.constants.Constants;
 import com.wanda.portal.constants.InputActionType;
-import com.wanda.portal.constants.RepoProtocol;
 import com.wanda.portal.constants.RepoType;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
 
 @Entity
 @Table(name = "scm_repository")
@@ -54,6 +41,12 @@ public class SCMRepo implements Serializable {
 
     @Column(name = "repo_style")
     private String repoStyle;
+
+    @Column(name = "web_ui")
+    private String webui;
+
+    @Column(name = "check_out")
+    private String checkout;
 
     
     private Long templateId;
@@ -233,5 +226,20 @@ public class SCMRepo implements Serializable {
     public void setRepoStyle(String repoStyle) {
         this.repoStyle = repoStyle;
     }
-    
+
+    public String getWebui() {
+        return webui;
+    }
+
+    public void setWebui(String webui) {
+        this.webui = webui;
+    }
+
+    public String getCheckout() {
+        return checkout;
+    }
+
+    public void setCheckout(String checkout) {
+        this.checkout = checkout;
+    }
 }

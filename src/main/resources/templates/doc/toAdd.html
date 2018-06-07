@@ -20,13 +20,13 @@
 
     <section class="content-header" th:style="'display:'+ @{${returnBtn} ? 'none' : 'block'}+''">
         <h1>
-            新建项目产出物
+            新建Confluence空间
             <small>preview</small>
         </h1>
         <ol class="breadcrumb" style="margin:0px;">
             <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
-            <li><a href="#">软件仓库</a></li>
-            <li class="active">新建项目产出物</li>
+            <li><a href="#">文档管理</a></li>
+            <li class="active">新建Confluence空间</li>
         </ol>
     </section>
 
@@ -57,23 +57,33 @@
                             <div class="widget-main">
                                 <h3 class="lighter block green">填写下列信息</h3>
                                 <div class="bs-example" data-example-id="hoverable-table">
-                                    <table class="table table-hover editable" id="editable_art"
-                                           data-target="artifacts">
+                                    <table class="table table-hover editable" id="editable_doc"
+                                           data-target="confluenceSpaces">
                                         <thead>
                                         <tr>
-                                            <th id="artifactId" style="display:none">artifactId</th>
+                                            <th id="inputActionType">操作类型</th>
                                             <th id="serverId">服务器地址</th>
-                                            <th id="artifactType">类型</th>
-                                            <th id="rootPath">内容</th>
+                                            <th data-ingore="true">请选择模板</th>
+                                            <th id="spaceId" style="display:none">spaceId</th>
+                                            <th id="spaceKey">Confluence空间英文简称</th>
+                                            <th id="spaceName">Confluence空间名称</th>
+                                            <th id="spaceDescription">描述</th>
+                                            <th id="pageId" style="display:none">pageId</th>
                                             <th></th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         <tr>
-                                            <td style="display:none">
+                                            <td>
                                                 <div class="form-group">
-                                                    <input class="form-control" type="hidden" name="artifactId"
-                                                           id="artifactId" th:value="*{artifactId}"/>
+                                                    <select class="form-control select2 actionConfluence"
+                                                            id="inputActionType" name="inputActionType">
+                                                        <option value="">------请选择------</option>
+                                                        <option th:each="optype : ${inputActionTypes}"
+                                                                th:value="${optype.key}"
+                                                                th:text="${optype.value}"
+                                                                th:remove="${#strings.equalsIgnoreCase(optype.key, 'UPDATE_OR_NOTHING')}? all"/>
+                                                    </select>
                                                 </div>
                                             </td>
                                             <td>
@@ -84,24 +94,49 @@
                                                         <option th:each="ip : ${serverIPs}"
                                                                 th:value="${ip.serverId}"
                                                                 th:text="${ip.outerServerIpAndPort}"
-                                                                th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'ARTIFACT')}? none:all"/>
+                                                                th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'CONFLUENCE')}? none:all"/>
                                                     </select>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="form-group">
-                                                    <select class="form-control select2" id="artifactType"
-                                                            name="artifactType">
+                                                    <select class="form-control select2 selectConfluence"
+                                                            id="conf" name="conf" data-ingore="true">
                                                         <option value="">------请选择------</option>
-                                                        <option th:each="type : ${aritifactTypes}"
-                                                                th:value="${type.key}" th:text="${type.value}"/>
+                                                        <option th:each="conf : ${existConfs}"
+                                                                th:value="${conf.spaceKey}"
+                                                                th:text="${conf.spaceName}"/>
                                                     </select>
+                                                </div>
+                                            </td>
+                                            <td style="display:none">
+                                                <div class="form-group">
+                                                    <input class="form-control selectChange" type="hidden"
+                                                           name="spaceId" id="spaceId" th:value="*{spaceId}"/>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="form-group">
-                                                    <input class="form-control" type="text" name="rootPath"
-                                                           id="rootPath"/>
+                                                    <input class="form-control selectChange" type="text"
+                                                           name="spaceKey" id="spaceKey" disabled/>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <input class="form-control selectChange" type="text"
+                                                           name="spaceName" id="spaceName" disabled/>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <input class="form-control" type="text"
+                                                           name="spaceDescription" id="spaceDescription"/>
+                                                </div>
+                                            </td>
+                                            <td style="display:none">
+                                                <div class="form-group">
+                                                    <input class="form-control selectChange" type="text"
+                                                           name="pageId" id="pageId" disabled/>
                                                 </div>
                                             </td>
                                             <td></td>
@@ -117,6 +152,7 @@
                                         <i class="ace-icon fa fa-arrow-right icon-on-right"></i>
                                     </button>
                                 </div>
+
                             </div><!-- /.widget-main -->
                         </div><!-- /.widget-body -->
                     </form>
@@ -171,7 +207,6 @@
 
         $("#finished").click(function () {
             if (!$('#validation-form').valid()) {
-                e.preventDefault();
                 return;
             }
             btnSumbit();
@@ -194,25 +229,47 @@
                 projectId: {
                     required: true
                 },
+                inputActionType: {
+                    required: true
+                },
                 serverId: {
                     required: true
                 },
-                artifactType: {
-                    required: true
-                },
-                rootPath: {
+                conf: {
                     required: true,
-                    maxlength: 50
+                    maxlength: 200
+                },
+                spaceKey: {
+                    required: true,
+                    rangelength: [2, 16],
+                    projectKey: true
+                },
+                spaceName: {
+                    required: true,
+                    rangelength: [2, 25],
+                    projectName: true
+                },
+                spaceDescription: {
+                    required: false,
+                    maxlength: 200
                 }
             },
 
             messages: {
                 projectId: "请选择项目",
+                inputActionType: "请选择操作类型",
                 serverId: "请选择服务器地址",
-                artifactType: "请选择服务器类型",
-                rootPath: {
-                    required: "请输入有效的内容",
-                    maxlength: "长度为0~50个字符"
+                conf: "请选择Confluence空间模板",
+                spaceKey: {
+                    required: "请输入有效的Confluence空间英文简称",
+                    rangelength: "长度为2~16个字符"
+                },
+                spaceName: {
+                    required: "请输入有效的Confluence空间名称",
+                    rangelength: "长度为2~25个字符"
+                },
+                spaceDescription: {
+                    rangelength: "长度为0~200个字符"
                 }
             },
 
@@ -247,7 +304,7 @@
             }
         });
 
-        $('#editable_art').handleTable({
+        $('#editable_doc').handleTable({
             "handleFirst": true,
             "del": " <span class='glyphicon glyphicon-remove-circle text-red' style='font-size:20px;'></span> ",
             "add": " <span class='glyphicon glyphicon-ok-circle text-blue' style='font-size:20px;'></span> ",
@@ -280,7 +337,7 @@
 
         var successMsg = "创建成功！";
 
-        var url = "/artifact/save";
+        var url = "/doc/save";
 
         jQuery.confirm({
             title: '请确认',
@@ -299,7 +356,7 @@
                                 if (msg.responseCode == "0000") {
                                     jQuery.alert(successMsg);
                                     let returnBtn = /*[[${returnBtn}]]*/ false;
-                                    let url = "artifact/toList";
+                                    let url = "code/toList";
                                     if (returnBtn) {
                                         url = "project/toList";
                                     }
@@ -319,6 +376,55 @@
         });
 
     };
+
+    $(document).on("change", ".actionConfluence", function () {
+        var action = jQuery(this).children('option:selected').val();
+        var parentTr = jQuery(this).parents('tr');
+        parentTr.find(".selectConfluence").get(0).options[0].selected = true;
+
+        if (action == "REMOTE_CREATE") { //创建
+            parentTr.find("input,textarea").each(function () {
+                jQuery(this).val('');
+                jQuery(this).attr("disabled", false);
+            });
+            parentTr.find(".selectConfluence").attr("disabled", true);
+            parentTr.find("#spaceKey").val($("#projectKey").val());
+            parentTr.find("#spaceName").val($("#projectName").val());
+        } else if (action == "-1") {
+            parentTr.find(".selectConfluence").attr("disabled", false);
+            parentTr.find(".selectChange").each(function () {
+                jQuery(this).val('');
+                jQuery(this).attr("disabled", true);
+            });
+        } else { //导入
+            parentTr.find(".selectConfluence").attr("disabled", false);
+            parentTr.find(".selectChange").each(function () {
+                jQuery(this).val('');
+                jQuery(this).attr("disabled", true);
+            });
+        }
+    });
+
+    $(document).on("change", ".selectConfluence", function () {
+        var index = jQuery(this).children('option:selected').index();
+        index--;
+        var parentTr = $(this).parents('tr');
+        var action = parentTr.find(".actionConfluence").children('option:selected').val();
+        var oo = /*[[${existConfs}]]*/ null;
+        var conf = oo[index];
+        if (!isEmpty(conf)) {
+            if ("ATTACH_OLD" == action) {
+                parentTr.find(".selectChange").each(function () {
+                    jQuery(this).val(conf[this.id]);
+                });
+            }
+        } else {
+            parentTr.find(".selectChange").each(function () {
+                jQuery(this).val('');
+            });
+        }
+
+    });
 
     /*]]>*/
 </script>
