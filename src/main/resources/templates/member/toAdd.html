@@ -8,25 +8,25 @@
 
 <body style="background: #ffffff">
 <div th:fragment="dashboard">
-    <div class="row" th:style="'display:'+ @{${returnBtn} ? 'block' : 'none'}+''">
+    <div class="row" th:style="'display:'+ @{${backPath != null} ? 'block' : 'none'}+''">
         <div class="col-md-2">
             <p style="margin: 10px 0px 5px 15px;">
-                <button type="button" class="btn btn-block btn-success" onclick="window.history.go(-1)">
+                <button type="button" class="btn btn-block btn-success" th:onclick="'showPart(\''+${backPath}+'\')'">
                     <i class="fa fa-arrow-circle-o-left">返回</i>
                 </button>
             </p>
         </div>
     </div>
 
-    <section class="content-header" th:style="'display:'+ @{${returnBtn} ? 'none' : 'block'}+''">
+    <section class="content-header" th:style="'display:'+ @{${backPath != null} ? 'none' : 'block'}+''">
         <h1>
-            新建项目成员
+            新增项目成员
             <small>preview</small>
         </h1>
         <ol class="breadcrumb" style="margin:0px;">
             <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
             <li><a href="#">项目成员管理</a></li>
-            <li class="active">新建项目成员</li>
+            <li class="active">新增项目成员</li>
         </ol>
     </section>
 
@@ -45,8 +45,11 @@
                             <div class="col-md-3">
                                 <h3 class="lighter block green">选择项目</h3>
                                 <div class="form-group">
-                                    <select class="form-control select2" id="projectId" name="projectId">
+                                    <select class="form-control select2" id="projectId" name="projectId" th:if="${project.projectId eq null}">
                                         <option value="">------请选择------</option>
+                                    </select>
+                                    <select class="form-control select2" id="projectId" name="projectId" th:if="${project.projectId ne null}">
+                                        <option th:value="${project.projectId}" th:text="${project.projectName}"></option>
                                     </select>
                                 </div>
                             </div>
@@ -55,14 +58,14 @@
 
                         <div class="widget-body">
                             <div class="widget-main">
-                                <h3 class="lighter block green">填写下列信息</h3>
+                                <h3 class="lighter block green">添加团队成员</h3>
                                 <div class="bs-example" data-example-id="hoverable-table">
                                     <table class="table table-hover editable" id="editable_pm"
                                            data-target="projectMembers">
                                         <thead>
                                         <tr>
                                             <th id="projectMemberId" style="display:none">projectMemberId</th>
-                                            <th id="role">项目成员</th>
+                                            <th id="role">成员名称</th>
                                             <th id="username">担任角色</th>
                                             <th data-ingore="true"></th>
                                         </tr>
@@ -159,6 +162,12 @@
 
         $("#finished").click(function () {
             if (!$('#validation-form').valid()) {
+                jQuery.alert({
+                    type: 'blue',
+                    title: '系统提示',
+                    content: "表单验证不通过！",
+                    icon:'glyphicon glyphicon-info-sign'
+                });
                 return;
             }
             btnSumbit();
@@ -190,7 +199,7 @@
             messages: {
                 projectId: "请选择项目",
                 username: {
-                    required: "请输入有效的项目成员",
+                    required: "请输入有效的成员名称",
                     rangelength: "长度为2~25个字符"
                 },
                 role: "请选择担任角色"
@@ -229,8 +238,8 @@
 
         $('#editable_pm').handleTable({
             "handleFirst": true,
-            "del": " <span class='glyphicon glyphicon-remove-circle text-red' style='font-size:20px;'></span> ",
-            "add": " <span class='glyphicon glyphicon-ok-circle text-blue' style='font-size:20px;'></span> ",
+            "del": " <span class='glyphicon glyphicon-remove text-red' style='font-size:20px;'></span> ",
+            "add": " <span class='glyphicon glyphicon-plus text-blue' style='font-size:20px;'></span> ",
             "operatePos": -1
         });
     })
@@ -277,16 +286,22 @@
                             data: jsondata,
                             success: function (msg) {
                                 if (msg.responseCode == "0000") {
-                                    jQuery.alert(successMsg);
-                                    let returnBtn = /*[[${returnBtn}]]*/ false;
-                                    let url = "member/toList";
-                                    if (returnBtn) {
-                                        url = "project/toList";
-                                    }
-                                    $("#mainframe", parent.document.body).attr("src", url);
+                                    jQuery.alert({
+                                        type: 'blue',
+                                        title: '系统提示',
+                                        content: successMsg,
+                                        icon:'glyphicon glyphicon-info-sign'
+                                    });
+                                    let backPath = /*[[${backPath}]]*/ false;
+                                    $("#mainframe", parent.document.body).attr("src", backPath);
                                     //top.location.href = "/index";
                                 } else {
-                                    jQuery.alert("错误: " + msg.responseMsg);
+                                    jQuery.alert({
+                                        type: 'blue',
+                                        title: '系统提示',
+                                        content: "错误: " + msg.responseMsg,
+                                        icon:'glyphicon glyphicon-info-sign'
+                                    });
                                 }
                             }
                         });
@@ -299,6 +314,10 @@
         });
 
     };
+
+    function showPart(url) {
+        $("#mainframe", parent.document.body).attr("src", url);
+    }
 
     /*]]>*/
 </script>

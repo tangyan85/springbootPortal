@@ -1,29 +1,9 @@
 package com.wanda.portal.test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSONObject;
 import com.wanda.portal.RootApplication;
-import com.wanda.portal.config.WebConfigBeans;
 import com.wanda.portal.config.biz.JiraConfig;
 import com.wanda.portal.constants.InputActionType;
-import com.wanda.portal.constants.JiraConstants;
 import com.wanda.portal.constants.ProjectMemberRole;
 import com.wanda.portal.constants.RepoType;
 import com.wanda.portal.constants.ServerType;
@@ -36,21 +16,23 @@ import com.wanda.portal.dto.confluence.CreateConfluenceSpaceParamDTO;
 import com.wanda.portal.dto.confluence.GenericConfluenceSpaceDTO;
 import com.wanda.portal.dto.jenkins.JenkinsJobDTO;
 import com.wanda.portal.dto.jira.GenericJiraProjectDTO;
-import com.wanda.portal.dto.jira.JiraInputDTO;
-import com.wanda.portal.dto.jira.JiraOutputDTO;
 import com.wanda.portal.dto.svn.SubversionRepoDTO;
 import com.wanda.portal.dto.svn.SvnTemplateWrapperDTO;
 import com.wanda.portal.entity.Server;
-import com.wanda.portal.exception.ConfluenceSpaceCreateFailureException;
-import com.wanda.portal.facade.model.input.ArtifactInputParam;
-import com.wanda.portal.facade.model.input.ConfluenceSpaceInputParam;
-import com.wanda.portal.facade.model.input.JenkinsInputParam;
-import com.wanda.portal.facade.model.input.JiraProjectInputParam;
-import com.wanda.portal.facade.model.input.ProjectInputParam;
-import com.wanda.portal.facade.model.input.ProjectMemberInputParam;
-import com.wanda.portal.facade.model.input.ScmRepoInputParam;
+import com.wanda.portal.facade.model.input.*;
 import com.wanda.portal.utils.RegexUtils;
-import com.wanda.portal.utils.RestUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = RootApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -65,16 +47,16 @@ public class TestCase2 {
      @Test
      public void testRest() {
     
-     HttpHeaders headers = RestUtils.packBasicAuthHeader(jiraConfig.getUsername(),
-     jiraConfig.getPassword());
-    
-     HttpEntity<String> request = new HttpEntity<String>(headers);
-     ResponseEntity<String> response = restTemplate.exchange(
-     "http://10.215.4.199:8080/rest/api/2/project", HttpMethod.GET, request,
-     String.class);
-     String account = response.getBody();
-     System.out.println("Query for new JIRA for all projects: " + account);
-    
+//     HttpHeaders headers = RestUtils.packBasicAuthHeader(jiraConfig.getUsername(),
+//     jiraConfig.getPassword());
+//    
+//     HttpEntity<String> request = new HttpEntity<String>(headers);
+//     ResponseEntity<String> response = restTemplate.exchange(
+//     "http://10.215.4.199:8080/rest/api/2/project", HttpMethod.GET, request,
+//     String.class);
+//     String account = response.getBody();
+//     System.out.println("Query for new JIRA for all projects: " + account);
+//    
      }
     //
     @Autowired
@@ -178,7 +160,7 @@ public class TestCase2 {
     public void findAllJiraFromRemote() throws Exception {
         List<Server> ll = serverRepository.findByServerType(ServerType.JIRA);
         jiraService.setServer(ll.get(0));
-        List<GenericJiraProjectDTO> z = jiraService.fetchAllJiraProjects();
+        List<GenericJiraProjectDTO> z = jiraService.fetchAllJiraProjects(null);
         System.out.println("Query For all JIRAs: " + JSONObject.toJSONString(z));
     }
 
@@ -206,19 +188,21 @@ public class TestCase2 {
 
     /* 创建confluence的space */
     @Test
-    public void createSpace() {
-//        CreateConfluenceSpaceParamDTO param = new CreateConfluenceSpaceParamDTO();
-//        param.setDescription("这是一个高级示范DEMO项目"); // 项目描述
-//        param.setKey("UNIQUE"); // Space唯一的Key，不对外展现
-//        param.setName("Confluence展现的Space名称"); // 项目名称
-//        param.setRepresentation("似乎没有太多用处的表述"); // description的表述
-//        String view = "";
-//        try {
-//            view = confluenceService.createSpace(param);
-//        } catch (ConfluenceSpaceCreateFailureException e) {
-//            System.out.println(e);
-//        }
-//        System.out.println("view = " + view);
+    public void createSpace() throws Exception {
+        List<Server> ll = serverRepository.findByServerType(ServerType.CONFLUENCE);
+        confluenceService.setServer(ll.get(0));
+        CreateConfluenceSpaceParamDTO param = new CreateConfluenceSpaceParamDTO();
+        param.setDescription("这是一个高级示范DEMO项目"); // 项目描述
+        param.setKey("UNIQUEKKK"); // Space唯一的Key，不对外展现
+        param.setName("Confluence展现的Space名称"); // 项目名称
+        param.setRepresentation("似乎没有太多用处的表述"); // description的表述
+        String view = "";
+        try {
+            view = confluenceService.createSpace(param);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        System.out.println("view = " + view);
     }
 
     @Autowired

@@ -1,10 +1,10 @@
 package com.wanda.portal.dao.remote;
 
-import java.util.List;
-
 import com.wanda.portal.dto.jenkins.JenkinsJobDTO;
 import com.wanda.portal.entity.Server;
 import com.wanda.portal.facade.model.input.JenkinsInputParam;
+
+import java.util.List;
 
 public interface JenkinsService {
 
@@ -19,4 +19,6 @@ public interface JenkinsService {
     void setServer(Server server);
     
     Server getServer();
+
+    void deleteByJenkinsId(Long jenkinsId);
 }

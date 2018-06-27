@@ -1,12 +1,5 @@
 package com.wanda.portal.dao;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.stereotype.Service;
 import com.wanda.portal.dao.jpa.ServerRepository;
 import com.wanda.portal.dao.remote.ConfluenceService;
 import com.wanda.portal.dao.remote.JenkinsService;
@@ -17,6 +10,15 @@ import com.wanda.portal.facade.model.input.ConfluenceSpaceInputParam;
 import com.wanda.portal.facade.model.input.JenkinsInputParam;
 import com.wanda.portal.facade.model.input.JiraProjectInputParam;
 import com.wanda.portal.facade.model.input.ScmRepoInputParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Future;
 
 /**
       异步线程池任务
@@ -35,16 +37,15 @@ public class AsyncTaskService {
     RepoService repoService;
     
     @Async
-    public Future<List<JiraProjectInputParam>> fetchAllJiras(List<Server> jiraServers) {
+    public Future<List<JiraProjectInputParam>> fetchAllJiras(List<Server> jiraServers, UserDetails user) {
         List<JiraProjectInputParam> existJiras = new ArrayList<>();
         if (jiraServers != null && jiraServers.size() > 0) {
             for (Server jiraServer : jiraServers) {
                 jiraService.setServer(jiraServer);
-                existJiras.addAll(jiraService.fetchUnusedJiraProject());
+                existJiras.addAll(jiraService.fetchUnusedJiraProject(user));
             }
         }
-        // model.addAttribute("existJiras", existJiras);
-        return new AsyncResult<List<JiraProjectInputParam>>(existJiras);
+        return new AsyncResult<>(existJiras);
     }
     
     @Async

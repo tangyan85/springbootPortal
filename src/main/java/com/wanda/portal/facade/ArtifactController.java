@@ -12,6 +12,7 @@ import com.wanda.portal.entity.Project;
 import com.wanda.portal.entity.Server;
 import com.wanda.portal.facade.model.input.ProjectInputParam;
 import com.wanda.portal.utils.ConversionUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
@@ -36,32 +37,53 @@ public class ArtifactController {
     ProjectService projectService;
 
     @RequestMapping("/toList")
-    public String toList(Model model) {
+    public String toList(Model model, String projectId) {
         model.addAttribute("projects", projectService.findAll(PageRequest.of(0, 10)));
         model.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
+        model.addAttribute("projectId", projectId);
         return "artifact/toList";
     }
 
-    @RequestMapping(value = "/preview/{projectId}/{returnBtn}")
-    public String preview(Model model, @PathVariable("projectId") String projectId,
-                          @PathVariable("returnBtn") Boolean returnBtn) {
+    @RequestMapping(value = "/preview/{projectId}")
+    public String preview(Model model, @PathVariable("projectId") String projectId, String backPath) {
         Project project = new Project();
         try {
-            project = projectService.getProjectById(Long.valueOf(projectId));
+            if (StringUtils.isNotEmpty(projectId)) {
+                project = projectService.getProjectById(Long.valueOf(projectId));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         model.addAttribute("project", project);
-        model.addAttribute("returnBtn", returnBtn);
+        model.addAttribute("backPath", backPath);
 
         return "artifact/toDetail";
     }
 
-    @RequestMapping("/toAdd/{returnBtn}")
-    public String toAdd(Model model, @PathVariable("returnBtn") Boolean returnBtn) {
+    @RequestMapping("/remove")
+    @ResponseBody
+    public String remove(String artifactId) {
+        if (StringUtils.isNotEmpty(artifactId)) {
+            artifactService.deleteByArtifactId(Long.valueOf(artifactId));
+        }
+        return "ok";
+    }
+
+    @RequestMapping("/toAdd")
+    public String toAdd(Model model, String projectId, String backPath) {
         setModelCommon(model);
         setCommonServerInfoAsync(model);
-        model.addAttribute("returnBtn", returnBtn);
+        Project project = new Project();
+        try {
+            if (StringUtils.isNotEmpty(projectId)) {
+                project = projectService.getProjectById(Long.valueOf(projectId));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        model.addAttribute("project", project);
+        model.addAttribute("backPath", backPath);
+
         return "artifact/toAdd";
     }
 

@@ -14,7 +14,7 @@ public class RegexUtils {
 	 * 验证svn repo名称
 	 * */
 	public static boolean isValidRepo(String repo) {
-		String regex = "^\\w+[a-zA-Z0-9_-]+";
+		String regex = "^\\w+[/a-zA-Z0-9_-]+";
 		return Pattern.matches(regex, repo);
 	}
 	

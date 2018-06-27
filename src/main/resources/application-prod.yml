@@ -25,25 +25,30 @@ myprops:
       urlHead: http://svn.wdjr.local
   ldap: # ldap相关
     enable: true
-    url: ldap://10.214.170.67:389/dc=wanda,dc=cn      
+    userDnPatterns: cn={0}
+    groupSearchBase: dc=wdjr
+    managerDn: cn=yyyy,dc=wdjr
+    managerPassword: yyyy@wdjr2018!@#
+    url: ldap://10.215.4.104:389/
   switch: #功能开关
     enableSso: true  
                    
 spring:
   datasource:
     password: Wanda@2017
-    url: jdbc:mysql://192.168.0.17:3306/portal?useSSL=false
+    url: jdbc:mysql://localhost:3306/portal?useSSL=false
     username: portal
   redis:
     database: 0
-    host: 192.168.0.17
+    host: localhost
     port: 6379
     password:
 
 logging:
   level:
     root: ERROR
-    org.springframework.web: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
     org.hibernate: ERROR
     com.wanda.portal: INFO
 file: /var/log/portal.log

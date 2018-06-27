@@ -16,29 +16,59 @@
 
     <div class="navbar-custom-menu">
       <ul class="nav navbar-nav">
-        <li role="presentation">
+        <li role="presentation" class="dropdown">
           <a th:href="${PORTAL_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px" data-url-top="true">全生命周期管理</a>
         </li>
-        <li role="presentation">
-          <a th:href="${JIRA_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px">任务跟踪</a>
+        <li role="presentation" class="dropdown">
+          <!--<a th:href="${JIRA_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px">任务跟踪</a>-->
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding-left: 10px;padding-right: 10px">任务跟踪<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li th:each="server : ${servers}" th:object="${server}" th:if="${server.serverType.toString()} == 'JIRA'">
+              <a th:href="*{domain}" th:text="*{domain}"></a>
+            </li>
+          </ul>
         </li>
-        <li role="presentation">
-          <a th:href="${CONFLUENCE_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px">文档协同</a>
+        <li role="presentation" class="dropdown">
+          <!--<a th:href="${CONFLUENCE_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px">文档协同</a>-->
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding-left: 10px;padding-right: 10px">文档协同<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li th:each="server : ${servers}" th:object="${server}" th:if="${server.serverType.toString()} == 'CONFLUENCE'">
+              <a th:href="*{domain}" th:text="*{domain}"></a>
+            </li>
+          </ul>
         </li>
         <li role="presentation">
           <a th:href="${TESTLINK_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px">测试管理</a>
         </li>
-        <li role="presentation">
-          <a th:href="${JENKINS_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px">持续集成</a>
+        <li role="presentation" class="dropdown">
+          <!--<a th:href="${JENKINS_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px">持续集成</a>-->
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding-left: 10px;padding-right: 10px">持续集成<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li th:each="server : ${servers}" th:object="${server}" th:if="${server.serverType.toString()} == 'JENKINS'">
+              <a th:href="*{domain}" th:text="*{domain}"></a>
+            </li>
+          </ul>
+        </li>
+        <li role="presentation" class="dropdown">
+          <!--<a th:onclick="'javascript:window.open(\''+${ARTIFACT_SERVER.urlContext}+'\');'" style="padding-left: 10px;padding-right: 10px">软件仓库</a>-->
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding-left: 10px;padding-right: 10px">软件仓库<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li th:each="server : ${servers}" th:object="${server}" th:if="${server.serverType.toString()} == 'ARTIFACT'">
+              <a th:href="*{domain}" th:text="*{domain}"></a>
+            </li>
+          </ul>
+        </li>
+        <li role="presentation" class="dropdown">
+          <!--<a th:href="${SVN_SERVER.urlContext}" style="padding-left: 10px;padding-right: 10px">代码管理</a>-->
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding-left: 10px;padding-right: 10px">代码管理<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li th:each="server : ${servers}" th:object="${server}" th:if="${server.serverType.toString()} == 'SVN' or ${server.serverType.toString()} == 'GIT'">
+              <a th:href="*{domain}" th:text="*{domain}"></a>
+            </li>
+          </ul>
         </li>
         <li role="presentation">
-          <a th:href="${ARTIFACT_SERVER.urlContext}" style="padding-left: 10px;padding-right: 10px">软件仓库</a>
-        </li>
-        <li role="presentation">
-          <a th:href="${SVN_SERVER.urlContext}" style="padding-left: 10px;padding-right: 10px">代码管理</a>
-        </li>
-        <li role="presentation">
-          <a th:href="${SONAR_SERVER.urlContext}" style="padding-left: 10px;padding-right: 10px">静态分析</a>
+          <a th:onclick="'javascript:window.open(\''+${SONAR_SERVER.urlContext}+'\');'" style="padding-left: 10px;padding-right: 10px">静态分析</a>
         </li>
         <li role="presentation">
           <a href="http://10.214.178.66/zabbix/" style="padding-left: 10px;padding-right: 10px">监控管理</a>

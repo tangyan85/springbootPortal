@@ -32,7 +32,8 @@
                     <div class="box-body no-padding">
                         <ul class="nav nav-pills nav-stacked" id="project-list-ul">
                             <li th:each="project ,projectStat : ${projects.content}">
-                                <a href="#" th:onclick="'javascript:showDetail(\''+${project.projectId}+'\');'">
+                                <a href="#" th:style="${projectId} eq ${project.projectId} ? 'background-color: #ebf2f9;' : ''"
+                                   th:onclick="'javascript:showDetail(\''+${project.projectId}+'\');'">
                                     <i th:class="${project.status != 'START'} ? 'fa fa-fw fa-plus-square text-success' : 'fa fa-fw fa-power-off text-danger'">&nbsp;
                                         <span th:text="${project.projectKey}"></span></i>
                                     <p th:text="${project.projectName}" class="text-primary list-group-item-text"></p>
@@ -51,7 +52,10 @@
     </section>
 </div>
 
-<script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    let projectId = /*[[${projectId}]]*/ null;
+
     $(function () {
         $("#project-list-paging").Page({
             totalPages: 7,//分页总数
@@ -64,8 +68,18 @@
             }
         });
 
-        $("#project-list-ul li:eq(0)").find("a").click();
-    })
+        $(".nav > li > a").click(function () {
+            $(".nav > li > a").removeAttr("style");
+            $(this).attr("style", "background-color: #ebf2f9;");
+        });
+
+        if (projectId == null) {
+            $("#project-list-ul li:eq(0)").find("a").click();
+        } else {
+            showDetail(projectId);
+        }
+
+    });
 
     function showPage(url) {
         jQuery.ajax({
@@ -75,9 +89,13 @@
                 if (data != null) {
                     jQuery("#project-list-ul li").remove();
                     var htm = '';
-                    for (i in data.content) {
-                        htm += '<li><a href="#" onclick="showDetail(' + data.content[i].projectId + ')">';
-                        htm += '<i class="' + (data.content[i].status == 'START' ? 'fa fa-fw fa-plus-square text-success' : 'fa fa-fw fa-power-off text-danger')
+                    for (let i in data.content) {
+                        htm += '<li><a href="#" ';
+                        if (projectId === data.content[i].projectId) {
+                            htm += 'style="background-color: #ebf2f9;" ';
+                        }
+                        htm += 'onclick="showDetail(' + data.content[i].projectId + ')">';
+                        htm += '<i class="' + (data.content[i].status === 'START' ? 'fa fa-fw fa-plus-square text-success' : 'fa fa-fw fa-power-off text-danger')
                             + '">&nbsp;<span>' + data.content[i].projectKey + '</span></i>';
                         htm += '<p class="text-primary list-group-item-text">' + data.content[i].projectName + '</p>';
                         htm += '</a></li>';
@@ -94,6 +112,7 @@
         });
     }
 
+    /*]]>*/
 </script>
 
 </body>

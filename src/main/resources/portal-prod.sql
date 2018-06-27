@@ -156,6 +156,20 @@ CREATE TABLE IF NOT EXISTS `server` (
   PRIMARY KEY (`server_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 
+-- 正在导出表  portal.server 的数据：10 rows
+/*!40000 ALTER TABLE `server` DISABLE KEYS */;
+INSERT INTO `server` (`server_id`, `inner_server_ip`, `outer_server_ip`, `remark`, `server_type`, `protocol`, `reserved`, `server_root`, `login_suffix`, `domain`) VALUES
+	(5, '192.168.0.14', '	10.215.4.103', 'git的url', 'GIT', 'http', 'not applied', NULL, NULL, 'git.wdjr.local'),
+	(10, '	192.168.0.16', '	10.215.4.189', 'testlink的url', 'TESTLINK', 'http', NULL, 'testlink', '/login.php', '	\r\n\r\ntest.wdjr.local'),
+	(8, '	192.168.0.17', '10.215.4.152', 'portal的url', 'PORTAL', 'http', NULL, '', '/index', 'adlm.wdjr.local'),
+	(7, '192.168.0.9', '10.215.4.200', 'confluence的url', 'CONFLUENCE', 'http', NULL, NULL, '/dashboard.action#all-updates', '	conf.wdjr.local'),
+	(3, '192.168.0.11', '10.215.4.165', 'svn的url,对外展现端口是80', 'SVN', 'http', NULL, '', '/csvn', 'svn.wdjr.local:3343'),
+	(2, '192.168.0.12', '10.215.4.154', 'jenkins master的url', 'JENKINS', 'http', NULL, NULL, '', '	ci.wdjr.local'),
+	(1, '192.168.0.20', '10.215.4.166:8081', 'nexus的url', 'ARTIFACT', 'http', NULL, NULL, NULL, 'nexus.wdjr.local:8081	\r\n'),
+	(9, '192.168.0.7', '10.215.4.199', 'jira的url', 'JIRA', 'http', NULL, NULL, '', 'jira.wdjr.local'),
+	(6, '	192.168.0.28', '10.215.4.102', 'sonarqube的url', 'SONAR', 'http', NULL, NULL, '/sessions/new', 'sonar.wdjr.local'),
+	(4, '192.168.0.11', '10.215.4.165:3343', 'viewvc的url', 'VIEWVC', 'http', NULL, '', '', 'svn.wdjr.local');
+
 -- 导出  表 portal.stat_task_record 结构
 DROP TABLE IF EXISTS `stat_task_record`;
 CREATE TABLE IF NOT EXISTS `stat_task_record` (

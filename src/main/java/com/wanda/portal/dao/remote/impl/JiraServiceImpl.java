@@ -1,52 +1,36 @@
 package com.wanda.portal.dao.remote.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
 import com.alibaba.fastjson.JSONObject;
 import com.wanda.portal.config.biz.JiraConfig;
 import com.wanda.portal.constants.JiraConstants;
 import com.wanda.portal.dao.jpa.JiraProjectRepository;
 import com.wanda.portal.dao.remote.JiraService;
-import com.wanda.portal.dto.confluence.GenericConfluenceSpaceDTO;
 import com.wanda.portal.dto.jira.GenericJiraProjectDTO;
 import com.wanda.portal.dto.jira.JiraInputDTO;
 import com.wanda.portal.dto.jira.JiraOutputDTO;
-import com.wanda.portal.dto.svn.SubversionRepoDTO;
-import com.wanda.portal.entity.ConfluenceSpace;
 import com.wanda.portal.entity.JiraProject;
-import com.wanda.portal.entity.SCMRepo;
 import com.wanda.portal.entity.Server;
 import com.wanda.portal.exception.JiraProjectCreateFailureException;
 import com.wanda.portal.facade.model.input.JiraProjectInputParam;
 import com.wanda.portal.utils.RegexUtils;
 import com.wanda.portal.utils.RestLogUtils;
 import com.wanda.portal.utils.RestUtils;
-import com.wanda.portal.utils.UrlUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
+import org.springframework.http.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.*;
 @Primary
 @Service("JiraServiceImpl")
 @Scope("prototype")
 public class JiraServiceImpl implements JiraService {
-    private static Logger LOGGER = LoggerFactory.getLogger(JiraServiceImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(JiraServiceImpl.class);
     private static final String JIRA_ALREADY_EXISTS_ERROR_MSG = "jira project already exists";
     private static final String JIRA_CREATE_ERROR_MSG = "error occurred during creating for jira project";
     @Autowired
@@ -61,7 +45,7 @@ public class JiraServiceImpl implements JiraService {
      */
     @Override
     public JiraOutputDTO createJiraProjectUsingTemplate(JiraInputDTO dto, boolean isCheckExist) throws Exception {
-        LOGGER.info("===Begin create Jira project" + JSONObject.toJSONString(dto) + "isCheckExist:" + isCheckExist);
+        logger.info("===Begin create Jira project" + JSONObject.toJSONString(dto) + "isCheckExist:" + isCheckExist);
 
         if (isCheckExist) { // 是否事先检查jira项目已经存在？
             boolean isExist = checkIfJiraProjectExist(dto.getKey());
@@ -79,15 +63,15 @@ public class JiraServiceImpl implements JiraService {
                         + jiraConfig.getGenericApi() + "/project", HttpMethod.POST, requestEntity, String.class);
 
         String apiResponse = response.getBody();
-        LOGGER.info("response +" + apiResponse);
+        logger.info("response +" + apiResponse);
         if (response.getStatusCode().is2xxSuccessful()) {
             JiraOutputDTO res = JSONObject.parseObject(apiResponse, JiraOutputDTO.class);
-            LOGGER.info(RestLogUtils.packSuccHTTPLogs("Create Jira： " + dto, response));
-            LOGGER.info("===End create Jira project normally");
+            logger.info(RestLogUtils.packSuccHTTPLogs("Create Jira： " + dto, response));
+            logger.info("===End create Jira project normally");
             return res;
         } else {
-            LOGGER.info(RestLogUtils.packFailHTTPLogs("Create Jira： " + dto, response));
-            LOGGER.warn("End create Jira project Abnormally===");
+            logger.info(RestLogUtils.packFailHTTPLogs("Create Jira： " + dto, response));
+            logger.warn("End create Jira project Abnormally===");
             throw new JiraProjectCreateFailureException(JIRA_CREATE_ERROR_MSG);
         }
 
@@ -121,10 +105,10 @@ public class JiraServiceImpl implements JiraService {
             return false;
         }
         if (response.getStatusCode().is2xxSuccessful()) { // 找到了，说明存在
-            LOGGER.info(RestLogUtils.packSuccHTTPLogs("JIRA项目" + jiraKeyOrId + "存在", response));
+            logger.info(RestLogUtils.packSuccHTTPLogs("JIRA项目" + jiraKeyOrId + "存在", response));
             return true;
         } else {
-            LOGGER.info(RestLogUtils.packFailHTTPLogs("JIRA项目" + jiraKeyOrId + "不存在", response));
+            logger.info(RestLogUtils.packFailHTTPLogs("JIRA项目" + jiraKeyOrId + "不存在", response));
             return false;
         }
     }
@@ -133,10 +117,22 @@ public class JiraServiceImpl implements JiraService {
      * 此方法轮询所有Project，不返还Exception，目的是为了安全的轮询一下JIRA获得所有Project
      */
     @Override
-    public List<GenericJiraProjectDTO> fetchAllJiraProjects() {
-        HttpHeaders headers = RestUtils.packBasicAuthHeader(jiraConfig.getUsername(), jiraConfig.getPassword());
+    public List<GenericJiraProjectDTO> fetchAllJiraProjects(UserDetails user) {
+        String username = "";
+        String password = "";
+        if (JiraConstants.LOGIN_MODE.CURR_USER.getModeCode().equals(server.getLoginMode())) {
+            username = user.getUsername();
+            password = user.getPassword();
+        }
+
+        if (JiraConstants.LOGIN_MODE.DB_USER.getModeCode().equals(server.getLoginMode())) {
+            username = server.getLoginName();
+            password = server.getPasswd();
+        }
+
+        HttpHeaders headers = RestUtils.packBasicAuthHeader(username, password);
         HttpEntity<String> request = new HttpEntity<String>(headers);
-        ResponseEntity<String> response = new ResponseEntity<>(HttpStatus.OK);
+        ResponseEntity<String> response;
         try {
             response = restTemplate.exchange(server.getProtocol() + "://" + server.getOuterServerIpAndPort()
                     + jiraConfig.getGenericApi() + "/" + JiraConstants.project, HttpMethod.GET, request, String.class); // 轮询jira
@@ -144,12 +140,12 @@ public class JiraServiceImpl implements JiraService {
             return new ArrayList<GenericJiraProjectDTO>();
         }
         if (response.getStatusCode().is2xxSuccessful()) { // 说明有Project
-            LOGGER.info(RestLogUtils.packSuccHTTPLogs("JIRA项目Project列表轮询存在合法数据", response));
+            logger.info(RestLogUtils.packSuccHTTPLogs("JIRA项目Project列表轮询存在合法数据", response));
             List<GenericJiraProjectDTO> res = JSONObject.parseArray(response.getBody(), GenericJiraProjectDTO.class);
-            LOGGER.info("获得的项目列表为：" + res);
+            logger.info("获得的项目列表为：" + res);
             return res;
         } else {
-            LOGGER.error(RestLogUtils.packFailHTTPLogs("JIRA项目Project列表轮询不存在合法数据", response));
+            logger.error(RestLogUtils.packFailHTTPLogs("JIRA项目Project列表轮询不存在合法数据", response));
             return new ArrayList<GenericJiraProjectDTO>();
         }
     }
@@ -183,14 +179,14 @@ public class JiraServiceImpl implements JiraService {
                 HttpMethod.POST, requestEntity, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
-            LOGGER.info(
+            logger.info(
                     "JIRA项目Project创建成功,HTTP返回状态码为: " + response.getStatusCode() + "HTTP返回body为: " + response.getBody());
             JSONObject jb = JSONObject.parseObject(response.getBody());
-            LOGGER.info("===End create Jira project normally");
+            logger.info("===End create Jira project normally");
             return jb.getLong("projectId");
         } else {
-            LOGGER.error("create failed");
-            LOGGER.warn("End create Jira project Abnormally===");
+            logger.error("create failed");
+            logger.warn("End create Jira project Abnormally===");
             throw new JiraProjectCreateFailureException(JIRA_CREATE_ERROR_MSG);
         }
 
@@ -214,11 +210,11 @@ public class JiraServiceImpl implements JiraService {
                 server.getProtocol() + "://" + server.getOuterServerIpAndPort() + "/rest/auth/1/session",
                 HttpMethod.POST, requestEntity, String.class);
 
-        System.out.println(response.getBody());
+        logger.info(response.getBody());
         if (response.getStatusCode().is2xxSuccessful()) {
-            LOGGER.info("JIRA登录成功,HTTP返回状态码为: " + response.getStatusCode() + "HTTP返回body为: " + response.getBody());
+            logger.info("JIRA登录成功,HTTP返回状态码为: " + response.getStatusCode() + "HTTP返回body为: " + response.getBody());
         } else {
-            LOGGER.error("create failed");
+            logger.error("create failed");
             throw new JiraProjectCreateFailureException(JIRA_CREATE_ERROR_MSG);
         }
        return  response.getStatusCode().toString();
@@ -228,8 +224,8 @@ public class JiraServiceImpl implements JiraService {
     JiraProjectRepository jiraProjectRepository;
 
     @Override
-    public List<JiraProjectInputParam> fetchUnusedJiraProject() {
-        List<GenericJiraProjectDTO> allJiras = this.fetchAllJiraProjects();
+    public List<JiraProjectInputParam> fetchUnusedJiraProject(UserDetails user) {
+        List<GenericJiraProjectDTO> allJiras = this.fetchAllJiraProjects(user);
         List<JiraProject> usedJiras = jiraProjectRepository.findAll();
         List<JiraProjectInputParam> retJiras = new ArrayList<>();
 
@@ -269,5 +265,10 @@ public class JiraServiceImpl implements JiraService {
     @Override
     public Server gerServer() {
         return this.server;
+    }
+
+    @Override
+    public void deleteByJiraId(Long jiraId) {
+        jiraProjectRepository.deleteById(jiraId);
     }
 }

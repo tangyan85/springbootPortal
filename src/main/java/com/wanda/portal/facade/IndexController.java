@@ -1,11 +1,14 @@
 package com.wanda.portal.facade;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import com.wanda.portal.config.biz.LdapConfig;
+import com.wanda.portal.dao.jpa.ServerRepository;
+import com.wanda.portal.dao.remote.JiraService;
+import com.wanda.portal.dto.common.CommonHttpResponseBody;
+import com.wanda.portal.entity.Server;
+import com.wanda.portal.security.SecurityConfigCrowd;
+import com.wanda.portal.utils.ConversionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.Authentication;
@@ -15,23 +18,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import com.wanda.portal.config.biz.LdapConfig;
-import com.wanda.portal.dao.jpa.ServerRepository;
-import com.wanda.portal.dao.remote.JiraService;
-import com.wanda.portal.dto.common.CommonHttpResponseBody;
-import com.wanda.portal.entity.Server;
-import com.wanda.portal.security.SecurityConfigCrowd;
-import com.wanda.portal.utils.ConversionUtil;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 // @RequestMapping("/info")
 public class IndexController {
+	private static final Logger logger = LoggerFactory.getLogger(IndexController.class);
 	@Autowired
 	ServerRepository serverRepository;
 	@Autowired
@@ -49,7 +47,7 @@ public class IndexController {
 
 	@RequestMapping(value = "/login")
 	public String loginPage(Model model) {
-		System.out.println("------Current path:/login");
+		logger.info("------Current path:/login");
 		return "login";
 	}
 
@@ -64,6 +62,7 @@ public class IndexController {
         }
 		model.addAttribute("currentUser", ud);
 		list = serverRepository.findAll();
+		model.addAttribute("servers", list);
 		for (Server s : list) {
 			model.addAttribute(s.getServerType().toString() + "_SERVER",
 					ConversionUtil.Con2ServerOutputParam(s));
@@ -74,14 +73,14 @@ public class IndexController {
 
 	@RequestMapping("pages/{url}")
 	public String redirect(@PathVariable("url") String url) {
-		System.out.println("------Current path:/pages/" + url);
+		logger.info("------Current path:/pages/" + url);
 		return "pages/" + url;
 	}
 
 	@RequestMapping("/toLogin")
 	@ResponseBody
 	public CommonHttpResponseBody toLogin(Model model, @RequestBody User User) {
-		System.out.println("------Current path:/toLogin/" + User);
+		logger.info("------Current path:/toLogin/" + User);
 		CommonHttpResponseBody response = CommonHttpResponseBody.packSuccess();
 
 		try {
@@ -121,7 +120,7 @@ public class IndexController {
             return "redirect:/login";
         }
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		System.out.println("------Current path:/logout/");
+		logger.info("------Current path:/logout/");
 		if (auth != null){    
 			new SecurityContextLogoutHandler().logout(request, response, auth);
 		}

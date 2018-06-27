@@ -1,23 +1,5 @@
 package com.wanda.portal.dao.remote.impl;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wanda.portal.config.biz.JenkinsConfig;
@@ -25,14 +7,26 @@ import com.wanda.portal.constants.JenkinsConstants;
 import com.wanda.portal.dao.jpa.JenkinsProjectRepository;
 import com.wanda.portal.dao.remote.JenkinsService;
 import com.wanda.portal.dto.jenkins.JenkinsJobDTO;
-import com.wanda.portal.dto.svn.SubversionRepoDTO;
 import com.wanda.portal.entity.JenkinsProject;
-import com.wanda.portal.entity.SCMRepo;
 import com.wanda.portal.entity.Server;
 import com.wanda.portal.exception.JenkinsJobCreateFailureException;
 import com.wanda.portal.facade.model.input.JenkinsInputParam;
 import com.wanda.portal.utils.RestLogUtils;
 import com.wanda.portal.utils.RestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Primary
 @Service("JenkinsServiceImpl")
@@ -43,6 +37,8 @@ public class JenkinsServiceImpl implements JenkinsService {
     JenkinsConfig jenkinsConfig;
     @Autowired
     RestTemplate restTemplate;
+    @Autowired
+    JenkinsProjectRepository jenkinsProjectRepository;
 
     private Server server;
     
@@ -112,8 +108,6 @@ public class JenkinsServiceImpl implements JenkinsService {
                 + "=" + fromName;
     }
     
-    @Autowired
-    JenkinsProjectRepository jenkinsProjectRepository;
     @Override
     public List<JenkinsInputParam> fetchUnusedJekins() {
         List<JenkinsJobDTO> allJenkins = this.fetchAllJenkinsJobs();
@@ -156,6 +150,11 @@ public class JenkinsServiceImpl implements JenkinsService {
     @Override
     public Server getServer() {
         return this.server;
+    }
+
+    @Override
+    public void deleteByJenkinsId(Long jenkinsId) {
+        jenkinsProjectRepository.deleteById(jenkinsId);
     }
 
 }

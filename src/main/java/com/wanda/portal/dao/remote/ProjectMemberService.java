@@ -16,4 +16,12 @@ public interface ProjectMemberService {
      * @return {@link ProjectMember}
      */
     ProjectMember findByProjectMemberId(Long projectMemberId);
+
+    /**
+     * 根据项目成员ID删除成员
+     *
+     * @param projectMemberId 项目成员ID
+     */
+    void deleteByProjectMemberId(Long projectMemberId);
+
 }

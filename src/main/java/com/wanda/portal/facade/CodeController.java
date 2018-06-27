@@ -7,13 +7,16 @@ import com.wanda.portal.constants.ServerType;
 import com.wanda.portal.dao.AsyncTaskService;
 import com.wanda.portal.dao.jpa.ServerRepository;
 import com.wanda.portal.dao.remote.ProjectService;
+import com.wanda.portal.dao.remote.RepoService;
 import com.wanda.portal.dto.common.CommonHttpResponseBody;
 import com.wanda.portal.entity.Project;
 import com.wanda.portal.entity.Server;
 import com.wanda.portal.facade.model.input.ProjectInputParam;
 import com.wanda.portal.facade.model.input.ScmRepoInputParam;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -33,34 +36,70 @@ public class CodeController {
     AsyncTaskService asyncTaskService;
     @Autowired
     ServerRepository serverRepository;
+    @Autowired
+    RepoService repoService;
 
     @RequestMapping("/toList")
-    public String toList(Model model) {
+    public String toList(Model model, String projectId) {
         model.addAttribute("projects", projectService.findAll(PageRequest.of(0, 10)));
         model.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
+        model.addAttribute("projectId", projectId);
         return "code/toList";
     }
 
-    @RequestMapping(value = "/preview/{projectId}/{returnBtn}")
-    public String preview(Model model, @PathVariable("projectId") String projectId,
-                          @PathVariable("returnBtn") Boolean returnBtn) {
+    @RequestMapping("/remove")
+    @ResponseBody
+    public String remove(String repoId) {
+        if (StringUtils.isNotEmpty(repoId)) {
+           repoService.deleteByRepoId(Long.valueOf(repoId));
+        }
+        return "ok";
+    }
+
+    @RequestMapping(value="/switchType", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public List<Server> switchType(String repoType) {
+        return serverRepository.findByServerType(ServerType.find(RepoType.find(repoType)));
+    }
+
+    @RequestMapping(value="/switchServer", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public List<ScmRepoInputParam> switchServer(Long serverId, String repoType) {
+        Server server = serverRepository.findById(serverId).get();
+        return repoService.fetchScmByRepoType(server, RepoType.find(repoType));
+    }
+
+    @RequestMapping(value = "/preview/{projectId}")
+    public String preview(Model model, @PathVariable("projectId") String projectId, String backPath) {
         Project project = new Project();
         try {
-            project = projectService.getProjectById(Long.valueOf(projectId));
+            if (StringUtils.isNotEmpty(projectId)) {
+                project = projectService.getProjectById(Long.valueOf(projectId));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         model.addAttribute("project", project);
-        model.addAttribute("returnBtn", returnBtn);
+        model.addAttribute("backPath", backPath);
 
         return "code/toDetail";
     }
 
-    @RequestMapping("/toAdd/{returnBtn}")
-    public String toAdd(Model model, @PathVariable("returnBtn") Boolean returnBtn) {
+    @RequestMapping(value = "/toAdd")
+    public String toAdd(Model model, String projectId, String backPath) {
         setModelCommon(model);
         setCommonServerInfoAsync(model);
-        model.addAttribute("returnBtn", returnBtn);
+        Project project = new Project();
+        try {
+            if (StringUtils.isNotEmpty(projectId)) {
+                project = projectService.getProjectById(Long.valueOf(projectId));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        model.addAttribute("project", project);
+        model.addAttribute("backPath", backPath);
+
         return "code/toAdd";
     }
 

@@ -27,14 +27,14 @@ public class LdapIndexController {
 //	@GetMapping(value = "/idx")
 //	public String home(Model model, HttpSession session) {
 //	    UserDetails user = (UserDetails) session.getAttribute(SecurityConfigCrowd.SESSION_KEY);
-//	    System.out.println("User is = " + user);
-//	    System.out.println("whoamI? " + idConfig.getWhoami());
+//	    logger.info("User is = " + user);
+//	    logger.info("whoamI? " + idConfig.getWhoami());
 //        return "idx";
 //	}
  
 //    @GetMapping("/loginLdap")
 //    public String login(Model model, HttpSession session, @RequestParam(value = "error", required = false) String error) {
-//        System.out.println("entering into loginLdap");       
+//        logger.info("entering into loginLdap");
 //        if (error != null) {
 //            model.addAttribute("error", "用户名或密码错误");
 //        }

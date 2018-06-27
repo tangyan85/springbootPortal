@@ -4,17 +4,17 @@ myprops:
   whoami: uat # 环境
   confluence: # confluence相关
     username: admin
-    password: admin@123
+    password: admin@uat
     pureIp: conf-uat.wdjr.local
     urlHead: http://conf-uat.wdjr.local
   jenkins: # jenkins相关
-    username: admin
-    password: admin@123
+    username: guoliang34
+    password: 88888888
     pureIp: ci-uat.wdjr.local
     urlHead: http://ci-uat.wdjr.local
   jira: # jira相关
     username: admin
-    password: admin@123
+    password: admin@uat
     pureIp: jira-uat.wdjr.local
     urlHead: http://jira-uat.wdjr.local
   scm: # scm相关
@@ -24,8 +24,12 @@ myprops:
       pureIp: svn-uat.wdjr.local
       urlHead: https://svn-uat.wdjr.local:4434
   ldap: # ldap相关
-    enable: false
-    url: ldap://adlm-uat.wdjr.local:389/dc=wanda,dc=cn
+    enable: true
+    userDnPatterns: cn={0}
+    groupSearchBase: dc=wdjr
+    managerDn: cn=yyyy,dc=wdjr
+    managerPassword: yyyy@wdjr2018!@#
+    url: ldap://10.215.4.108:389/
   switch: #功能开关
     enableSso: true  
                         
@@ -43,7 +47,8 @@ spring:
 logging:
   level:
     root: ERROR
-    org.springframework.web: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
     org.hibernate: ERROR
     com.wanda.portal: INFO
   file: /var/log/portal.log

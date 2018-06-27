@@ -1,43 +1,31 @@
 package com.wanda.portal.dao.remote.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import com.wanda.portal.config.biz.ConfluenceConfig;
 import com.wanda.portal.constants.ConfluenceConstants;
 import com.wanda.portal.dao.jpa.ConfluenceSpaceRepository;
 import com.wanda.portal.dao.remote.ConfluenceService;
 import com.wanda.portal.dto.confluence.CreateConfluenceSpaceParamDTO;
 import com.wanda.portal.dto.confluence.GenericConfluenceSpaceDTO;
-import com.wanda.portal.dto.jenkins.JenkinsJobDTO;
 import com.wanda.portal.entity.ConfluenceSpace;
-import com.wanda.portal.entity.JenkinsProject;
 import com.wanda.portal.entity.Server;
 import com.wanda.portal.exception.ConfluenceSpaceCreateFailureException;
 import com.wanda.portal.facade.model.input.ConfluenceSpaceInputParam;
 import com.wanda.portal.utils.RestLogUtils;
 import com.wanda.portal.utils.RestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.*;
 
 @Primary
 @Service("ConfluenceSeviceImpl")
@@ -51,7 +39,7 @@ public class ConfluenceSeviceImpl implements ConfluenceService {
     RestTemplate restTemplate;
 
     private Server server;
-    
+
     /*
      * { "key" : "ZZRR", "name" : "打时空的金卡", "description": { "plain": {
      * "representation":"software-project", "value": "very good" } } }
@@ -78,6 +66,44 @@ public class ConfluenceSeviceImpl implements ConfluenceService {
                 LOGGER.info(RestLogUtils.packSuccHTTPLogs("ConfluenceSpace项目" + confluenceSpace + "创建", response));
                 JSONObject jb = JSONObject.parseObject(response.getBody());
                 String webui = jb.getJSONObject("homepage").getJSONObject("_links").getString("webui");
+                return confluenceConfig.getUrlHead() + webui;
+            } else {
+                LOGGER.error(RestLogUtils.packSuccHTTPLogs("ConfluenceSpace项目" + confluenceSpace + "创建", response));
+                throw new ConfluenceSpaceCreateFailureException("confluence create error!");
+            }
+        } catch (RestClientException e) {
+            LOGGER.error(
+                    "Failed to create confluence space due to rest errors, the error is: " + e.getLocalizedMessage());
+            throw new ConfluenceSpaceCreateFailureException("call confluence error!");
+        } catch (Exception ex) {
+            LOGGER.error(
+                    "Failed to create confluence space due to other errors, the error is: " + ex.getLocalizedMessage());
+            throw new ConfluenceSpaceCreateFailureException("call confluence error!");
+        }
+    }
+
+    @Override
+    public String findSpace(CreateConfluenceSpaceParamDTO confluenceSpace) throws Exception {
+        HttpHeaders headers =
+                RestUtils.packBasicAuthHeader(confluenceConfig.getUsername(), confluenceConfig.getPassword());
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        List<MediaType> accps = new ArrayList<>();
+        accps.add(MediaType.APPLICATION_JSON_UTF8);
+        headers.setAccept(accps);
+        Map<String, Object> confInputParam = packCreateConfluenceParam(confluenceSpace);
+
+        HttpEntity<String> requestEntity = new HttpEntity<String>(JSONObject.toJSONString(confInputParam), headers);
+        ResponseEntity<String> response;
+        try {
+            response =
+                    restTemplate.exchange(
+                            server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                                    + confluenceConfig.getGenericApi() + "/" + ConfluenceConstants.space + "/" + confluenceSpace.getKey(),
+                            HttpMethod.GET, requestEntity, String.class);
+            if (response.getStatusCode().is2xxSuccessful()) { // 创建成功
+                LOGGER.info(RestLogUtils.packSuccHTTPLogs("ConfluenceSpace项目" + confluenceSpace + "创建", response));
+                JSONObject jb = JSONObject.parseObject(response.getBody());
+                String webui = jb.getJSONObject("_links").getString("webui");
                 return confluenceConfig.getUrlHead() + webui;
             } else {
                 LOGGER.error(RestLogUtils.packSuccHTTPLogs("ConfluenceSpace项目" + confluenceSpace + "创建", response));
@@ -128,37 +154,51 @@ public class ConfluenceSeviceImpl implements ConfluenceService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<String>(headers);
         ResponseEntity<String> response = new ResponseEntity<>(HttpStatus.OK);
-        try {
-            response =
-                    restTemplate.exchange(
-                            server.getProtocol() + "://" + server.getOuterServerIpAndPort()
-                                    + confluenceConfig.getGenericApi() + "/" + ConfluenceConstants.space,
-                            HttpMethod.GET, request, String.class); // 轮询Confluence Space
-        } catch (Exception e) {
-            LOGGER.error("Query for all confluence spaces error: " + e);
-            return new ArrayList<GenericConfluenceSpaceDTO>();
-        }
-        if (response.getStatusCode().is2xxSuccessful()) { // 说明有Confluence Space
-            LOGGER.info("ConfluenceSpace列表轮询存在合法数据,HTTP返回状态码为: " + response.getStatusCode() + "HTTP返回body为: "
-                    + response.getBody());
+        List<GenericConfluenceSpaceDTO> result = new ArrayList<>();
+
+        String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + confluenceConfig.getGenericApi() + "/" + ConfluenceConstants.space + "?limit=100";
+        boolean next;
+
+        do {
+            next = false;
+
             try {
-                JSONObject jb = JSONObject.parseObject(response.getBody());
-                JSONArray re = jb.getJSONArray("results");
-                List<GenericConfluenceSpaceDTO> res =
-                        JSONObject.parseArray(re.toJSONString(), GenericConfluenceSpaceDTO.class);
-                LOGGER.info("获得的Confluence Space为：" + res);
-                return res;
+                // 轮询Confluence Space
+                response = restTemplate.exchange(url.trim(), HttpMethod.GET, request, String.class);
             } catch (Exception e) {
-                LOGGER.error("Query for all confluence spaces get 200, but parse json error: " + e);
-                return new ArrayList<GenericConfluenceSpaceDTO>();
+                LOGGER.error("Query for all confluence spaces error: " + e);
             }
-        } else {
-            LOGGER.error("ConfluenceSpace列表轮询不存在合法数据,HTTP返回状态码为: " + response.getStatusCode() + "HTTP返回body为: "
-                    + response.getBody());
-            return new ArrayList<GenericConfluenceSpaceDTO>();
-        }
+            // 说明有Confluence Space
+            if (response.getStatusCode().is2xxSuccessful()) {
+                LOGGER.info("ConfluenceSpace列表轮询存在合法数据,HTTP返回状态码为: {}, HTTP返回body为: {}"
+                        , response.getStatusCode(), response.getBody());
+                try {
+                    JSONObject jb = JSONObject.parseObject(response.getBody());
+                    JSONArray re = jb.getJSONArray("results");
+                    List<GenericConfluenceSpaceDTO> res =
+                            JSONObject.parseArray(re.toJSONString(), GenericConfluenceSpaceDTO.class);
+                    LOGGER.info("获得的Confluence Space为：" + res);
+                    result.addAll(res);
+
+                    Object baseObj = JSONPath.eval(jb, "$._links.base");
+                    Object nextObj = JSONPath.eval(jb, "$._links.next");
+                    if (baseObj != null && nextObj != null) {
+                        next = true;
+                        url = baseObj.toString() + nextObj.toString();
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("Query for all confluence spaces get 200, but parse json error: " + e);
+                }
+            } else {
+                LOGGER.error("ConfluenceSpace列表轮询不存在合法数据,HTTP返回状态码为: {}, HTTP返回body为: {}"
+                        ,response.getStatusCode(), response.getBody());
+            }
+        } while (next);
+
+        return result;
     }
-    
+
     @Autowired
     ConfluenceSpaceRepository confluenceSpaceRepository;
     @Override
@@ -182,7 +222,7 @@ public class ConfluenceSeviceImpl implements ConfluenceService {
 //        for (GenericConfluenceSpaceDTO conf : allConfs) {
 //            retConfs.add(conf.getConfluenceSpace());
 //        }
-        
+
         Set<String> usedConfSet = new HashSet<String>();
         for (ConfluenceSpace usd : usedConfs) {
             usedConfSet.add(usd.getSpaceKey());
@@ -203,5 +243,10 @@ public class ConfluenceSeviceImpl implements ConfluenceService {
     @Override
     public Server getServer() {
         return this.server;
+    }
+
+    @Override
+    public void deleteByConfluenceId(Long confluenceId) {
+        confluenceSpaceRepository.deleteById(confluenceId);
     }
 }

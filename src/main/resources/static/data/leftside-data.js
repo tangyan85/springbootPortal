@@ -42,8 +42,8 @@
                         iconClass: "fa fa-user",
                         nodes: [
                             {
-                                text: '新建项目成员',
-                                url: 'member/toAdd/false',
+                                text: '新增项目成员',
+                                url: 'member/toAdd',
                                 iconClass: "fa fa-circle-thin"
                             },
                             {
@@ -59,6 +59,16 @@
                         iconClass: "fa fa-sitemap",
                         nodes: [
                             {
+                                text: '新增Jira项目',
+                                url: 'task/toAdd',
+                                iconClass: "fa fa-circle-thin"
+                            },
+                            {
+                                text: '查询/维护Jira项目',
+                                url: '/task/toList',
+                                iconClass: "fa fa-circle-thin"
+                            },
+                            {
                                 text: '新建Jira任务',
                                 url: jiraUrlPrefix + '/secure/CreateIssue.jspa',
                                 iconClass: "fa fa-circle-thin"
@@ -66,17 +76,8 @@
                             {
                                 text: '查询任务',
                                 url: jiraUrlPrefix + '/issues/?jql=',
-                                iconClass: "fa fa-circle-thin"
-                            },
-                            {
-                                text: '新建Jira项目',
-                                url: 'task/toAdd/false',
-                                iconClass: "fa fa-circle-thin"
-                            },
-                            {
-                                text: '查询/维护Jira项目',
-                                url: '/task/toList',
-                                iconClass: "fa fa-circle-thin"
+                                iconClass: "fa fa-circle-thin",
+                                target: "_blank"
                             }
                         ]
                     },
@@ -86,6 +87,16 @@
                         iconClass: "fa fa-gears",
                         nodes: [
                             {
+                                text: '新增Confluence空间',
+                                url: 'doc/toAdd',
+                                iconClass: "fa fa-circle-thin"
+                            },
+                            {
+                                text: '查看/维护Confluence空间',
+                                url: 'doc/toList',
+                                iconClass: "fa fa-circle-thin"
+                            },
+                            {
                                 text: '新建Confluence页面',
                                 url: confUrlContext + '/pages/resumedraft.action?draftId=12582916&draftShareId=9e1062ec-fbeb-49e7-a798-74d9fa4e336d',
                                 iconClass: "fa fa-circle-thin"
@@ -93,33 +104,6 @@
                             {
                                 text: '查询文档',
                                 url: confUrlContext + '/spacedirectory/view.action',
-                                iconClass: "fa fa-circle-thin"
-                            },
-                            {
-                                text: '新建Confluence空间',
-                                url: 'doc/toAdd/false',
-                                iconClass: "fa fa-circle-thin"
-                            },
-                            {
-                                text: '查看/维护Confluence空间',
-                                url: 'doc/toList',
-                                iconClass: "fa fa-circle-thin"
-                            }
-                        ]
-                    },
-                    {
-                        text: '持续集成',
-                        href: '#parent4',
-                        iconClass: "fa fa-copy",
-                        nodes: [
-                            {
-                                text: '新建Jenkins Job',
-                                url: 'ci/toAdd/false',
-                                iconClass: "fa fa-circle-thin"
-                            },
-                            {
-                                text: '查看/维护Jenkins Job',
-                                url: 'ci/toList',
                                 iconClass: "fa fa-circle-thin"
                             }
                         ]
@@ -135,18 +119,18 @@
                                 iconClass: "fa fa-circle-thin"
                             },*/
                             {
-                                text: '代码库查询',
-                                url: svnLoginUrl + '#browse/browse',
-                                iconClass: "fa fa-circle-thin"
-                            },
-                            {
-                                text: '新建代码库',
-                                url: 'code/toAdd/false',
+                                text: '新增代码库',
+                                url: 'code/toAdd',
                                 iconClass: "fa fa-circle-thin"
                             },
                             {
                                 text: '查看/维护代码库',
                                 url: 'code/toList',
+                                iconClass: "fa fa-circle-thin"
+                            },
+                            {
+                                text: '代码库查询',
+                                url: svnLoginUrl + '#browse/browse',
                                 iconClass: "fa fa-circle-thin"
                             },
                             {
@@ -162,6 +146,23 @@
                             {
                                 text: '修改访问规则',
                                 url: svnLoginUrl + '/repo/editAuthorization',
+                                iconClass: "fa fa-circle-thin"
+                            }
+                        ]
+                    },
+                    {
+                        text: '持续集成',
+                        href: '#parent4',
+                        iconClass: "fa fa-copy",
+                        nodes: [
+                            {
+                                text: '新增Jenkins Job',
+                                url: 'ci/toAdd',
+                                iconClass: "fa fa-circle-thin"
+                            },
+                            {
+                                text: '运行/维护Jenkins Job',
+                                url: 'ci/toList',
                                 iconClass: "fa fa-circle-thin"
                             }
                         ]
@@ -229,8 +230,8 @@
                         href: '#parent5',
                         nodes: [
                             {
-                                text: '新建项目产出物',
-                                url: 'artifact/toAdd/false',
+                                text: '新增项目产出物',
+                                url: 'artifact/toAdd',
                                 iconClass: "fa fa-circle-thin"
                             },
                             {
@@ -313,8 +314,13 @@
 
                             nodes += '<li>';
                             nodes += '<a href="#" ';
+
                             if (typeof (node.url) != "undefined" && node.url != null) {
-                                nodes += ' data-url="' + node.url + '"';
+                                if (typeof (node.target) != "undefined" && node.target != null) {
+                                    nodes += ' onclick="window.open(\'' + node.url + '\',\'' + node.target + '\')"';
+                                } else {
+                                    nodes += ' data-url="' + node.url + '"';
+                                }
                             }
                             nodes += '> <i ';
                             if (typeof (node.iconClass) != "undefined" && node.iconClass != null) {

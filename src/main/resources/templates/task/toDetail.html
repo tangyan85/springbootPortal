@@ -2,64 +2,64 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="section/header :: head"></head>
+<link rel="stylesheet" th:href="@{/assets/css/ace.min.css}" th:if="${backPath != null}"/>
 
-<body>
-<div class="row" th:style="'display:'+ @{${returnBtn} ? 'block' : 'none'}+''">
+<body style="background: #ffffff">
+<div class="row" th:style="'display:'+ @{${backPath != null} ? 'block' : 'none'}+''">
     <div class="col-md-2">
         <p style="margin: 10px 0px 5px 15px;">
-            <button type="button" class="btn btn-block btn-success" onclick="window.history.go(-1)">
+            <button type="button" class="btn btn-block btn-success"
+                    th:onclick="'showPart(\'/project/toList?projectId='+${projectId}+'\')'">
                 <i class="fa fa-arrow-circle-o-left">返回</i>
             </button>
         </p>
     </div>
 </div>
 
-<div class="row" th:style="@{${returnBtn} ? 'margin: 5px 5px 5px 5px;' : ''}">
+<div class="row" th:style="@{${backPath != null} ? 'margin: 5px 5px 5px 5px;' : ''}">
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title">
                     <span class="glyphicon glyphicon-tasks" style="color:#f44336;"></span>&nbsp;任务跟踪</h3>
+
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool"
+                            th:onclick="'showPart(\'/task/toAdd?projectId='+*{project.projectId}+'&backPath=/task/toList?projectId='+*{project.projectId}+'\')'">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" onclick="removeTask()">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </div>
             </div>
             <!-- /.box-header -->
             <div class="box-body no-padding">
-                <tr th:each="jira : ${project.jiraProjects}" th:object="${jira}">
-                    <td>
-                    <td>
-                        <ul class="products-list product-list-in-box">
-                            <li class="item">Jira项目英文简称
-                                <a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
-                                    <span class="pull-right" th:text="*{jiraProjectKey}"></span></a>
-                            </li>
-                            <li class="item">任务情况<span class="pull-right">任务总数（<label class="text-blue">10</label>）&nbsp;/&nbsp;已完成（<label
-                                    class="text-green">5</label>）</span></a>
-                            </li>
-                            <li class="item">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        版本信息
-                                        <!-- ./chart-responsive -->
-                                    </div>
-                                    <!-- /.col -->
-                                    <div class="col-md-4">
-                                        <ul class="chart-legend clearfix pull-right">
-                                            <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.3
-                                                <small class="label-primary" style="margin-left: 30px;">归档</small>
-                                            </li>
-                                            <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.2
-                                                <small class="label-danger" style="margin-left: 30px;">未发布</small>
-                                            </li>
-                                            <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.1
-                                                <small class="label-info" style="margin-left: 30px;">已发布</small>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <!-- /.col -->
-                                </div>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
+                <input id="delTask" type="hidden" value=""/>
+                <table class="table table-hover" id="task-table">
+                    <tr>
+                        <th>Jira项目英文简称</th>
+                        <th>任务情况</th>
+                        <th>版本信息</th>
+                    </tr>
+                    <tr th:each="jira : ${project.jiraProjects}" th:object="${jira}" th:data="*{jiraProjectId}">
+                        <td><a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
+                                <span th:text="*{jiraProjectKey}"></span></a></td>
+                        <td>任务总数（<label class="text-blue">10</label>）&nbsp;/&nbsp;已完成（<label class="text-green">5</label>）</td>
+                        <td>
+                            <ul class="chart-legend clearfix">
+                                <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.3
+                                    <small class="label-primary" style="margin-left: 30px;">归档</small>
+                                </li>
+                                <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.2
+                                    <small class="label-danger" style="margin-left: 30px;">未发布</small>
+                                </li>
+                                <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.1
+                                    <small class="label-info" style="margin-left: 30px;">已发布</small>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
                 </table>
             </div>
             <!-- /.box-footer -->
@@ -69,7 +69,7 @@
 
 </div>
 
-<div class="row" th:style="@{${returnBtn} ? 'margin: 5px 5px 5px 5px;' : ''}">
+<div class="row" th:style="@{${backPath != null} ? 'margin: 5px 5px 5px 5px;' : ''}">
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
@@ -124,7 +124,7 @@
 
 </div>
 
-<div class="row" th:style="@{${returnBtn} ? 'margin: 5px 5px 5px 5px;' : ''}">
+<div class="row" th:style="@{${backPath != null} ? 'margin: 5px 5px 5px 5px;' : ''}">
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
@@ -133,8 +133,10 @@
             </div>
             <!-- /.box-header -->
             <div class="box-body table-responsive no-padding">
-                <h4 style="display: inline;vertical-align:middle;">版本 0.3</h4><small class="label" style="background-color:#f6c342;margin-left: 10px">未发布</small>
-                <p class="text-muted" style="height:30px;line-height:30px;"><i class="fa fa-calendar-check-o"></i>开始：30/四月/18<span style="margin-left: 20px">发布：25/五月/18</span></p>
+                <h4 style="display: inline;vertical-align:middle;">版本 0.3</h4>
+                <small class="label" style="background-color:#f6c342;margin-left: 10px">未发布</small>
+                <p class="text-muted" style="height:30px;line-height:30px;"><i class="fa fa-calendar-check-o"></i>开始：30/四月/18<span
+                        style="margin-left: 20px">发布：25/五月/18</span></p>
                 <p style="height:30px;line-height:30px;">集成版本</p>
             </div>
             <!-- /.box-footer -->
@@ -144,19 +146,24 @@
                     <ul class="nav nav-tabs">
                         <li class="active"><a href="#tab_1" data-toggle="tab">
                             <span style="display: inline-block;font-size: 40px;">0</span>
-                            <span style="display: inline-block;line-height: 1.3;margin-left: 5px;"> <br> 警告</span></a></li>
+                            <span style="display: inline-block;line-height: 1.3;margin-left: 5px;"> <br> 警告</span></a>
+                        </li>
                         <li><a href="#tab_2" data-toggle="tab">
                             <span style="display: inline-block;font-size: 40px;">1</span>
-                            <span style="display: inline-block;line-height: 1.3;margin-left: 5px;">当前版本 <br> 个问题</span></a></li>
+                            <span style="display: inline-block;line-height: 1.3;margin-left: 5px;">当前版本 <br> 个问题</span></a>
+                        </li>
                         <li><a href="#tab_3" data-toggle="tab">
                             <span style="color:#14892c; display: inline-block;font-size: 40px;">1</span>
-                            <span style="display: inline-block;line-height: 1.3;margin-left: 5px;">问题 <br> 已完成</span></a></li>
+                            <span style="display: inline-block;line-height: 1.3;margin-left: 5px;">问题 <br> 已完成</span></a>
+                        </li>
                         <li><a href="#tab_4" data-toggle="tab">
                             <span style="color:#ffd351; display: inline-block;font-size: 40px;">0</span>
-                            <span style="display: inline-block;line-height: 1.3;margin-left: 5px;">问题 <br> 正在处理</span></a></li>
+                            <span style="display: inline-block;line-height: 1.3;margin-left: 5px;">问题 <br> 正在处理</span></a>
+                        </li>
                         <li><a href="#tab_5" data-toggle="tab">
                             <span style="color:#4a6785; display: inline-block;font-size: 40px;">0</span>
-                            <span style="display: inline-block;line-height: 1.3;margin-left: 5px;">问题 <br> 待处理</span></a></li>
+                            <span style="display: inline-block;line-height: 1.3;margin-left: 5px;">问题 <br> 待处理</span></a>
+                        </li>
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane active" id="tab_1">
@@ -208,14 +215,74 @@
                         </div>
                         <!-- /.tab-pane -->
                     </div>
+                </div>
             </div>
+
         </div>
-
     </div>
-
 </div>
 
-<script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    jQuery(function ($) {
+        $("#task-table tr").not(":eq(0)").click(function () {
+            $("#task-table tr").removeAttr("style");
+            $(this).attr("style", "background-color: #ebf2f9;");
+            $("#delTask").val($(this).attr("data"));
+        });
+
+    });
+
+    function removeTask() {
+        let value = $("#delTask").val();
+        let projectId = /*[[${project.projectId}]]*/ null;
+
+        if (value === "") {
+            jQuery.alert({
+                type: 'blue',
+                title: '系统提示',
+                content: "请选择需要删除的Jira项目！",
+                icon:'glyphicon glyphicon-info-sign'
+            });
+        } else {
+            jQuery.confirm({
+                title: '系统提示',
+                content: '确认要删除吗？',
+                type: 'blue',
+                icon:'glyphicon glyphicon-question-sign',
+                buttons: {
+                    ok: {
+                        text: '确认',
+                        btnClass: 'btn-primary',
+                        action: function(){
+                            $.ajax({
+                                type: "POST",
+                                url: "/task/remove",
+                                data: {"jiraId": value},
+                                success: function(data){
+                                    if (data != null) {
+                                        showDetail(projectId);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    cancel: {
+                        text: '取消',
+                        btnClass: 'btn-primary',
+                        action: function(){
+
+                        }
+                    },
+                }
+            });
+        }
+    }
+
+    function showPart(url) {
+        $("#mainframe", parent.document.body).attr("src", url);
+    }
+
     function showIframe(url) {
         layer.open({
             type: 2,
@@ -225,6 +292,8 @@
             content: url
         });
     }
+
+    /*]]>*/
 </script>
 </body>
 

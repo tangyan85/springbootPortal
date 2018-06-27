@@ -1,12 +1,24 @@
 package com.wanda.portal.test;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
+import com.alibaba.fastjson.JSONObject;
+import com.wanda.portal.RootApplication;
+import com.wanda.portal.config.biz.ConfluenceConfig;
+import com.wanda.portal.config.biz.IdConfig;
+import com.wanda.portal.config.biz.JenkinsConfig;
+import com.wanda.portal.config.biz.JiraConfig;
+import com.wanda.portal.constants.InputActionType;
+import com.wanda.portal.constants.RepoType;
+import com.wanda.portal.constants.ServerType;
+import com.wanda.portal.dao.AsyncTaskService;
+import com.wanda.portal.dao.jpa.*;
+import com.wanda.portal.dao.remote.*;
+import com.wanda.portal.dto.confluence.GenericConfluenceSpaceDTO;
+import com.wanda.portal.dto.jenkins.JenkinsJobDTO;
+import com.wanda.portal.dto.jira.GenericJiraProjectDTO;
+import com.wanda.portal.dto.svn.SubversionRepoDTO;
+import com.wanda.portal.entity.*;
+import com.wanda.portal.facade.ProjectController;
+import com.wanda.portal.facade.model.input.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,46 +29,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.ui.Model;
 import org.springframework.validation.support.BindingAwareModelMap;
 import org.springframework.web.client.RestTemplate;
-import com.alibaba.fastjson.JSONObject;
-import com.wanda.portal.RootApplication;
-import com.wanda.portal.config.biz.ConfluenceConfig;
-import com.wanda.portal.config.biz.IdConfig;
-import com.wanda.portal.config.biz.JenkinsConfig;
-import com.wanda.portal.config.biz.JiraConfig;
-import com.wanda.portal.constants.InputActionType;
-import com.wanda.portal.constants.ProjectMemberRole;
-import com.wanda.portal.constants.RepoType;
-import com.wanda.portal.constants.ServerType;
-import com.wanda.portal.dao.AsyncTaskService;
-import com.wanda.portal.dao.jpa.ConfluenceSpaceRepository;
-import com.wanda.portal.dao.jpa.JenkinsProjectRepository;
-import com.wanda.portal.dao.jpa.JiraProjectRepository;
-import com.wanda.portal.dao.jpa.ProjectMemberRepository;
-import com.wanda.portal.dao.jpa.ProjectRepository;
-import com.wanda.portal.dao.jpa.SCMRepoRepository;
-import com.wanda.portal.dao.jpa.ServerRepository;
-import com.wanda.portal.dao.remote.ConfluenceService;
-import com.wanda.portal.dao.remote.JenkinsService;
-import com.wanda.portal.dao.remote.JiraService;
-import com.wanda.portal.dao.remote.ProjectService;
-import com.wanda.portal.dao.remote.RepoService;
-import com.wanda.portal.dto.confluence.GenericConfluenceSpaceDTO;
-import com.wanda.portal.dto.jenkins.JenkinsJobDTO;
-import com.wanda.portal.dto.jira.GenericJiraProjectDTO;
-import com.wanda.portal.dto.svn.SubversionRepoDTO;
-import com.wanda.portal.entity.ConfluenceSpace;
-import com.wanda.portal.entity.JenkinsProject;
-import com.wanda.portal.entity.JiraProject;
-import com.wanda.portal.entity.Project;
-import com.wanda.portal.entity.ProjectMember;
-import com.wanda.portal.entity.SCMRepo;
-import com.wanda.portal.entity.Server;
-import com.wanda.portal.facade.ProjectController;
-import com.wanda.portal.facade.model.input.ConfluenceSpaceInputParam;
-import com.wanda.portal.facade.model.input.JenkinsInputParam;
-import com.wanda.portal.facade.model.input.JiraProjectInputParam;
-import com.wanda.portal.facade.model.input.ProjectInputParam;
-import com.wanda.portal.facade.model.input.ScmRepoInputParam;
+
+import java.util.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = RootApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -245,7 +219,7 @@ public class TestCase3 {
         Model model = new BindingAwareModelMap();
         pj.fetchAllConfluences(model);
         pj.fetchAllJenkinses(model);
-        pj.fetchAllJiras(model);
+        pj.fetchAllJiras(model, null);
         pj.fetchAllSvnAndTemplates(model);
         System.out.println(JSONObject.toJSONString(model));
         Long t2 = System.currentTimeMillis();
@@ -259,14 +233,14 @@ public class TestCase3 {
     public void testFetchAllTogether() {
         Long t1 = System.currentTimeMillis();
         Model model1 = new BindingAwareModelMap();
-        pj.setCommonServerInfo(model1);
+        pj.setCommonServerInfo(model1, null);
         //System.out.println(JSONObject.toJSONString(model1));
         Long t2 = System.currentTimeMillis();
         System.out.println("Serial time is " + (t2 - t1) + "ms");
         
         Long t3 = System.currentTimeMillis();
         Model model2 = new BindingAwareModelMap();
-        pj.setCommonServerInfoAsync(model2);
+        pj.setCommonServerInfoAsync(model2, null);
         //System.out.println(JSONObject.toJSONString(model));
         Long t4 = System.currentTimeMillis();
         System.out.println("Async time is " + (t4 - t3) + "ms");
@@ -432,7 +406,7 @@ public class TestCase3 {
     public void fetchUnusedJiraProject() {
         List<Server> jiraServers = serverRepository.findByServerType(ServerType.JIRA); // 先从db获取confluence的所有Server
         jiraService.setServer(jiraServers.get(0));
-        List<GenericJiraProjectDTO> allJiras = jiraService.fetchAllJiraProjects();
+        List<GenericJiraProjectDTO> allJiras = jiraService.fetchAllJiraProjects(null);
         List<JiraProject> usedJiras = jiraProjectRepository.findAll();
         List<JiraProjectInputParam> retJiras = new ArrayList<>();
         Long t1 = System.currentTimeMillis();

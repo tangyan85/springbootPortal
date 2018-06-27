@@ -24,4 +24,9 @@ public class ProjectMemberImpl implements ProjectMemberService {
     public ProjectMember findByProjectMemberId(Long projectMemberId) {
         return projectMemberRepository.getOne(projectMemberId);
     }
+
+    @Override
+    public void deleteByProjectMemberId(Long projectMemberId) {
+        projectMemberRepository.deleteById(projectMemberId);
+    }
 }

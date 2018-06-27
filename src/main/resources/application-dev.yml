@@ -25,7 +25,11 @@ myprops:
       urlHead: https://svn-uat.wdjr.local:4434
   ldap: # ldap相关
     enable: true
-    url: ldap://adlm-uat.wdjr.local:389/dc=wanda,dc=cn
+    userDnPatterns: cn={0}
+    groupSearchBase: dc=wdjr
+    managerDn: cn=yyyy,dc=wdjr
+    managerPassword: yyyy@wdjr2018!@#
+    url: ldap://10.215.4.108:389/
   switch: #功能开关
     enableSso: true
       
@@ -46,7 +50,7 @@ logging:
   level:
     root: ERROR
     org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
     org.hibernate: DEBUG
     com.wanda.portal: INFO
   file: C:/Log/portal.log
-  

@@ -1,12 +1,13 @@
 package com.wanda.portal.dao.remote;
 
-import java.util.List;
-
 import com.wanda.portal.dto.jira.GenericJiraProjectDTO;
 import com.wanda.portal.dto.jira.JiraInputDTO;
 import com.wanda.portal.dto.jira.JiraOutputDTO;
 import com.wanda.portal.entity.Server;
 import com.wanda.portal.facade.model.input.JiraProjectInputParam;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.List;
 
 public interface JiraService {
 
@@ -24,17 +25,19 @@ public interface JiraService {
      * */
     boolean checkIfJiraProjectExist(String jiraKey) throws Exception;
 
-    List<GenericJiraProjectDTO> fetchAllJiraProjects();
+    List<GenericJiraProjectDTO> fetchAllJiraProjects(UserDetails user);
 
     /**
      * 根据jirakey进行过滤
      * @return
      */
-	List<JiraProjectInputParam> fetchUnusedJiraProject();
+	List<JiraProjectInputParam> fetchUnusedJiraProject(UserDetails user);
 
 	String loginJira(String username, String password) throws Exception;
 
     void setServer(Server server);
     
     Server gerServer();
+
+    void deleteByJiraId(Long jiraId);
 }

@@ -33,6 +33,6 @@ public class PageUtil {
 	}
 //
 //	public static void main(String[] args) {
-//		System.out.println(calEndIndex(7, 5, 31));
+//		logger.info(calEndIndex(7, 5, 31));
 //	}
 }

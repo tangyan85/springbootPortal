@@ -1,13 +1,6 @@
 package com.wanda.portal.security;
 
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.atlassian.crowd.exception.ApplicationAccessDeniedException;
-import com.atlassian.crowd.exception.ApplicationPermissionException;
-import com.atlassian.crowd.exception.ExpiredCredentialException;
-import com.atlassian.crowd.exception.InactiveAccountException;
-import com.atlassian.crowd.exception.InvalidAuthenticationException;
-import com.atlassian.crowd.exception.OperationFailedException;
+import com.atlassian.crowd.exception.*;
 import com.atlassian.crowd.integration.http.CrowdHttpAuthenticator;
 import com.atlassian.crowd.integration.springsecurity.RemoteCrowdAuthenticationProvider;
 import com.atlassian.crowd.integration.springsecurity.user.CrowdUserDetailsService;
@@ -16,6 +9,11 @@ import com.atlassian.crowd.service.client.CrowdClient;
 import com.wanda.portal.constants.SM4;
 import com.wanda.portal.utils.RedisUtil;
 import com.wanda.portal.utils.sm4.SM4Crypter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 /**
  * 记录密码时候，对RemoteCrowdAuthenticationProvider不做任何修改
  * @author tangyan21
@@ -23,6 +21,8 @@ import com.wanda.portal.utils.sm4.SM4Crypter;
  */
 public class CrowdAuthenticationProviderExt extends
 		RemoteCrowdAuthenticationProvider {
+	private static final Logger logger = LoggerFactory.getLogger(CrowdAuthenticationProviderExt.class);
+
 	@Autowired
 	private RedisUtil redisUtil;
 
@@ -41,11 +41,11 @@ public class CrowdAuthenticationProviderExt extends
 		final String EncodePsw = SM4Crypter.encrypt(password,SM4.SM4_KEY, SM4.SM4_IV);
 		
 		redisUtil.set(SM4.PASSWORD_PREFIX+username, EncodePsw);
-		System.out.println(username+" has stored in redis;");
+		logger.info(username+" has stored in redis;");
 		
 		//String value = redisUtil.get(SM4.PASSWORD_PREFIX+username);
 		//final String decodePsw = SM4Crypter.decrypt(value, SM4.SM4_KEY, SM4.SM4_IV);
-		//System.out.println(username+":"+decodePsw);
+		//logger.info(username+":"+decodePsw);
 		return super.authenticate(username, password, validationFactors);
 	}
 }

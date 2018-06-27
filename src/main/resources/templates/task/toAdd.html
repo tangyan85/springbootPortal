@@ -8,25 +8,25 @@
 
 <body style="background: #ffffff">
 <div th:fragment="dashboard">
-    <div class="row" th:style="'display:'+ @{${returnBtn} ? 'block' : 'none'}+''">
+    <div class="row" th:style="'display:'+ @{${backPath != null} ? 'block' : 'none'}+''">
         <div class="col-md-2">
             <p style="margin: 10px 0px 5px 15px;">
-                <button type="button" class="btn btn-block btn-success" onclick="window.history.go(-1)">
+                <button type="button" class="btn btn-block btn-success" th:onclick="'showPart(\''+${backPath}+'\')'">
                     <i class="fa fa-arrow-circle-o-left">返回</i>
                 </button>
             </p>
         </div>
     </div>
 
-    <section class="content-header" th:style="'display:'+ @{${returnBtn} ? 'none' : 'block'}+''">
+    <section class="content-header" th:style="'display:'+ @{${backPath != null} ? 'none' : 'block'}+''">
         <h1>
-            新建Jira项目
+            新增Jira项目
             <small>preview</small>
         </h1>
         <ol class="breadcrumb" style="margin:0px;">
             <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
             <li><a href="#">任务跟踪</a></li>
-            <li class="active">新建Jira项目</li>
+            <li class="active">新增Jira项目</li>
         </ol>
     </section>
 
@@ -45,8 +45,11 @@
                             <div class="col-md-3">
                                 <h3 class="lighter block green">选择项目</h3>
                                 <div class="form-group">
-                                    <select class="form-control select2" id="projectId" name="projectId">
+                                    <select class="form-control select2" id="projectId" name="projectId" th:if="${project.projectId eq null}">
                                         <option value="">------请选择------</option>
+                                    </select>
+                                    <select class="form-control select2" id="projectId" name="projectId" th:if="${project.projectId ne null}">
+                                        <option th:value="${project.projectId}" th:text="${project.projectName}"></option>
                                     </select>
                                 </div>
                             </div>
@@ -56,7 +59,7 @@
                         <div class="widget-body">
                             <div class="widget-main">
 
-                                <h3 class="lighter block green">填写下列信息</h3>
+                                <h3 class="lighter block green">创建/关联Jira项目</h3>
                                 <div class="form-group fg2">
                                     <label for="inputActionType"
                                            class="col-xs-12 col-sm-3 control-label no-padding-right">操作类型</label>
@@ -81,10 +84,10 @@
 
                                     <div class="col-xs-12 col-sm-5">
                                         <span class="block input-icon input-icon-right">
-                                            <select class="width-100 select2" id="serverId" name="serverId">
+                                            <select class="width-100 select2 jiraServer" id="serverId" name="serverId">
                                                 <option value="">------请选择------</option>
                                                 <option th:each="ip : ${serverIPs}" th:value="${ip.serverId}"
-                                                        th:text="${ip.outerServerIpAndPort}"
+                                                        th:text="${ip.domain}"
                                                         th:remove="${#strings.equalsIgnoreCase(ip.serverType, 'jira')}? none:all"/>
                                             </select>
                                         </span>
@@ -102,7 +105,8 @@
                                                 <option value="">------请选择------</option>
                                                 <option th:each="jira : ${existJiras}"
                                                         th:value="${jira.referJiraId}"
-                                                        th:text="${jira.jiraProjectName}"/>
+                                                        th:data="${jira.jiraProjectKey}"
+                                                        th:text="|${jira.jiraProjectName} [${jira.jiraProjectKey}]|"/>
                                             </select>
                                         </span>
                                     </div>
@@ -160,7 +164,7 @@
 
                                 <div class="form-group fg2">
                                     <label for="jiraProjectName"
-                                           class="col-xs-12 col-sm-3 control-label no-padding-right">Jira项目名称</label>
+                                           class="col-xs-12 col-sm-3 control-label no-padding-right">Jira项目中文称</label>
 
                                     <div class="col-xs-12 col-sm-5">
                                         <span class="block input-icon input-icon-right">
@@ -222,8 +226,6 @@
 
 <script type="text/javascript">
     jQuery(function ($) {
-        $('.select2').not(':eq(0)').select2({width: '100%', minimumResultsForSearch: Infinity});
-
         $('#projectId').select2({
             width: '100%',
             dataType: 'json',
@@ -253,14 +255,20 @@
 
         $("#finished").click(function () {
             if (!$('#validation-form').valid()) {
+                jQuery.alert({
+                    type: 'blue',
+                    title: '系统提示',
+                    content: "表单验证不通过！",
+                    icon:'glyphicon glyphicon-info-sign'
+                });
                 return;
             }
             btnSumbit();
         });
 
         jQuery.validator.addMethod("projectKey", function (value, element) {
-            return this.optional(element) || /^[a-zA-Z-_]+$/.test(value);
-        }, "只支持字母和-_");
+            return this.optional(element) || /^[a-zA-Z\d]+$/.test(value);
+        }, "只支持大小写字母和数字");
 
         jQuery.validator.addMethod("projectName", function (value, element) {
             return this.optional(element) || /^[a-zA-Z\d\u4e00-\u9fa5]+$/.test(value);
@@ -310,7 +318,7 @@
                     rangelength: "长度为2~16个字符"
                 },
                 jiraProjectName: {
-                    required: "请输入有效的Jira项目名称",
+                    required: "请输入有效的Jira项目中文名称",
                     rangelength: "长度为2~25个字符"
                 },
                 jiraProjectDescription: {
@@ -362,7 +370,7 @@
 
             jsonData["projectId"] = $("#projectId").val();
 
-            $(".bs-example").find("input,textarea,select").each(function () {
+            $(".widget-main").find("input,textarea,select").each(function () {
                 var ingore = $(this).data("ingore");
                 if (!ingore) {
                     jiraStepData[this.name] = $(this).val();
@@ -397,15 +405,21 @@
                             data: jsondata,
                             success: function (msg) {
                                 if (msg.responseCode == "0000") {
-                                    jQuery.alert(successMsg);
-                                    let returnBtn = /*[[${returnBtn}]]*/ false;
-                                    let url = "task/toList";
-                                    if (returnBtn) {
-                                        url = "project/toList";
-                                    }
-                                    $("#mainframe", parent.document.body).attr("src", url);
+                                    jQuery.alert({
+                                        type: 'blue',
+                                        title: '系统提示',
+                                        content: successMsg,
+                                        icon:'glyphicon glyphicon-info-sign'
+                                    });
+                                    let backPath = /*[[${backPath}]]*/ false;
+                                    $("#mainframe", parent.document.body).attr("src", backPath);
                                 } else {
-                                    jQuery.alert("错误: " + msg.responseMsg);
+                                    jQuery.alert({
+                                        type: 'blue',
+                                        title: '系统提示',
+                                        content: "错误: " + msg.responseMsg,
+                                        icon:'glyphicon glyphicon-info-sign'
+                                    });
                                 }
                             }
                         });
@@ -424,41 +438,65 @@
         jQuery("#selectJira").get(0).options[0].selected = true;
         jQuery("#teamleader").val(teamleader);
         if (action == "REMOTE_CREATE") { //导入
-            jQuery("#jiraProjectKey").val($("#projectKey").val());
-            jQuery("#jiraProjectName").val($("#projectName").val());
-        } else if (action == "-1") {
-            jQuery("div[data-step='3']").find(".selectChange").each(function () {
+            jQuery("#jiraProjectKey").attr("disabled", false).val('');
+            jQuery("#jiraProjectName").attr("disabled", false).val('');
+        } else if (action == "") {
+            jQuery(".widget-main").find(".selectChange").each(function () {
                 jQuery(this).val('');
             });
         } else { //创建
-            jQuery("div[data-step='3']").find(".selectChange").each(function () {
+            jQuery("#jiraProjectKey").attr("disabled", true);
+            jQuery("#jiraProjectName").attr("disabled", true);
+            jQuery(".widget-main").find(".selectChange").each(function () {
+                jQuery(this).val('');
                 jQuery(this).val('');
             });
         }
     });
 
     $(document).on("change", ".selectJira", function () {
-        var index = $(this).children('option:selected').index();
         var value = $(this).children('option:selected').val();
-        index--;
-        var action = jQuery("div[data-step='3']").find(".actionJira").children('option:selected').val();
-        jQuery("div[data-step='3']").find("#referJiraId").val(value);
+        var action = jQuery(".widget-main").find(".actionJira").children('option:selected').val();
+        jQuery(".widget-main").find("#referJiraId").val(value);
         debugger;
 
-        var oo = /*[[${existJiras}]]*/ null;
-        var jira = oo[index];
-        if (!isEmpty(jira)) {
-            if ("ATTACH_OLD" == action) {
-                jQuery("div[data-step='3']").find("input,textarea").each(function () {
-                    jQuery(this).val(jira[this.id]);
-                });
-            }
+        if ("ATTACH_OLD" == action) {
+            jQuery("#jiraProjectKey").val(jQuery(this).children('option:selected').attr("data"));
+            let jiraProjectName = jQuery(this).children('option:selected').text();
+            jQuery("#jiraProjectName").val(jiraProjectName.substring(0, jiraProjectName.lastIndexOf('[')));
         } else {
-            jQuery("div[data-step='3']").find(".selectChange").each(function () {
+            jQuery(".widget-main").find(".selectChange").each(function () {
                 jQuery(this).val('');
             });
         }
     });
+
+    $(document).on("change", ".jiraServer", function () {
+        let serverId = $(this).children('option:selected').val();
+
+        debugger;
+
+        if (serverId !== "") {
+            $.ajax({
+                type: "POST",
+                url: "/task/switchServer",
+                data: {"serverId": serverId},
+                success: function(data){
+                    if (data != null) {
+                        let html = '<option value="">------请选择------</option>';
+                        for (let i = 0; i < data.length; i++) {
+                            html += '<option value="' + data[i].referJiraId + '" data="'+data[i].jiraProjectKey+'">' + data[i].jiraProjectName + '[' + data[i].jiraProjectKey + ']' +'</option>';
+                        }
+                        $("#selectJira").html(html);
+                    }
+                }
+            });
+        }
+    });
+
+    function showPart(url) {
+        $("#mainframe", parent.document.body).attr("src", url);
+    }
 
     /*]]>*/
 </script>

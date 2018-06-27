@@ -1,34 +1,27 @@
 package com.wanda.portal.utils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-
 import com.wanda.portal.constants.Constants;
 import com.wanda.portal.constants.InputActionType;
-import com.wanda.portal.constants.RepoProtocol;
 import com.wanda.portal.constants.RepoType;
-import com.wanda.portal.constants.ServerType;
 import com.wanda.portal.dto.confluence.GenericConfluenceSpaceDTO;
+import com.wanda.portal.dto.git.GitRepoDTO;
 import com.wanda.portal.dto.jenkins.JenkinsJobDTO;
 import com.wanda.portal.dto.jira.GenericJiraProjectDTO;
 import com.wanda.portal.dto.svn.SubversionRepoDTO;
 import com.wanda.portal.dto.svn.SvnTemplateDTO;
-import com.wanda.portal.entity.ConfluenceSpace;
-import com.wanda.portal.entity.JenkinsProject;
-import com.wanda.portal.entity.JiraProject;
-import com.wanda.portal.entity.Project;
-import com.wanda.portal.entity.SCMRepo;
-import com.wanda.portal.entity.Server;
+import com.wanda.portal.entity.*;
 import com.wanda.portal.facade.model.input.ConfluenceSpaceInputParam;
 import com.wanda.portal.facade.model.input.JenkinsInputParam;
 import com.wanda.portal.facade.model.input.JiraProjectInputParam;
 import com.wanda.portal.facade.model.input.ScmRepoInputParam;
 import com.wanda.portal.facade.model.output.ServerOutputParam;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 对象转换工具类
@@ -280,6 +273,20 @@ public class ConversionUtil {
 			outputDto.setRepoRemoteId(inputDto.getId());
 
 			// outputDto.setRemark(JSON.toJSONString(inputDto));
+		}
+		return outputDto;
+	}
+
+	public static ScmRepoInputParam Con2SCMRepo(GitRepoDTO inputDto) {
+		ScmRepoInputParam outputDto = new ScmRepoInputParam();
+		if (inputDto != null) {
+			if (StringUtils.isNotEmpty(inputDto.getName())) {
+				outputDto.setRepoName(inputDto.getName());
+			}
+			if (null != outputDto.getRepoType()) {
+				outputDto.setRepoType(RepoType.GIT);
+			}
+			outputDto.setRepoRemoteId(inputDto.getId());
 		}
 		return outputDto;
 	}

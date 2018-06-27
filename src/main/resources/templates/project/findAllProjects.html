@@ -105,7 +105,12 @@
 										if (msg.responseCode == "0000") {
 											$("#mainframe", parent.document.body).attr("src", "project/findAllProjects/end");
 										} else {
-											jQuery.alert("错误: " + msg.responseMsg);
+                                            jQuery.alert({
+                                                type: 'blue',
+                                                title: '系统提示',
+                                                content: "错误: " + msg.responseMsg,
+                                                icon:'glyphicon glyphicon-info-sign'
+                                            });
 										}
 									}
 								});

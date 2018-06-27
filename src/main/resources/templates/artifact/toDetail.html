@@ -2,34 +2,45 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="section/header :: head"></head>
+<link rel="stylesheet" th:href="@{/assets/css/ace.min.css}" th:if="${backPath != null}"/>
 
-<body>
-<div class="row" th:style="'display:'+ @{${returnBtn} ? 'block' : 'none'}+''">
+<body style="background: #ffffff">
+<div class="row" th:style="'display:'+ @{${backPath != null} ? 'block' : 'none'}+''">
     <div class="col-md-2">
         <p style="margin: 10px 0px 5px 15px;">
-            <button type="button" class="btn btn-block btn-success" onclick="window.history.go(-1)">
+            <button type="button" class="btn btn-block btn-success" th:onclick="'showPart(\'/project/toList?projectId='+${projectId}+'\')'">
                 <i class="fa fa-arrow-circle-o-left">返回</i>
             </button>
         </p>
     </div>
 </div>
 
-<div class="row" th:style="@{${returnBtn} ? 'margin: 5px 5px 5px 5px;' : ''}">
+<div class="row" th:style="@{${backPath != null} ? 'margin: 5px 5px 5px 5px;' : ''}">
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title">
                     <span class="glyphicon glyphicon-grain" style="color:#f5db53;"></span>&nbsp;产出物</h3>
+
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/artifact/toAdd?projectId='+*{project.projectId}+'&backPath=/artifact/toList?projectId='+*{project.projectId}+'\')'">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" onclick="removeArt()">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </div>
             </div>
             <!-- /.box-header -->
             <div class="box-body table-responsive no-padding">
-                <table class="table table-hover">
+                <input id="delArtifact" type="hidden" value=""/>
+                <table class="table table-hover" id="artifact-table">
                     <tr>
                         <th>构件</th>
                         <th>效验码</th>
                         <th>签名</th>
                     </tr>
-                    <tr th:each="artifact: ${project.artifacts}" th:object="${artifact}">
+                    <tr th:each="artifact: ${project.artifacts}" th:object="${artifact}"  th:data="*{artifactId}">
                         <td><a>adlm.1.0.0.jar</a></td>
                         <td><a>adlm.1.0.0.jar.sha1</a></td>
                         <td><a>adlm.1.0.0.jar.asc</a></td>
@@ -40,7 +51,67 @@
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    jQuery(function ($) {
+        $("#artifact-table tr").not(":eq(0)").click(function () {
+            $("#artifact-table tr").removeAttr("style");
+            $(this).attr("style", "background-color: #ebf2f9;");
+            $("#delArtifact").val($(this).attr("data"));
+        });
+
+    });
+
+    function removeArt() {
+        let value = $("#delArtifact").val();
+        let projectId = /*[[${project.projectId}]]*/ null;
+
+        if (value === "") {
+            jQuery.alert({
+                type: 'blue',
+                title: '系统提示',
+                content: "请选择需要删除的产出物！",
+                icon:'glyphicon glyphicon-info-sign'
+            });
+        } else {
+            jQuery.confirm({
+                title: '系统提示',
+                content: '确认要删除吗？',
+                type: 'blue',
+                icon:'glyphicon glyphicon-question-sign',
+                buttons: {
+                    ok: {
+                        text: '确认',
+                        btnClass: 'btn-primary',
+                        action: function(){
+                            $.ajax({
+                                type: "POST",
+                                url: "/artifact/remove",
+                                data: {"artifactId": value},
+                                success: function(data){
+                                    if (data != null) {
+                                        showDetail(projectId);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    cancel: {
+                        text: '取消',
+                        btnClass: 'btn-primary',
+                        action: function(){
+
+                        }
+                    },
+                }
+            });
+        }
+    }
+
+    function showPart(url) {
+        $("#mainframe", parent.document.body).attr("src", url);
+    }
+
     function showIframe(url) {
         layer.open({
             type: 2,
@@ -50,6 +121,8 @@
             content: url
         });
     }
+
+    /*]]>*/
 </script>
 </body>
 

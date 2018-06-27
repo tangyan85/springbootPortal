@@ -11,6 +11,7 @@ import com.wanda.portal.entity.Project;
 import com.wanda.portal.entity.ProjectMember;
 import com.wanda.portal.entity.Server;
 import com.wanda.portal.facade.model.input.*;
+import com.wanda.portal.security.SecurityConfigCrowd;
 import com.wanda.portal.utils.ConversionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,11 +21,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -35,6 +38,7 @@ import java.util.concurrent.Future;
 @RequestMapping("/project")
 public class ProjectController {
     private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
+
     @Autowired
     ProjectService projectService;
     @Autowired
@@ -56,19 +60,21 @@ public class ProjectController {
     AsyncTaskService asyncTaskService;
 
     @RequestMapping("/toAdd")
-    public String toAdd(Model model) {
+    public String toAdd(Model model, HttpSession session) {
         logger.info("------Current path:/project/toAdd");
-        model = setModelCommon(model);
-        model = setCommonServerInfoAsync(model);
+        setModelCommon(model);
+        UserDetails user = (UserDetails) session.getAttribute(SecurityConfigCrowd.SESSION_KEY);
+        setCommonServerInfoAsync(model, user);
 
         return "project/toAdd";
     }
 
     @RequestMapping("/toAdd2")
-    public String toAdd2(Model model) {
+    public String toAdd2(Model model, HttpSession session) {
         logger.info("------Current path:/project/toAdd2");
-        model = setModelCommon(model);
-        model = setCommonServerInfoAsync(model);
+        setModelCommon(model);
+        UserDetails user = (UserDetails) session.getAttribute(SecurityConfigCrowd.SESSION_KEY);
+        setCommonServerInfoAsync(model, user);
 
         return "project/toAdd2";
     }
@@ -87,11 +93,12 @@ public class ProjectController {
     }
 
     @RequestMapping("/toList")
-    public String toList(Model model) {
+    public String toList(Model model, String projectId) {
         logger.info("------Current path:/project/toList");
         Sort sort = new Sort(Sort.Direction.DESC, "rank", "createTime");
         model.addAttribute("projects", projectService.findAll(PageRequest.of(0, 10, sort)));
         model.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
+        model.addAttribute("projectId", projectId);
         return "project/toList";
     }
 
@@ -128,7 +135,8 @@ public class ProjectController {
     }
 
     @RequestMapping("/projects/{projectId}/{optype}")
-    public String toEdit(Model model, @PathVariable("projectId") String projectId, @PathVariable("optype") String optype) {
+    public String toEdit(Model model, @PathVariable("projectId") String projectId,
+                         @PathVariable("optype") String optype, HttpSession session) {
         logger.info("------Current path:/project/projects" + projectId);
 
         if (StringUtils.isNotEmpty(optype)) {
@@ -138,8 +146,9 @@ public class ProjectController {
         Project project = projectService.getProjectById(Long.valueOf(projectId));
         model.addAttribute("project", ConversionUtil.Con2Project(project));
 
-        model = setModelCommon(model);
-        model = setCommonServerInfoAsync(model);
+        setModelCommon(model);
+        UserDetails user = (UserDetails) session.getAttribute(SecurityConfigCrowd.SESSION_KEY);
+        setCommonServerInfoAsync(model, user);
 
 
         logger.debug("------Current path:/project/toAddProject:" + project);
@@ -156,10 +165,11 @@ public class ProjectController {
      * @return
      */
     @RequestMapping("/toImport")
-    public String toImport(Model model) {
+    public String toImport(Model model, HttpSession session) {
         logger.info("------Current path:/project/toImport");
-        model = setModelCommon(model);
-        model = setCommonServerInfoAsync(model);
+        setModelCommon(model);
+        UserDetails user = (UserDetails) session.getAttribute(SecurityConfigCrowd.SESSION_KEY);
+        setCommonServerInfoAsync(model, user);
 
         return "project/toImport";
     }
@@ -172,7 +182,7 @@ public class ProjectController {
 
     @RequestMapping(value = "/toViewProject/{projectId}", method = RequestMethod.GET)
     public String toViewProject(Model model, @PathVariable("projectId") String projectId) {
-        System.out.println("toViewProject:" + projectId);
+        logger.info("toViewProject:" + projectId);
         Project project = new Project();
         try {
             project = projectService.getProjectById(Long.valueOf(projectId));
@@ -188,7 +198,7 @@ public class ProjectController {
     @RequestMapping(value = "/toEditProject", method = RequestMethod.POST)
     @ResponseBody
     public CommonHttpResponseBody toEditProject(Model model, @RequestBody ProjectInputParam projectInputParam, RedirectAttributes redirectAttributes) {
-        System.out.println("input" + JSON.toJSONString(projectInputParam));
+        logger.info("input" + JSON.toJSONString(projectInputParam));
         CommonHttpResponseBody response = CommonHttpResponseBody.packSuccess();
         Project project;
         try {
@@ -210,7 +220,7 @@ public class ProjectController {
     @ResponseBody
     public CommonHttpResponseBody toImportProject(Model model, @RequestBody ProjectInputParam projectInputParam,
                                                   RedirectAttributes redirectAttributes) {
-        System.out.println("input" + JSON.toJSONString(projectInputParam));
+        logger.info("input" + JSON.toJSONString(projectInputParam));
         CommonHttpResponseBody response = CommonHttpResponseBody.packSuccess();
         Project project;
         try {
@@ -231,7 +241,7 @@ public class ProjectController {
     @RequestMapping(value = "/toEndProject/{projectId}", method = RequestMethod.POST)
     @ResponseBody
     public CommonHttpResponseBody toEndProject(Model model, @PathVariable("projectId") String projectId) {
-        System.out.println("toEndProject:" + projectId);
+        logger.info("toEndProject:" + projectId);
         CommonHttpResponseBody response = CommonHttpResponseBody.packSuccess();
         String ret = "success";
         try {
@@ -251,10 +261,11 @@ public class ProjectController {
     public CommonHttpResponseBody toAddProjectX(Model model, @RequestBody ProjectInputParam projectInputParam,
                                                 RedirectAttributes redirectAttributes) {
         CommonHttpResponseBody response = CommonHttpResponseBody.packSuccess();
-        System.out.println("input" + JSON.toJSONString(projectInputParam));
+        logger.info("input" + JSON.toJSONString(projectInputParam));
         Project project;
         try {
-            project = projectService.createProject(projectInputParam); // 调远程服务创建
+            // 调远程服务创建
+            project = projectService.createProject(projectInputParam);
         } catch (Exception e) {
             response.setResponseCode(CommonHttpResponseBody.FAIL_CODE);
             response.setResponseMsg(e.getMessage());
@@ -270,11 +281,12 @@ public class ProjectController {
     @ResponseBody
     public CommonHttpResponseBody toEditProjectX(Model model, @RequestBody ProjectInputParam projectInputParam, RedirectAttributes redirectAttributes) {
         CommonHttpResponseBody response = CommonHttpResponseBody.packSuccess();
-        System.out.println("input" + JSON.toJSONString(projectInputParam));
+        logger.info("input" + JSON.toJSONString(projectInputParam));
         try {
-            Project project = projectService.updateProject(projectInputParam); // 调远程服务创建
+            // 调远程服务创建
+            Project project = projectService.updateProject(projectInputParam);
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
             response.setResponseCode(CommonHttpResponseBody.FAIL_CODE);
             response.setResponseMsg(e.getMessage());
             return response;
@@ -286,7 +298,9 @@ public class ProjectController {
     }
 
 
-    //通过配合@ResponseBody来将内容或者对象作为HTTP响应正文返回（适合做即时校验）；  
+    /**
+     * 通过配合@ResponseBody来将内容或者对象作为HTTP响应正文返回（适合做即时校验）；
+     */
     @RequestMapping(value = "/valid", method = RequestMethod.GET)
     @ResponseBody
     public String valid(@RequestParam(value = "userId", required = false) Integer userId,
@@ -294,20 +308,18 @@ public class ProjectController {
         return String.valueOf(true);
     }
 
-    private Model setModelCommon(Model model) {
-        Model m = model;
-        m.addAttribute("repoTypes", EnumSet.allOf(RepoType.class));
-        m.addAttribute("protocols", EnumSet.allOf(RepoProtocol.class));
-        m.addAttribute("aritifactTypes", EnumSet.allOf(AritifactType.class));
-        m.addAttribute("projectMemberRoles", EnumSet.allOf(ProjectMemberRole.class));
-        m.addAttribute("inputActionTypes", EnumSet.allOf(InputActionType.class));
-        m.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
-        m.addAttribute("serverIPs", serverRepository.findAll());
-        return m;
+    private void setModelCommon(Model model) {
+        model.addAttribute("repoTypes", EnumSet.allOf(RepoType.class));
+        model.addAttribute("protocols", EnumSet.allOf(RepoProtocol.class));
+        model.addAttribute("aritifactTypes", EnumSet.allOf(AritifactType.class));
+        model.addAttribute("projectMemberRoles", EnumSet.allOf(ProjectMemberRole.class));
+        model.addAttribute("inputActionTypes", EnumSet.allOf(InputActionType.class));
+        model.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
+        model.addAttribute("serverIPs", serverRepository.findAll());
     }
 
-    public Model setCommonServerInfo(Model model) {
-        fetchAllJiras(model);
+    public Model setCommonServerInfo(Model model, UserDetails user) {
+        fetchAllJiras(model, user);
         //创建项目时需要选择已有项目id来进行创建
         fetchAllConfluences(model);
         //创建项目时需要新建key来进行创建
@@ -318,41 +330,50 @@ public class ProjectController {
         return model;
     }
 
-    /*
+    /**
      * 上述代码的线程池并行改造
-     * */
-    public Model setCommonServerInfoAsync(Model model) {
+     * @param model
+     */
+    public void setCommonServerInfoAsync(Model model, UserDetails user) {
         try {
-            List<Server> jiraServers = serverRepository.findByServerType(ServerType.JIRA); // 先从db中获取jira的所有Server
-            Future<List<JiraProjectInputParam>> existJiras = asyncTaskService.fetchAllJiras(jiraServers); // 再轮询外部jira，过滤         
-            List<Server> confServers = serverRepository.findByServerType(ServerType.CONFLUENCE); // 先从db中获取confluence的所有Server
-            Future<List<ConfluenceSpaceInputParam>> existConfs = asyncTaskService.fetchAllConfluences(confServers); // 再轮询外部confluence，过滤         
-            List<Server> jenkinsServers = serverRepository.findByServerType(ServerType.JENKINS); // 先从db中获取jenkins的所有Server
-            Future<List<JenkinsInputParam>> existJenkinses = asyncTaskService.fetchAllJenkinses(jenkinsServers); // 再轮询外部jenkins，过滤        
-            List<Server> svnServers = serverRepository.findByServerType(ServerType.SVN); // 先从db获取svn的所有Server
-            Future<List<ScmRepoInputParam>> existSvns = asyncTaskService.fetchAllSvnRepos(svnServers); // 轮询外部svn，过滤         
-            Future<List<ScmRepoInputParam>> svnTemplates = asyncTaskService.fetchAllSvnTemplates(svnServers); // template似乎要去重
+            // 先从db中获取jira的所有Server
+            List<Server> jiraServers = serverRepository.findByServerType(ServerType.JIRA);
+            // 再轮询外部jira，过滤
+            Future<List<JiraProjectInputParam>> existJiras = asyncTaskService.fetchAllJiras(jiraServers, user);
+            // 先从db中获取confluence的所有Server
+            List<Server> confServers = serverRepository.findByServerType(ServerType.CONFLUENCE);
+            // 再轮询外部confluence，过滤
+            Future<List<ConfluenceSpaceInputParam>> existConfs = asyncTaskService.fetchAllConfluences(confServers);
+            // 先从db中获取jenkins的所有Server
+            List<Server> jenkinsServers = serverRepository.findByServerType(ServerType.JENKINS);
+            // 再轮询外部jenkins，过滤
+            Future<List<JenkinsInputParam>> existJenkinses = asyncTaskService.fetchAllJenkinses(jenkinsServers);
+            // 先从db获取svn的所有Server
+            List<Server> svnServers = serverRepository.findByServerType(ServerType.SVN);
+            // 轮询外部svn，过滤
+            Future<List<ScmRepoInputParam>> existSvns = asyncTaskService.fetchAllSvnRepos(svnServers);
+            // template似乎要去重
+            Future<List<ScmRepoInputParam>> svnTemplates = asyncTaskService.fetchAllSvnTemplates(svnServers);
 
             model.addAttribute("existJiras", existJiras.get());
             model.addAttribute("existConfs", existConfs.get());
             model.addAttribute("existJenkins", existJenkinses.get());
             model.addAttribute("existSvns", existSvns.get());
             model.addAttribute("svnTemplates", svnTemplates.get());
-        } catch (InterruptedException e) {
-            return model;
-        } catch (ExecutionException e) {
-            return model;
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
         }
-        return model;
     }
 
-    public void fetchAllJiras(Model model) {
+    public void fetchAllJiras(Model model, UserDetails user) {
         List<Server> jiraServers = serverRepository.findByServerType(ServerType.JIRA);
         List<JiraProjectInputParam> existJiras = new ArrayList<>();
+
         if (jiraServers != null && jiraServers.size() > 0) {
             for (Server jiraServer : jiraServers) {
                 jiraService.setServer(jiraServer);
-                existJiras.addAll(jiraService.fetchUnusedJiraProject());
+
+                existJiras.addAll(jiraService.fetchUnusedJiraProject(user));
             }
         }
         model.addAttribute("existJiras", existJiras);

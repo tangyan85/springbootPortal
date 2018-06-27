@@ -1,8 +1,8 @@
 package com.wanda.portal.utils;
 
-import java.net.URL;
-
 import org.apache.commons.lang3.StringUtils;
+
+import java.net.URL;
 
 public class UrlUtil {
 	

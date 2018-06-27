@@ -9,6 +9,7 @@ import com.wanda.portal.constants.ProjectStatus;
 import com.wanda.portal.dao.jpa.*;
 import com.wanda.portal.dao.remote.*;
 import com.wanda.portal.dto.confluence.CreateConfluenceSpaceParamDTO;
+import com.wanda.portal.dto.git.GitRepoDTO;
 import com.wanda.portal.dto.svn.SubversionRepoDTO;
 import com.wanda.portal.dto.svn.SvnTemplateDTO;
 import com.wanda.portal.dto.svn.SvnTemplateWrapperDTO;
@@ -228,7 +229,7 @@ public class ProjectServiceImpl implements ProjectService {
         proj.setProjectName(projectInputParam.getProjectName());
         proj.setRank(projectInputParam.getRank());
         proj.setRemark(projectInputParam.getRemark());
-        proj.setStatus(ProjectStatus.find(projectInputParam.getStatus()));
+        proj.setStatus(ProjectStatus.START);
         proj = projectRepository.saveAndFlush(proj);
         return proj;
     }
@@ -303,28 +304,53 @@ public class ProjectServiceImpl implements ProjectService {
         for (ScmRepoInputParam repo : list) {
             Server server = serverRepository.findById(repo.getServerId()).get(); // 查询出对应的Server
             repoService.setServer(server); // 设置server，非常重要！
-            SvnTemplateWrapperDTO tmps = repoService.findSubversionTemplates();
-            Map<Long, String> tmpMap = new HashMap<>();
-            for (SvnTemplateDTO tmp : tmps.getTemplates()) {
-                tmpMap.put(tmp.getId(), tmp.getName());
-            }
             RESULT checkRes = repo.getInputActionType().checkWithMainId(repo.getRepoId());
             if (checkRes.equals(RESULT.VALID_REMOTE_CREATE)) { // 远程创建
                 LOGGER.info("创建");
-                SubversionRepoDTO srdto = repoService.createSvnRepo(repo.getRepoName(), repo.getTemplateId(), true);
+                SvnTemplateWrapperDTO tmps = repoService.findSubversionTemplates();
+                Map<Long, String> tmpMap = new HashMap<>();
+                for (SvnTemplateDTO tmp : tmps.getTemplates()) {
+                    tmpMap.put(tmp.getId(), tmp.getName());
+                }
                 SCMRepo scmRepo = prepareScmRepo(repo);
-                scmRepo.setWebui(srdto.getViewvcUrl());
-                scmRepo.setCheckout("svn co " + srdto.getSvnUrl() + " " + srdto.getName() +" --username=***");
-                Long tmpId = repo.getTemplateId();
-                String repoStyle = tmpId == null ? "Empty repository"
-                        : (tmpMap.get(tmpId) == null ? "Empty repository" : tmpMap.get(tmpId));
-                scmRepo.setRepoStyle(repoStyle);
+                switch (repo.getRepoType()) {
+                    case SVN:
+                        SubversionRepoDTO srdto = repoService.createSvnRepo(repo.getRepoName(), repo.getTemplateId(), true);
+                        scmRepo.setWebui(srdto.getViewvcUrl());
+                        scmRepo.setCheckout("svn co " + srdto.getSvnUrl() + " " + srdto.getName() +" --username=***");
+                        Long tmpId = repo.getTemplateId();
+                        String repoStyle = tmpId == null ? "Empty repository"
+                                : (tmpMap.get(tmpId) == null ? "Empty repository" : tmpMap.get(tmpId));
+                        scmRepo.setRepoStyle(repoStyle);
+                        break;
+                    case GIT:
+                        GitRepoDTO grdto = repoService.createGitRepo(repo.getRepoName());
+                        scmRepo.setWebui(grdto.getWeb_url());
+                        scmRepo.setCheckout(grdto.getHttp_url_to_repo());
+                        break;
+                    default:
+                        break;
+                }
                 persistScmOnly(project, scmRepo, server);
             } else if (checkRes.equals(RESULT.VALID_ATTACH_OLD)) { // 添加已有
                 LOGGER.info("添加已有");
                 SCMRepo scmRepo = prepareScmRepo(repo);
+                switch (repo.getRepoType()) {
+                    case SVN:
+                        SubversionRepoDTO srdto = repoService.findSvnRepo(repo.getRepoName());
+                        scmRepo.setWebui(srdto.getViewvcUrl());
+                        scmRepo.setCheckout("svn co " + srdto.getSvnUrl() + " " + srdto.getName() +" --username=***");
+                        break;
+                    case GIT:
+                        GitRepoDTO grdto = repoService.findGitRepo(repo.getRepoName());
+                        scmRepo.setWebui(grdto.getWeb_url());
+                        scmRepo.setCheckout(grdto.getHttp_url_to_repo());
+                        break;
+                    default:
+                        break;
+                }
                 persistScmOnly(project, scmRepo, server);
-            } else if (checkRes.equals(RESULT.VALID_UPDATE_OR_NOTHING)) { // 更新已有              
+            } else if (checkRes.equals(RESULT.VALID_UPDATE_OR_NOTHING)) { // 更新已有
                 LOGGER.info("更新已有");
                 SCMRepo scmRepo = prepareScmRepo(repo);
                 persistScmOnly(project, scmRepo, server);
@@ -423,7 +449,11 @@ public class ProjectServiceImpl implements ProjectService {
                 persistConfluenceOnly(proj, confluenceSpace, server);
             } else if (checkRes.equals(RESULT.VALID_ATTACH_OLD)) { // 添加已有
                 LOGGER.info("添加已有");
+                CreateConfluenceSpaceParamDTO param = new CreateConfluenceSpaceParamDTO();
+                param.setKey(conf.getSpaceKey());
                 ConfluenceSpace confluenceSpace = prepareConfluence(conf);
+                String wb = confluenceService.findSpace(param);
+                confluenceSpace.setWebui(wb);
                 persistConfluenceOnly(proj, confluenceSpace, server);
             } else if (checkRes.equals(RESULT.VALID_UPDATE_OR_NOTHING)) { // 更新已有         
                 LOGGER.info("更新已有");

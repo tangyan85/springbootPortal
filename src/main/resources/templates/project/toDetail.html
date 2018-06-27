@@ -48,53 +48,44 @@
                 <h3 class="box-title">
                     <span class="glyphicon glyphicon-tasks" style="color:#f44336;"></span>&nbsp;任务跟踪</h3>
                 <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/task/preview/'+*{project.projectId}+'/true\')'">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/task/preview/'+*{project.projectId}+'?backPath=/project/toList?projectId='+*{project.projectId}+'\')'">
                         <i class="fa fa-external-link"></i>
                     </button>
-                    <button type="button" class="btn btn-box-tool" onclick="showPart('/task/toAdd/true')">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/task/toAdd?projectId='+*{project.projectId}+'&backPath=/project/toList?projectId='+*{project.projectId}+'\')'">
                         <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" onclick="removeTask()">
+                        <i class="fa fa-minus"></i>
                     </button>
                 </div>
             </div>
             <!-- /.box-header -->
             <div class="box-body no-padding">
-                <tr th:each="jira : ${project.jiraProjects}" th:object="${jira}">
-                    <td>
-                    <td>
-                        <ul class="products-list product-list-in-box">
-                            <li class="item">Jira项目英文简称
-                                <a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
-                                    <span class="pull-right" th:text="*{jiraProjectKey}"></span></a>
-                            </li>
-                            <li class="item">任务情况<span class="pull-right">任务总数（<label class="text-blue">10</label>）&nbsp;/&nbsp;已完成（<label
-                                    class="text-green">5</label>）</span></a>
-                            </li>
-                            <li class="item">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        版本信息
-                                        <!-- ./chart-responsive -->
-                                    </div>
-                                    <!-- /.col -->
-                                    <div class="col-md-4">
-                                        <ul class="chart-legend clearfix pull-right">
-                                            <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.3
-                                                <small class="label-primary" style="margin-left: 30px;">归档</small>
-                                            </li>
-                                            <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.2
-                                                <small class="label-danger" style="margin-left: 30px;">未发布</small>
-                                            </li>
-                                            <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.1
-                                                <small class="label-info" style="margin-left: 30px;">已发布</small>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <!-- /.col -->
-                                </div>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
+                <input id="delTask" type="hidden" value=""/>
+                <table class="table table-hover" id="task-table">
+                    <tr>
+                        <th>Jira项目英文简称</th>
+                        <th>任务情况</th>
+                        <th>版本信息</th>
+                    </tr>
+                    <tr th:each="jira : ${project.jiraProjects}" th:object="${jira}" th:data="*{jiraProjectId}">
+                        <td><a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
+                            <span th:text="*{jiraProjectKey}"></span></a></td>
+                        <td>任务总数（<label class="text-blue">10</label>）&nbsp;/&nbsp;已完成（<label class="text-green">5</label>）</td>
+                        <td>
+                            <ul class="chart-legend clearfix">
+                                <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.3
+                                    <small class="label-primary" style="margin-left: 30px;">归档</small>
+                                </li>
+                                <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.2
+                                    <small class="label-danger" style="margin-left: 30px;">未发布</small>
+                                </li>
+                                <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.1
+                                    <small class="label-info" style="margin-left: 30px;">已发布</small>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
                 </table>
             </div>
             <!-- /.box-footer -->
@@ -106,23 +97,27 @@
                     <span class="glyphicon glyphicon-duplicate" style="color:#c33625;"></span>&nbsp;持续集成</h3>
 
                 <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/ci/preview/'+*{project.projectId}+'/true\')'">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/ci/preview/'+*{project.projectId}+'?backPath=/project/toList?projectId='+*{project.projectId}+'\')'">
                         <i class="fa fa-external-link"></i>
                     </button>
-                    <button type="button" class="btn btn-box-tool" onclick="showPart('/ci/toAdd/true')">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/ci/toAdd?projectId='+*{project.projectId}+'&backPath=/project/toList?projectId='+*{project.projectId}+'\')'">
                         <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" onclick="removeCi()">
+                        <i class="fa fa-minus"></i>
                     </button>
                 </div>
             </div>
             <!-- /.box-header -->
             <div class="box-body table-responsive no-padding">
-                <table class="table table-hover">
+                <input id="delCi" type="hidden" value=""/>
+                <table class="table table-hover" id="ci-table">
                     <tr>
-                        <th>Jenkins任务英文简称</th>
+                        <th>Jenkins Job英文简称</th>
                         <th>执行情况</th>
                         <th>操作</th>
                     </tr>
-                    <tr th:each="jenkins : ${project.jenkinsProjects}" th:object="${jenkins}">
+                    <tr th:each="jenkins : ${project.jenkinsProjects}" th:object="${jenkins}" th:data="*{jenkinsProjectId}">
                         <td th:text="*{jenkinsProjKey}"></td>
                         <td>成功</td>
                         <td><i class="fa fa-eye text-blue" th:onclick="'showIframe(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'\')'">任务</i>
@@ -139,29 +134,32 @@
                 <h3 class="box-title">
                     <span class="glyphicon glyphicon-list-alt" style="color:#cd8b51;"></span>&nbsp;源代码</h3>
                 <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/code/preview/'+*{project.projectId}+'/true\')'">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/code/preview/'+*{project.projectId}+'?backPath=/project/toList?projectId='+*{project.projectId}+'\')'">
                         <i class="fa fa-external-link"></i>
                     </button>
-                    <button type="button" class="btn btn-box-tool" onclick="showPart('/code/toAdd/true')">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/code/toAdd?projectId='+*{project.projectId}+'&backPath=/project/toList?projectId='+*{project.projectId}+'\')'">
                         <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" onclick="removeCode()">
+                        <i class="fa fa-minus"></i>
                     </button>
                 </div>
             </div>
             <!-- /.box-header -->
-            <div class="box-body">
-                <ul class="products-list product-list-in-box" th:each="repos: ${project.scmRepositories}"
-                    th:object="${repos}">
-                    <li class="item">
-                        <div class="product-img" style="width: 48px; height: 45px;">
-                            <img th:src="@{/dist/img/subversion.png}" style="width: 48px; height: 45px;"
-                                 alt="Product Image">
-                        </div>
-                        <div class="product-info">
-                            版本库地址:<br/><a data-toggle="tooltip" title="版本库地址" target="_blank" th:href="*{webui}" th:text="*{webui}"></a><br/>
-                            版本库检出命令:<br/><span class="product-description" data-toggle="tooltip" title="版本库检出命令" th:text="*{checkout}"></span>
-                        </div>
-                    </li>
-                </ul>
+            <div class="box-body table-responsive no-padding">
+                <input id="delCode" type="hidden" value=""/>
+                <table class="table table-hover" id="code-table">
+                    <tr>
+                        <th style="width:10%;">类型</th>
+                        <th>地址</th>
+                        <th>检出命令</th>
+                    </tr>
+                    <tr th:each="repos: ${project.scmRepositories}" th:object="${repos}" th:data="*{repoId}">
+                        <td th:text="*{repoType}"></td>
+                        <td><a data-toggle="tooltip" target="_blank" th:href="*{webui}" th:text="*{webui}"></a></td>
+                        <td th:text="*{checkout}"></td>
+                    </tr>
+                </table>
             </div>
         </div>
 
@@ -171,23 +169,27 @@
                     <span class="glyphicon glyphicon-grain" style="color:#f5db53;"></span>&nbsp;产出物</h3>
 
                 <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/artifact/preview/'+*{project.projectId}+'/true\')'">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/artifact/preview/'+*{project.projectId}+'?backPath=/project/toList?projectId='+*{project.projectId}+'\')'">
                         <i class="fa fa-external-link"></i>
                     </button>
-                    <button type="button" class="btn btn-box-tool" onclick="showPart('/artifact/toAdd/true')">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/artifact/toAdd?projectId='+*{project.projectId}+'&backPath=/project/toList?projectId='+*{project.projectId}+'\')'">
                         <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" onclick="removeArt()">
+                        <i class="fa fa-minus"></i>
                     </button>
                 </div>
             </div>
             <!-- /.box-header -->
             <div class="box-body table-responsive no-padding">
-                <table class="table table-hover">
+                <input id="delArtifact" type="hidden" value=""/>
+                <table class="table table-hover" id="artifact-table">
                     <tr>
                         <th>构件</th>
                         <th>效验码</th>
                         <th>签名</th>
                     </tr>
-                    <tr th:each="artifact: ${project.artifacts}" th:object="${artifact}">
+                    <tr th:each="artifact: ${project.artifacts}" th:object="${artifact}"  th:data="*{artifactId}">
                         <td><a>adlm.1.0.0.jar</a></td>
                         <td><a>adlm.1.0.0.jar.sha1</a></td>
                         <td><a>adlm.1.0.0.jar.asc</a></td>
@@ -205,22 +207,26 @@
                     <span class="glyphicon glyphicon-user" style="color:#0897ea;"></span>&nbsp;项目团队</h3>
 
                 <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/member/preview/'+*{project.projectId}+'/true\')'">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/member/preview/'+*{project.projectId}+'?backPath=/project/toList?projectId='+*{project.projectId}+'\')'">
                         <i class="fa fa-external-link"></i>
                     </button>
-                    <button type="button" class="btn btn-box-tool" onclick="showPart('/member/toAdd/true')">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/member/toAdd?projectId='+*{project.projectId}+'&backPath=/project/toList?projectId='+*{project.projectId}+'\')'">
                         <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" onclick="removePM()">
+                        <i class="fa fa-minus"></i>
                     </button>
                 </div>
             </div>
             <!-- /.box-header -->
             <div class="box-body table-responsive no-padding">
+                <input id="delProjectMember" type="hidden" value=""/>
                 <table class="table table-hover" id="project-member-table">
                     <tr>
-                        <th>项目角色</th>
-                        <th>项目成员</th>
+                        <th>担任角色</th>
+                        <th>成员名称</th>
                     </tr>
-                    <tr th:each="people: ${project.projectMembers}" th:object="${people}">
+                    <tr th:each="people: ${project.projectMembers}" th:object="${people}" th:data="*{projectMemberId}">
                         <td th:switch="*{role.value}">
                             <small class="label label-danger" th:case="项目经理" th:text="*{role.value}"></small>
                             <small class="label label-primary" th:case="开发人员" th:text="*{role.value}"></small>
@@ -239,21 +245,25 @@
                     <span class="glyphicon glyphicon-leaf" style="color:#63ba3c;"></span>&nbsp;文档协同</h3>
 
                 <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/doc/preview/'+*{project.projectId}+'/true\')'">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/doc/preview/'+*{project.projectId}+'?backPath=/project/toList?projectId='+*{project.projectId}+'\')'">
                         <i class="fa fa-external-link"></i>
                     </button>
-                    <button type="button" class="btn btn-box-tool" onclick="showPart('/doc/toAdd/true')">
+                    <button type="button" class="btn btn-box-tool" th:onclick="'showPart(\'/doc/toAdd?projectId='+*{project.projectId}+'&backPath=/project/toList?projectId='+*{project.projectId}+'\')'">
                         <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" onclick="removeDoc()">
+                        <i class="fa fa-minus"></i>
                     </button>
                 </div>
             </div>
             <!-- /.box-header -->
             <div class="box-body table-responsive no-padding">
-                <table class="table table-hover">
+                <input id="delDoc" type="hidden" value=""/>
+                <table class="table table-hover" id="doc-table">
                     <tr>
                         <th>Confluence项目英文简称</th>
                     </tr>
-                    <tr th:each="conf : ${project.confluenceSpaces}" th:object="${conf}">
+                    <tr th:each="conf : ${project.confluenceSpaces}" th:object="${conf}" th:data="*{spaceId}">
                         <td><a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
                             <span th:text="*{spaceKey}"></span></a>
                         </td>
@@ -265,7 +275,323 @@
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    jQuery(function ($) {
+        $("#artifact-table tr").not(":eq(0)").click(function () {
+            $("#artifact-table tr").removeAttr("style");
+            $(this).attr("style", "background-color: #ebf2f9;");
+            $("#delArtifact").val($(this).attr("data"));
+        });
+
+        $("#ci-table tr").not(":eq(0)").click(function () {
+            $("#ci-table tr").removeAttr("style");
+            $(this).attr("style", "background-color: #ebf2f9;");
+            $("#delCi").val($(this).attr("data"));
+        });
+
+        $("#code-table tr").not(":eq(0)").click(function () {
+            $("#code-table tr").removeAttr("style");
+            $(this).attr("style", "background-color: #ebf2f9;");
+            $("#delCode").val($(this).attr("data"));
+        });
+
+        $("#doc-table tr").not(":eq(0)").click(function () {
+            $("#doc-table tr").removeAttr("style");
+            $(this).attr("style", "background-color: #ebf2f9;");
+            $("#delDoc").val($(this).attr("data"));
+        });
+
+        $("#project-member-table tr").not(":eq(0)").click(function () {
+            $("#project-member-table tr").removeAttr("style");
+            $(this).attr("style", "background-color: #ebf2f9;");
+            $("#delProjectMember").val($(this).attr("data"));
+        });
+
+        $("#task-table tr").not(":eq(0)").click(function () {
+            $("#task-table tr").removeAttr("style");
+            $(this).attr("style", "background-color: #ebf2f9;");
+            $("#delTask").val($(this).attr("data"));
+        });
+
+    });
+
+    function removeArt() {
+        let value = $("#delArtifact").val();
+        let projectId = /*[[${project.projectId}]]*/ null;
+
+        if (value === "") {
+            jQuery.alert({
+                type: 'blue',
+                title: '系统提示',
+                content: "请选择需要删除的产出物！",
+                icon:'glyphicon glyphicon-info-sign'
+            });
+        } else {
+            jQuery.confirm({
+                title: '系统提示',
+                content: '确认要删除吗？',
+                type: 'blue',
+                icon:'glyphicon glyphicon-question-sign',
+                buttons: {
+                    ok: {
+                        text: '确认',
+                        btnClass: 'btn-primary',
+                        action: function(){
+                            $.ajax({
+                                type: "POST",
+                                url: "/artifact/remove",
+                                data: {"artifactId": value},
+                                success: function(data){
+                                    if (data != null) {
+                                        showDetail(projectId);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    cancel: {
+                        text: '取消',
+                        btnClass: 'btn-primary',
+                        action: function(){
+
+                        }
+                    },
+                }
+            });
+        }
+    }
+
+    function removeCi() {
+        let value = $("#delCi").val();
+        let projectId = /*[[${project.projectId}]]*/ null;
+
+        if (value === "") {
+            jQuery.alert({
+                type: 'blue',
+                title: '系统提示',
+                content: "请选择需要删除的Jenkins Job！",
+                icon:'glyphicon glyphicon-info-sign'
+            });
+        } else {
+            jQuery.confirm({
+                title: '系统提示',
+                content: '确认要删除吗？',
+                type: 'blue',
+                icon:'glyphicon glyphicon-question-sign',
+                buttons: {
+                    ok: {
+                        text: '确认',
+                        btnClass: 'btn-primary',
+                        action: function(){
+                            $.ajax({
+                                type: "POST",
+                                url: "/ci/remove",
+                                data: {"jenkinsId": value},
+                                success: function(data){
+                                    if (data != null) {
+                                        showDetail(projectId);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    cancel: {
+                        text: '取消',
+                        btnClass: 'btn-primary',
+                        action: function(){
+
+                        }
+                    },
+                }
+            });
+        }
+    }
+
+    function removeCode() {
+        let value = $("#delCode").val();
+        let projectId = /*[[${project.projectId}]]*/ null;
+
+        if (value === "") {
+            jQuery.alert({
+                type: 'blue',
+                title: '系统提示',
+                content: "请选择需要删除的源代码！",
+                icon:'glyphicon glyphicon-info-sign'
+            });
+        } else {
+            jQuery.confirm({
+                title: '系统提示',
+                content: '确认要删除吗？',
+                type: 'blue',
+                icon:'glyphicon glyphicon-question-sign',
+                buttons: {
+                    ok: {
+                        text: '确认',
+                        btnClass: 'btn-primary',
+                        action: function(){
+                            $.ajax({
+                                type: "POST",
+                                url: "/code/remove",
+                                data: {"repoId": value},
+                                success: function(data){
+                                    if (data != null) {
+                                        showDetail(projectId);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    cancel: {
+                        text: '取消',
+                        btnClass: 'btn-primary',
+                        action: function(){
+
+                        }
+                    },
+                }
+            });
+        }
+    }
+
+    function removeDoc() {
+        let value = $("#delDoc").val();
+        let projectId = /*[[${project.projectId}]]*/ null;
+
+        if (value === "") {
+            jQuery.alert({
+                type: 'blue',
+                title: '系统提示',
+                content: "请选择需要删除的Confluence项目！",
+                icon:'glyphicon glyphicon-info-sign'
+            });
+        } else {
+            jQuery.confirm({
+                title: '系统提示',
+                content: '确认要删除吗？',
+                type: 'blue',
+                icon:'glyphicon glyphicon-question-sign',
+                buttons: {
+                    ok: {
+                        text: '确认',
+                        btnClass: 'btn-primary',
+                        action: function(){
+                            $.ajax({
+                                type: "POST",
+                                url: "/doc/remove",
+                                data: {"confluenceId": value},
+                                success: function(data){
+                                    if (data != null) {
+                                        showDetail(projectId);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    cancel: {
+                        text: '取消',
+                        btnClass: 'btn-primary',
+                        action: function(){
+
+                        }
+                    },
+                }
+            });
+        }
+    }
+
+    function removeTask() {
+        let value = $("#delTask").val();
+        let projectId = /*[[${project.projectId}]]*/ null;
+
+        if (value === "") {
+            jQuery.alert({
+                type: 'blue',
+                title: '系统提示',
+                content: "请选择需要删除的Jira项目！",
+                icon:'glyphicon glyphicon-info-sign'
+            });
+        } else {
+            jQuery.confirm({
+                title: '系统提示',
+                content: '确认要删除吗？',
+                type: 'blue',
+                icon:'glyphicon glyphicon-question-sign',
+                buttons: {
+                    ok: {
+                        text: '确认',
+                        btnClass: 'btn-primary',
+                        action: function(){
+                            $.ajax({
+                                type: "POST",
+                                url: "/task/remove",
+                                data: {"jiraId": value},
+                                success: function(data){
+                                    if (data != null) {
+                                        showDetail(projectId);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    cancel: {
+                        text: '取消',
+                        btnClass: 'btn-primary',
+                        action: function(){
+
+                        }
+                    },
+                }
+            });
+        }
+    }
+
+    function removePM() {
+        let value = $("#delProjectMember").val();
+        let projectId = /*[[${project.projectId}]]*/ null;
+
+        if (value === "") {
+            jQuery.alert({
+                type: 'blue',
+                title: '系统提示',
+                content: "请选择需要删除的成员！",
+                icon:'glyphicon glyphicon-info-sign'
+            });
+        } else {
+            jQuery.confirm({
+                title: '系统提示',
+                content: '确认要删除吗？',
+                type: 'blue',
+                icon:'glyphicon glyphicon-question-sign',
+                buttons: {
+                    ok: {
+                        text: '确认',
+                        btnClass: 'btn-primary',
+                        action: function(){
+                            $.ajax({
+                                type: "POST",
+                                url: "/member/remove",
+                                data: {"projectMemberId": value},
+                                success: function(data){
+                                    if (data != null) {
+                                        showDetail(projectId);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    cancel: {
+                        text: '取消',
+                        btnClass: 'btn-primary',
+                        action: function(){
+
+                        }
+                    },
+                }
+            });
+        }
+    }
+
     function showPart(url) {
         $("#mainframe", parent.document.body).attr("src", url);
     }
@@ -273,13 +599,15 @@
     function showIframe(url) {
         layer.open({
             type: 2,
-            area: ['70%', '60%'],
+            area: ['700px', '450px'],
             fixed: false, //不固定
             maxmin: true,
             content: url
         });
     }
-</script><div id="aaa"></div>
+
+    /*]]>*/
+</script>
 </body>
 
 </html>

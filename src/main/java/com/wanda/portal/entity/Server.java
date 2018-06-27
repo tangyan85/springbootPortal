@@ -1,15 +1,9 @@
 package com.wanda.portal.entity;
 
-import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import com.wanda.portal.constants.ServerType;
+
+import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "server")
@@ -49,8 +43,17 @@ public class Server implements Serializable {
 
     @Column(name = "domain", length = 100)
     private String domain;
-    
-       
+
+    @Column(name = "login_name", length = 100)
+    private String loginName;
+
+    @Column(name = "passwd", length = 100)
+    private String passwd;
+
+    @Column(name = "login_mode", length = 1)
+    private String loginMode;
+
+
     public String getReserved() {
         return reserved;
     }
@@ -135,6 +138,29 @@ public class Server implements Serializable {
 
 	public void setDomain(String domain) {
 		this.domain = domain;
-	}  
-    
+	}
+
+    public String getLoginName() {
+        return loginName;
+    }
+
+    public void setLoginName(String loginName) {
+        this.loginName = loginName;
+    }
+
+    public String getPasswd() {
+        return passwd;
+    }
+
+    public void setPasswd(String passwd) {
+        this.passwd = passwd;
+    }
+
+    public String getLoginMode() {
+        return loginMode;
+    }
+
+    public void setLoginMode(String loginMode) {
+        this.loginMode = loginMode;
+    }
 }
