@@ -67,59 +67,21 @@
         let projectId = /*[[${project.projectId}]]*/ null;
 
         if (value === "") {
-            jQuery.alert({
-                type: 'blue',
-                title: '系统提示',
-                content: "请选择需要删除的产出物！",
-                icon:'glyphicon glyphicon-info-sign'
-            });
+            alert("请选择需要解绑的产出物！");
         } else {
-            jQuery.confirm({
-                title: '系统提示',
-                content: '确认要删除吗？',
-                type: 'blue',
-                icon:'glyphicon glyphicon-question-sign',
-                buttons: {
-                    ok: {
-                        text: '确认',
-                        btnClass: 'btn-primary',
-                        action: function(){
-                            $.ajax({
-                                type: "POST",
-                                url: "/artifact/remove",
-                                data: {"artifactId": value},
-                                success: function(data){
-                                    if (data != null) {
-                                        showDetail(projectId);
-                                    }
-                                }
-                            });
+            confirm("确认要解绑吗？", function() {
+                $.ajax({
+                    type: "POST",
+                    url: "/artifact/remove",
+                    data: {"artifactId": value},
+                    success: function(data){
+                        if (data != null) {
+                            showDetail(projectId);
                         }
-                    },
-                    cancel: {
-                        text: '取消',
-                        btnClass: 'btn-primary',
-                        action: function(){
-
-                        }
-                    },
-                }
+                    }
+                });
             });
         }
-    }
-
-    function showPart(url) {
-        $("#mainframe", parent.document.body).attr("src", url);
-    }
-
-    function showIframe(url) {
-        layer.open({
-            type: 2,
-            area: ['700px', '450px'],
-            fixed: false, //不固定
-            maxmin: true,
-            content: url
-        });
     }
 
     /*]]>*/

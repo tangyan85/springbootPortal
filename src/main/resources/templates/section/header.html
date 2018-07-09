@@ -41,4 +41,56 @@
             background-color: #f4f5f7;
         }
     </style>
+
+    <script type="text/javascript">
+        function alert(msg) {
+            jQuery.alert({
+                type: 'blue',
+                title: '系统提示',
+                content: msg,
+                icon:'glyphicon glyphicon-info-sign'
+            });
+        }
+
+        function confirm(msg, func) {
+            jQuery.confirm({
+                title: '系统提示',
+                content: msg,
+                type: 'blue',
+                icon:'glyphicon glyphicon-question-sign',
+                buttons: {
+                    ok: {
+                        text: '确认',
+                        btnClass: 'btn-primary',
+                        action: function(){
+                            func();
+                        }
+                    },
+                    cancel: {
+                        text: '取消',
+                        btnClass: 'btn-primary',
+                        action: function(){
+
+                        }
+                    },
+                }
+            });
+        }
+
+        function showPart(url) {
+            if (url === undefined || url === "") return;
+            $("#mainframe", parent.document.body).attr("src", url);
+        }
+
+        function showIframe(url) {
+            if (url === undefined || url === "") return;
+            layer.open({
+                type: 2,
+                area: ['100%', '100%'],
+                fixed: false, //不固定
+                content: url
+            });
+        }
+
+    </script>
   </head>

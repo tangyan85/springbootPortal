@@ -15,8 +15,28 @@
                             <span class="glyphicon glyphicon-tree-conifer" style="font-size:40px;color:#3c763d;"></span>
                         </div>
                         <div class="product-info">
-                            <a href="javascript:void(0)" class="product-title" th:text="*{projectKey}"></a>
-                            <span class="product-description text-dark" th:text="*{projectName}"></span>
+                            <span class="product-description">
+                                <div style="display: none;z-index: 18;">
+                                    <input type="text" style="height: 24px;width:30%;" class="form-control">
+                                    <span style="float:left;height:24px;line-height:24px;text-align:center;width:24px;border:1px solid #d2d6de;"><i class="fa fa-check"></i></span>
+                                    <span style="float:left;height:24px;line-height:24px;text-align:center;width:24px;border:1px solid #d2d6de;"><i class="fa fa-close"></i></span>
+                                </div>
+                                <div>
+                                    <a href="javascript:void(0)" class="product-title" th:text="*{projectKey}"></a>&nbsp;
+                                    <i id="edit_projectKey" class="fa fa-pencil-square-o text-blue"></i>
+                                </div>
+                            </span>
+                            <span class="product-description">
+                                <div style="display: none;">
+                                    <input type="text" style="height: 24px;width:30%;" class="form-control">
+                                    <span style="float:left;height:24px;line-height:24px;text-align:center;width:24px;border:1px solid #d2d6de;"><i class="fa fa-check"></i></span>
+                                    <span style="float:left;height:24px;line-height:24px;text-align:center;width:24px;border:1px solid #d2d6de;"><i class="fa fa-close"></i></span>
+                                </div>
+                                <div>
+                                    <label th:text="*{projectName}"></label>&nbsp;
+                                    <i id="edit_projectName" class="fa fa-pencil-square-o text-blue"></i>
+                                </div>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -71,17 +91,14 @@
                     <tr th:each="jira : ${project.jiraProjects}" th:object="${jira}" th:data="*{jiraProjectId}">
                         <td><a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
                             <span th:text="*{jiraProjectKey}"></span></a></td>
-                        <td>任务总数（<label class="text-blue">10</label>）&nbsp;/&nbsp;已完成（<label class="text-green">5</label>）</td>
+                        <td>任务总数（<label class="text-blue" th:text="*{allIssues}"></label>）&nbsp;/&nbsp;已完成（<label class="text-green" th:text="*{finishIssues}"></label>）</td>
                         <td>
                             <ul class="chart-legend clearfix">
-                                <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.3
-                                    <small class="label-primary" style="margin-left: 30px;">归档</small>
-                                </li>
-                                <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.2
-                                    <small class="label-danger" style="margin-left: 30px;">未发布</small>
-                                </li>
-                                <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.1
-                                    <small class="label-info" style="margin-left: 30px;">已发布</small>
+                                <li th:each="version : *{projectVersions}" th:object="${version}">
+                                    <i class="fa fa-arrow-circle-o-up text-green" th:text="*{name}"></i>
+                                    <small class="label-primary" style="margin-left: 30px;" th:if="*{archived == true}">归档</small>
+                                    <small class="label-danger" style="margin-left: 30px;" th:if="*{archived == false} and *{released == false}">未发布</small>
+                                    <small class="label-info" style="margin-left: 30px;" th:if="*{archived == false} and *{released == true}">已发布</small>
                                 </li>
                             </ul>
                         </td>
@@ -118,12 +135,13 @@
                         <th>操作</th>
                     </tr>
                     <tr th:each="jenkins : ${project.jenkinsProjects}" th:object="${jenkins}" th:data="*{jenkinsProjectId}">
-                        <td th:text="*{jenkinsProjKey}"></td>
+                        <td><a href="#" th:onclick="'window.open(\''+*{webui}+'\')'">
+                            <span th:text="*{jenkinsProjKey}"></td>
                         <td>成功</td>
-                        <td><i class="fa fa-eye text-blue" th:onclick="'showIframe(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'\')'">任务</i>
-                            <i class="fa fa-eye text-blue" th:onclick="'showIframe(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'/ws\')'" style="margin-left: 10px;">工作空间</i>
-                            <i class="fa fa-play-circle text-blue" th:onclick="'showIframe(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'/build?delay=0sec\')'" style="margin-left: 10px;">任务</i>
-                            <i class="fa fa-cog text-blue" th:onclick="'showIframe(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'/configure\')'" style="margin-left: 10px;">任务</i></td>
+                        <td><i class="fa fa-eye text-blue" th:onclick="'window.open(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'\')'">任务</i>
+                            <i class="fa fa-eye text-blue" th:onclick="'window.open(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'/ws\')'" style="margin-left: 10px;">工作空间</i>
+                            <i class="fa fa-play-circle text-blue" th:onclick="'window.open(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'/build?delay=0sec\')'" style="margin-left: 10px;">任务</i>
+                            <i class="fa fa-cog text-blue" th:onclick="'window.open(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'/configure\')'" style="margin-left: 10px;">任务</i></td>
                     </tr>
                 </table>
             </div>
@@ -313,6 +331,98 @@
             $(this).attr("style", "background-color: #ebf2f9;");
             $("#delTask").val($(this).attr("data"));
         });
+        
+        $("#edit_projectKey").click(function (e) {
+            e.stopPropagation();
+            let parent = $(this).parent();
+            parent.prev().show();
+            parent.hide();
+            parent.prev().find(".fa-check").click(function (e) {
+                e.stopPropagation();
+                let projectId = /*[[${project.projectId}]]*/ null;
+                let projectKey = parent.prev().find("input").val();
+                if (projectKey === "") {
+                    alert("项目英文名称不能为空！");
+                    return;
+                }
+
+                if (!/^[a-zA-Z\d]{2,10}$/.test(projectKey)) {
+                    alert("项目英文名称只支持大小写字母和数字, 最多10个字符！");
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/project/rename",
+                    data: {
+                        "projectId": projectId,
+                        "projectKey": projectKey
+                    },
+                    success: function(data){
+                        if (data === 'ok') {
+                            parent.find("a").html(projectKey);
+                            parent.show();
+                            parent.prev().hide();
+
+                            $("a[style='background-color: #ebf2f9;'] > i > span").html(projectKey);
+                        } else {
+                            alert(data);
+                        }
+                    }
+                });
+            });
+            parent.prev().find(".fa-close").click(function (e) {
+                e.stopPropagation();
+                parent.show();
+                parent.prev().hide();
+            });
+        });
+
+        $("#edit_projectName").click(function (e) {
+            e.stopPropagation();
+            let parent = $(this).parent();
+            parent.prev().show();
+            parent.hide();
+            parent.prev().find(".fa-check").click(function (e) {
+                e.stopPropagation();
+                let projectId = /*[[${project.projectId}]]*/ null;
+                let projectName = parent.prev().find("input").val();
+                if (projectName === "") {
+                    alert("项目中文名称不能为空！");
+                    return;
+                }
+
+                if (!/^[a-zA-Z\d\u4e00-\u9fa5]{2,25}$/.test(projectName)) {
+                    alert("项目中文名称只支持汉字，大小写字母和数字，最多25个字符！");
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/project/rename",
+                    data: {
+                        "projectId": projectId,
+                        "projectName": projectName
+                    },
+                    success: function(data){
+                        if (data === 'ok') {
+                            parent.find("label").html(projectName);
+                            parent.show();
+                            parent.prev().hide();
+
+                            $("a[style='background-color: #ebf2f9;'] > p").html(projectName);
+                        } else {
+                            alert(data);
+                        }
+                    }
+                });
+            });
+            parent.prev().find(".fa-close").click(function (e) {
+                e.stopPropagation();
+                parent.show();
+                parent.prev().hide();
+            });
+        });
 
     });
 
@@ -321,44 +431,21 @@
         let projectId = /*[[${project.projectId}]]*/ null;
 
         if (value === "") {
-            jQuery.alert({
-                type: 'blue',
-                title: '系统提示',
-                content: "请选择需要删除的产出物！",
-                icon:'glyphicon glyphicon-info-sign'
-            });
+            alert("请选择需要解绑的产出物！");
         } else {
-            jQuery.confirm({
-                title: '系统提示',
-                content: '确认要删除吗？',
-                type: 'blue',
-                icon:'glyphicon glyphicon-question-sign',
-                buttons: {
-                    ok: {
-                        text: '确认',
-                        btnClass: 'btn-primary',
-                        action: function(){
-                            $.ajax({
-                                type: "POST",
-                                url: "/artifact/remove",
-                                data: {"artifactId": value},
-                                success: function(data){
-                                    if (data != null) {
-                                        showDetail(projectId);
-                                    }
-                                }
-                            });
+            confirm('确认要解绑吗？',
+                function(){
+                    $.ajax({
+                        type: "POST",
+                        url: "/artifact/remove",
+                        data: {"artifactId": value},
+                        success: function(data){
+                            if (data != null) {
+                                showDetail(projectId);
+                            }
                         }
-                    },
-                    cancel: {
-                        text: '取消',
-                        btnClass: 'btn-primary',
-                        action: function(){
-
-                        }
-                    },
-                }
-            });
+                    });
+                });
         }
     }
 
@@ -367,44 +454,21 @@
         let projectId = /*[[${project.projectId}]]*/ null;
 
         if (value === "") {
-            jQuery.alert({
-                type: 'blue',
-                title: '系统提示',
-                content: "请选择需要删除的Jenkins Job！",
-                icon:'glyphicon glyphicon-info-sign'
-            });
+            alert("请选择需要解绑的Jenkins Job！");
         } else {
-            jQuery.confirm({
-                title: '系统提示',
-                content: '确认要删除吗？',
-                type: 'blue',
-                icon:'glyphicon glyphicon-question-sign',
-                buttons: {
-                    ok: {
-                        text: '确认',
-                        btnClass: 'btn-primary',
-                        action: function(){
-                            $.ajax({
-                                type: "POST",
-                                url: "/ci/remove",
-                                data: {"jenkinsId": value},
-                                success: function(data){
-                                    if (data != null) {
-                                        showDetail(projectId);
-                                    }
-                                }
-                            });
+            confirm('确认要解绑吗？',
+                function(){
+                    $.ajax({
+                        type: "POST",
+                        url: "/ci/remove",
+                        data: {"jenkinsId": value},
+                        success: function(data){
+                            if (data != null) {
+                                showDetail(projectId);
+                            }
                         }
-                    },
-                    cancel: {
-                        text: '取消',
-                        btnClass: 'btn-primary',
-                        action: function(){
-
-                        }
-                    },
-                }
-            });
+                    });
+                });
         }
     }
 
@@ -413,44 +477,21 @@
         let projectId = /*[[${project.projectId}]]*/ null;
 
         if (value === "") {
-            jQuery.alert({
-                type: 'blue',
-                title: '系统提示',
-                content: "请选择需要删除的源代码！",
-                icon:'glyphicon glyphicon-info-sign'
-            });
+            alert("请选择需要解绑的源代码！");
         } else {
-            jQuery.confirm({
-                title: '系统提示',
-                content: '确认要删除吗？',
-                type: 'blue',
-                icon:'glyphicon glyphicon-question-sign',
-                buttons: {
-                    ok: {
-                        text: '确认',
-                        btnClass: 'btn-primary',
-                        action: function(){
-                            $.ajax({
-                                type: "POST",
-                                url: "/code/remove",
-                                data: {"repoId": value},
-                                success: function(data){
-                                    if (data != null) {
-                                        showDetail(projectId);
-                                    }
-                                }
-                            });
+            confirm('确认要解绑吗？',
+                function(){
+                    $.ajax({
+                        type: "POST",
+                        url: "/code/remove",
+                        data: {"repoId": value},
+                        success: function(data){
+                            if (data != null) {
+                                showDetail(projectId);
+                            }
                         }
-                    },
-                    cancel: {
-                        text: '取消',
-                        btnClass: 'btn-primary',
-                        action: function(){
-
-                        }
-                    },
-                }
-            });
+                    });
+                });
         }
     }
 
@@ -459,44 +500,21 @@
         let projectId = /*[[${project.projectId}]]*/ null;
 
         if (value === "") {
-            jQuery.alert({
-                type: 'blue',
-                title: '系统提示',
-                content: "请选择需要删除的Confluence项目！",
-                icon:'glyphicon glyphicon-info-sign'
-            });
+            alert("请选择需要解绑的Confluence项目！");
         } else {
-            jQuery.confirm({
-                title: '系统提示',
-                content: '确认要删除吗？',
-                type: 'blue',
-                icon:'glyphicon glyphicon-question-sign',
-                buttons: {
-                    ok: {
-                        text: '确认',
-                        btnClass: 'btn-primary',
-                        action: function(){
-                            $.ajax({
-                                type: "POST",
-                                url: "/doc/remove",
-                                data: {"confluenceId": value},
-                                success: function(data){
-                                    if (data != null) {
-                                        showDetail(projectId);
-                                    }
-                                }
-                            });
+            confirm('确认要解绑吗？',
+                function(){
+                    $.ajax({
+                        type: "POST",
+                        url: "/doc/remove",
+                        data: {"confluenceId": value},
+                        success: function(data){
+                            if (data != null) {
+                                showDetail(projectId);
+                            }
                         }
-                    },
-                    cancel: {
-                        text: '取消',
-                        btnClass: 'btn-primary',
-                        action: function(){
-
-                        }
-                    },
-                }
-            });
+                    });
+                });
         }
     }
 
@@ -505,44 +523,21 @@
         let projectId = /*[[${project.projectId}]]*/ null;
 
         if (value === "") {
-            jQuery.alert({
-                type: 'blue',
-                title: '系统提示',
-                content: "请选择需要删除的Jira项目！",
-                icon:'glyphicon glyphicon-info-sign'
-            });
+            alert("请选择需要解绑的Jira项目！");
         } else {
-            jQuery.confirm({
-                title: '系统提示',
-                content: '确认要删除吗？',
-                type: 'blue',
-                icon:'glyphicon glyphicon-question-sign',
-                buttons: {
-                    ok: {
-                        text: '确认',
-                        btnClass: 'btn-primary',
-                        action: function(){
-                            $.ajax({
-                                type: "POST",
-                                url: "/task/remove",
-                                data: {"jiraId": value},
-                                success: function(data){
-                                    if (data != null) {
-                                        showDetail(projectId);
-                                    }
-                                }
-                            });
+            confirm('确认要解绑吗？',
+                function(){
+                    $.ajax({
+                        type: "POST",
+                        url: "/task/remove",
+                        data: {"jiraId": value},
+                        success: function(data){
+                            if (data != null) {
+                                showDetail(projectId);
+                            }
                         }
-                    },
-                    cancel: {
-                        text: '取消',
-                        btnClass: 'btn-primary',
-                        action: function(){
-
-                        }
-                    },
-                }
-            });
+                    });
+                });
         }
     }
 
@@ -551,59 +546,22 @@
         let projectId = /*[[${project.projectId}]]*/ null;
 
         if (value === "") {
-            jQuery.alert({
-                type: 'blue',
-                title: '系统提示',
-                content: "请选择需要删除的成员！",
-                icon:'glyphicon glyphicon-info-sign'
-            });
+            alert("请选择需要解绑的成员！");
         } else {
-            jQuery.confirm({
-                title: '系统提示',
-                content: '确认要删除吗？',
-                type: 'blue',
-                icon:'glyphicon glyphicon-question-sign',
-                buttons: {
-                    ok: {
-                        text: '确认',
-                        btnClass: 'btn-primary',
-                        action: function(){
-                            $.ajax({
-                                type: "POST",
-                                url: "/member/remove",
-                                data: {"projectMemberId": value},
-                                success: function(data){
-                                    if (data != null) {
-                                        showDetail(projectId);
-                                    }
-                                }
-                            });
+            confirm('确认要解绑吗？',
+                function(){
+                    $.ajax({
+                        type: "POST",
+                        url: "/member/remove",
+                        data: {"projectMemberId": value},
+                        success: function(data){
+                            if (data != null) {
+                                showDetail(projectId);
+                            }
                         }
-                    },
-                    cancel: {
-                        text: '取消',
-                        btnClass: 'btn-primary',
-                        action: function(){
-
-                        }
-                    },
-                }
-            });
+                    });
+                });
         }
-    }
-
-    function showPart(url) {
-        $("#mainframe", parent.document.body).attr("src", url);
-    }
-
-    function showIframe(url) {
-        layer.open({
-            type: 2,
-            area: ['700px', '450px'],
-            fixed: false, //不固定
-            maxmin: true,
-            content: url
-        });
     }
 
     /*]]>*/

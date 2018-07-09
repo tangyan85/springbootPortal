@@ -1,10 +1,9 @@
 package com.wanda.portal.dto.jenkins;
 
-import java.io.Serializable;
-
-import com.wanda.portal.entity.JenkinsProject;
 import com.wanda.portal.facade.model.input.JenkinsInputParam;
 import com.wanda.portal.utils.ConversionUtil;
+
+import java.io.Serializable;
 
 /*
  * { "_class" : "com.cloudbees.hudson.plugins.folder.Folder", "displayName" :
@@ -19,6 +18,8 @@ public class JenkinsJobDTO implements Serializable {
     private String displayName;
 
     private String name;
+
+    private String url;
 
     public String get_class() {
         return _class;
@@ -42,6 +43,14 @@ public class JenkinsJobDTO implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     @Override

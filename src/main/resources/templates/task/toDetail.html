@@ -45,17 +45,14 @@
                     <tr th:each="jira : ${project.jiraProjects}" th:object="${jira}" th:data="*{jiraProjectId}">
                         <td><a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
                                 <span th:text="*{jiraProjectKey}"></span></a></td>
-                        <td>任务总数（<label class="text-blue">10</label>）&nbsp;/&nbsp;已完成（<label class="text-green">5</label>）</td>
+                        <td>任务总数（<label class="text-blue" th:text="*{allIssues}"></label>）&nbsp;/&nbsp;已完成（<label class="text-green" th:text="*{finishIssues}"></label>）</td>
                         <td>
                             <ul class="chart-legend clearfix">
-                                <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.3
-                                    <small class="label-primary" style="margin-left: 30px;">归档</small>
-                                </li>
-                                <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.2
-                                    <small class="label-danger" style="margin-left: 30px;">未发布</small>
-                                </li>
-                                <li><i class="fa fa-arrow-circle-o-up text-green"></i> 1.0.1
-                                    <small class="label-info" style="margin-left: 30px;">已发布</small>
+                                <li th:each="version : *{projectVersions}" th:object="${version}">
+                                    <i class="fa fa-arrow-circle-o-up text-green" th:text="*{name}"></i>
+                                    <small class="label-primary" style="margin-left: 30px;" th:if="*{archived == true}">归档</small>
+                                    <small class="label-danger" style="margin-left: 30px;" th:if="*{archived == false} and *{released == false}">未发布</small>
+                                    <small class="label-info" style="margin-left: 30px;" th:if="*{archived == false} and *{released == true}">已发布</small>
                                 </li>
                             </ul>
                         </td>
@@ -78,42 +75,12 @@
             </div>
             <!-- /.box-header -->
             <div class="box-body table-responsive no-padding">
-                <table class="table table-hover">
+                <table class="table table-hover" id="component">
                     <tr>
                         <th>模块</th>
                         <th>任务</th>
                         <th>负责人</th>
                         <th>描述</th>
-                    </tr>
-                    <tr>
-                        <td>authentication</td>
-                        <td><a>0 Tasks</a></td>
-                        <td>guoliang</td>
-                        <td>统一认证模块</td>
-                    </tr>
-                    <tr>
-                        <td>cas</td>
-                        <td><a>0 Tasks</a></td>
-                        <td></td>
-                        <td>单点登录模块</td>
-                    </tr>
-                    <tr>
-                        <td>code-review</td>
-                        <td><a>0 Tasks</a></td>
-                        <td>guoliang</td>
-                        <td>代码审查模块</td>
-                    </tr>
-                    <tr>
-                        <td>confluence</td>
-                        <td><a>0 Tasks</a></td>
-                        <td>guoliang</td>
-                        <td>文档协同模块</td>
-                    </tr>
-                    <tr>
-                        <td>continuous-deployment</td>
-                        <td><a>0 Tasks</a></td>
-                        <td>guoliang</td>
-                        <td>continuous-deployment</td>
                     </tr>
                 </table>
             </div>
@@ -229,7 +196,29 @@
             $("#task-table tr").removeAttr("style");
             $(this).attr("style", "background-color: #ebf2f9;");
             $("#delTask").val($(this).attr("data"));
+
+            $.ajax({
+                type: "POST",
+                url: "/task/component/" + $(this).attr("data"),
+                data: {},
+                success: function(data){
+                    if (data != null) {
+                        let html = "";
+                        for (let i = 0; i < data.length; i++) {
+                            html += "<tr><td>" + data[i].name + "</td>";
+                            html += "<td><a href='#' onclick='window.open(\"" + data[i].self + "\")'>"
+                                + (data[i].issues !== undefined ? data[i].issues : "0") + " Tasks</a></td>";
+                            html += "<td>" + (data[i].displayName !== undefined ? data[i].displayName : "") + "</td>";
+                            html += "<td>" + data[i].description + "</td></tr>";
+                        }
+                        $("#component tr").not(":eq(0)").remove();
+                        $("#component").append(html);
+                    }
+                }
+            });
         });
+
+        $("#task-table tr:eq(1)").click();
 
     });
 
@@ -238,59 +227,22 @@
         let projectId = /*[[${project.projectId}]]*/ null;
 
         if (value === "") {
-            jQuery.alert({
-                type: 'blue',
-                title: '系统提示',
-                content: "请选择需要删除的Jira项目！",
-                icon:'glyphicon glyphicon-info-sign'
-            });
+            alert("请选择需要解绑的Jira项目！");
         } else {
-            jQuery.confirm({
-                title: '系统提示',
-                content: '确认要删除吗？',
-                type: 'blue',
-                icon:'glyphicon glyphicon-question-sign',
-                buttons: {
-                    ok: {
-                        text: '确认',
-                        btnClass: 'btn-primary',
-                        action: function(){
-                            $.ajax({
-                                type: "POST",
-                                url: "/task/remove",
-                                data: {"jiraId": value},
-                                success: function(data){
-                                    if (data != null) {
-                                        showDetail(projectId);
-                                    }
-                                }
-                            });
+            confirm('确认要解绑吗？',
+                function(){
+                    $.ajax({
+                        type: "POST",
+                        url: "/task/remove",
+                        data: {"jiraId": value},
+                        success: function(data){
+                            if (data != null) {
+                                showDetail(projectId);
+                            }
                         }
-                    },
-                    cancel: {
-                        text: '取消',
-                        btnClass: 'btn-primary',
-                        action: function(){
-
-                        }
-                    },
-                }
-            });
+                    });
+                });
         }
-    }
-
-    function showPart(url) {
-        $("#mainframe", parent.document.body).attr("src", url);
-    }
-
-    function showIframe(url) {
-        layer.open({
-            type: 2,
-            area: ['700px', '450px'],
-            fixed: false, //不固定
-            maxmin: true,
-            content: url
-        });
     }
 
     /*]]>*/

@@ -174,12 +174,7 @@
 
         $("#finished").click(function () {
             if (!$('#validation-form').valid()) {
-                jQuery.alert({
-                    type: 'blue',
-                    title: '系统提示',
-                    content: "表单验证不通过！",
-                    icon:'glyphicon glyphicon-info-sign'
-                });
+                alert("表单验证不通过！");
                 return;
             }
             btnSumbit();
@@ -290,7 +285,7 @@
 
         var url = "/artifact/save";
 
-        jQuery.confirm({
+        confirm({
             title: '请确认',
             content: '<div style="text-align:center">确认是否提交项目信息？</div>',
             buttons: {
@@ -305,22 +300,12 @@
                             data: jsondata,
                             success: function (msg) {
                                 if (msg.responseCode == "0000") {
-                                    jQuery.alert({
-                                        type: 'blue',
-                                        title: '系统提示',
-                                        content: successMsg,
-                                        icon:'glyphicon glyphicon-info-sign'
-                                    });
+                                    alert(successMsg);
                                     let backPath = /*[[${backPath}]]*/ false;
                                     $("#mainframe", parent.document.body).attr("src", backPath);
                                     //top.location.href = "/index";
                                 } else {
-                                    jQuery.alert({
-                                        type: 'blue',
-                                        title: '系统提示',
-                                        content: "错误: " + msg.responseMsg,
-                                        icon:'glyphicon glyphicon-info-sign'
-                                    });
+                                    alert("错误: " + msg.responseMsg);
                                 }
                             }
                         });
@@ -332,10 +317,6 @@
             }
         });
 
-    }
-
-    function showPart(url) {
-        $("#mainframe", parent.document.body).attr("src", url);
     }
 
     /*]]>*/

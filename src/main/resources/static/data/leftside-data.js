@@ -5,15 +5,15 @@
                         href: '#parent1',
                         iconClass: "fa fa-dashboard",
                         nodes: [
-                            /*{
+                            {
                                 text: '新建项目',
                                 url: 'project/toAdd',
                                 iconClass: "fa fa-circle-thin"
-                            },*/{
+                            },/*{
                                 text: '新建项目',
                                 url: 'project/toAdd2',
                                 iconClass: "fa fa-circle-thin"
-                            },
+                            },*/
                             /*{
                                 text: '维护项目',
                                 url: 'project/findAllProjects/view',

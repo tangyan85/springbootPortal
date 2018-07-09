@@ -67,9 +67,8 @@
                                             <th id="inputActionType">操作类型</th>
                                             <th id="serverId">服务器地址</th>
                                             <th data-ingore="true">Jenkins Job模板</th>
-                                            <th id="jenkinsProjectId" style="display:none">
-                                                jenkinsProjectId
-                                            </th>
+                                            <th id="jenkinsProjUrl" style="display:none">jenkinsProjUrl</th>
+                                            <th id="jenkinsProjectId" style="display:none">jenkinsProjectId</th>
                                             <th id="referProj" style="display:none">referProj</th>
                                             <th id="jenkinsProjKey">Jenkins Job英文简称</th>
                                             <th></th>
@@ -107,9 +106,15 @@
                                                             name="jenkin" data-ingore="true">
                                                         <option value="">------请选择------</option>
                                                         <option th:each="jenkin : ${existJenkins}"
+                                                                th:data="${jenkin.jenkinsProjUrl}"
                                                                 th:value="${jenkin.jenkinsProjKey}"
                                                                 th:text="${jenkin.jenkinsProjKey}"/>
                                                     </select>
+                                                </div>
+                                            </td>
+                                            <td style="display:none">
+                                                <div class="form-group">
+                                                    <input class="form-control selectChange" type="hidden" id="jenkinsProjUrl" name="jenkinsProjUrl"/>
                                                 </div>
                                             </td>
                                             <td style="display:none">
@@ -198,12 +203,7 @@
 
         $("#finished").click(function () {
             if (!$('#validation-form').valid()) {
-                jQuery.alert({
-                    type: 'blue',
-                    title: '系统提示',
-                    content: "表单验证不通过！",
-                    icon:'glyphicon glyphicon-info-sign'
-                });
+                alert("表单验证不通过！");
                 return;
             }
             btnSumbit();
@@ -237,7 +237,7 @@
                     required: true
                 },
                 jenkin: {
-                    required: false
+                    required: true
                 },
                 jenkinsProjKey: {
                     required: true,
@@ -324,47 +324,26 @@
 
         var url = "/ci/save";
 
-        jQuery.confirm({
-            title: '请确认',
-            content: '<div style="text-align:center">确认是否提交项目信息？</div>',
-            buttons: {
-                confirm: {
-                    text: '确认',
-                    action: function () {
-                        jQuery.ajax({
-                            type: "POST",
-                            url: url,
-                            contentType: 'application/json;charset=utf-8', //设置请求头信息
-                            dataType: "json",
-                            data: jsondata,
-                            success: function (msg) {
-                                if (msg.responseCode == "0000") {
-                                    jQuery.alert({
-                                        type: 'blue',
-                                        title: '系统提示',
-                                        content: successMsg,
-                                        icon:'glyphicon glyphicon-info-sign'
-                                    });
-                                    let backPath = /*[[${backPath}]]*/ false;
-                                    $("#mainframe", parent.document.body).attr("src", backPath);
-                                    //top.location.href = "/index";
-                                } else {
-                                    jQuery.alert({
-                                        type: 'blue',
-                                        title: '系统提示',
-                                        content: "错误: " + msg.responseMsg,
-                                        icon:'glyphicon glyphicon-info-sign'
-                                    });
-                                }
-                            }
-                        });
+        confirm('确认是否提交项目信息？',
+            function () {
+                jQuery.ajax({
+                    type: "POST",
+                    url: url,
+                    contentType: 'application/json;charset=utf-8', //设置请求头信息
+                    dataType: "json",
+                    data: jsondata,
+                    success: function (msg) {
+                        if (msg.responseCode == "0000") {
+                            alert(successMsg);
+                            let backPath = /*[[${backPath}]]*/ false;
+                            $("#mainframe", parent.document.body).attr("src", backPath);
+                            //top.location.href = "/index";
+                        } else {
+                            alert("错误: " + msg.responseMsg);
+                        }
                     }
-                },
-                cancel: {
-                    text: '取消'
-                }
-            }
-        });
+                });
+            });
 
     };
 
@@ -387,9 +366,16 @@
         }
     });
 
-    function showPart(url) {
-        $("#mainframe", parent.document.body).attr("src", url);
-    }
+    $(document).on("change", ".selectJenkins", function () {
+        let checked = jQuery(this).children('option:selected');
+        let parentTr = jQuery(this).parents('tr');
+
+        let action = parentTr.find(".actionJenkins").children('option:selected').val();
+        if (action == "ATTACH_OLD") {
+            parentTr.find("#jenkinsProjUrl").val(checked.attr("data"));
+            parentTr.find("#jenkinsProjKey").val(checked.val());
+        }
+    });
 
     /*]]>*/
 </script>

@@ -1,13 +1,12 @@
 package com.wanda.portal.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import javax.persistence.*;
-
 import com.alibaba.fastjson.annotation.JSONField;
 import com.wanda.portal.constants.Constants;
 import com.wanda.portal.constants.InputActionType;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
 
 @Entity
 @Table(name = "jenkins_project")
@@ -34,6 +33,9 @@ public class JenkinsProject implements Serializable {
     
     @Column(name = "input_action_type")
     private InputActionType inputActionType;
+
+    @Column(name = "web_ui")
+    private String webui;
 
     @ManyToOne(fetch = FetchType.LAZY) // 注意ManyToOne如果采用Eager会导致糟糕的性能，参见vladmihalcea的博客 
     @JoinColumn(name = "project_id") //这里记得配置id，否则会默认生成难看的project_project_id
@@ -108,6 +110,13 @@ public class JenkinsProject implements Serializable {
         this.url = url;
     }
 
+    public String getWebui() {
+        return webui;
+    }
+
+    public void setWebui(String webui) {
+        this.webui = webui;
+    }
 
     public Project getProject() {
         return project;

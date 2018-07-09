@@ -162,12 +162,7 @@
 
         $("#finished").click(function () {
             if (!$('#validation-form').valid()) {
-                jQuery.alert({
-                    type: 'blue',
-                    title: '系统提示',
-                    content: "表单验证不通过！",
-                    icon:'glyphicon glyphicon-info-sign'
-                });
+                alert("表单验证不通过！");
                 return;
             }
             btnSumbit();
@@ -271,53 +266,28 @@
 
         var url = "/member/save";
 
-        jQuery.confirm({
-            title: '请确认',
-            content: '<div style="text-align:center">确认是否提交项目信息？</div>',
-            buttons: {
-                confirm: {
-                    text: '确认',
-                    action: function () {
-                        jQuery.ajax({
-                            type: "POST",
-                            url: url,
-                            contentType: 'application/json;charset=utf-8', //设置请求头信息
-                            dataType: "json",
-                            data: jsondata,
-                            success: function (msg) {
-                                if (msg.responseCode == "0000") {
-                                    jQuery.alert({
-                                        type: 'blue',
-                                        title: '系统提示',
-                                        content: successMsg,
-                                        icon:'glyphicon glyphicon-info-sign'
-                                    });
-                                    let backPath = /*[[${backPath}]]*/ false;
-                                    $("#mainframe", parent.document.body).attr("src", backPath);
-                                    //top.location.href = "/index";
-                                } else {
-                                    jQuery.alert({
-                                        type: 'blue',
-                                        title: '系统提示',
-                                        content: "错误: " + msg.responseMsg,
-                                        icon:'glyphicon glyphicon-info-sign'
-                                    });
-                                }
-                            }
-                        });
+        confirm('确认是否提交项目信息？',
+            function () {
+                jQuery.ajax({
+                    type: "POST",
+                    url: url,
+                    contentType: 'application/json;charset=utf-8', //设置请求头信息
+                    dataType: "json",
+                    data: jsondata,
+                    success: function (msg) {
+                        if (msg.responseCode == "0000") {
+                            alert(successMsg);
+                            let backPath = /*[[${backPath}]]*/ false;
+                            $("#mainframe", parent.document.body).attr("src", backPath);
+                            //top.location.href = "/index";
+                        } else {
+                            alert("错误: " + msg.responseMsg);
+                        }
                     }
-                },
-                cancel: {
-                    text: '取消'
-                }
-            }
-        });
+                });
+            });
 
     };
-
-    function showPart(url) {
-        $("#mainframe", parent.document.body).attr("src", url);
-    }
 
     /*]]>*/
 </script>

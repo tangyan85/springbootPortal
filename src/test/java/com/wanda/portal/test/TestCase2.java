@@ -160,7 +160,7 @@ public class TestCase2 {
     public void findAllJiraFromRemote() throws Exception {
         List<Server> ll = serverRepository.findByServerType(ServerType.JIRA);
         jiraService.setServer(ll.get(0));
-        List<GenericJiraProjectDTO> z = jiraService.fetchAllJiraProjects(null);
+        List<GenericJiraProjectDTO> z = jiraService.fetchAllJiraProjects();
         System.out.println("Query For all JIRAs: " + JSONObject.toJSONString(z));
     }
 

@@ -1,5 +1,6 @@
 package com.wanda.portal.dao;
 
+import com.wanda.portal.constants.JiraConstants;
 import com.wanda.portal.dao.jpa.ServerRepository;
 import com.wanda.portal.dao.remote.ConfluenceService;
 import com.wanda.portal.dao.remote.JenkinsService;
@@ -42,7 +43,11 @@ public class AsyncTaskService {
         if (jiraServers != null && jiraServers.size() > 0) {
             for (Server jiraServer : jiraServers) {
                 jiraService.setServer(jiraServer);
-                existJiras.addAll(jiraService.fetchUnusedJiraProject(user));
+                if (JiraConstants.LOGIN_MODE.CURR_USER.getModeCode().equals(jiraServer.getLoginMode())) {
+                    jiraServer.setLoginName(user.getUsername());
+                    jiraServer.setPasswd(user.getPassword());
+                }
+                existJiras.addAll(jiraService.fetchUnusedJiraProject());
             }
         }
         return new AsyncResult<>(existJiras);
@@ -62,10 +67,14 @@ public class AsyncTaskService {
     }
     
     @Async
-    public Future<List<JenkinsInputParam>> fetchAllJenkinses(List<Server> jenkinsServers) {
+    public Future<List<JenkinsInputParam>> fetchAllJenkinses(List<Server> jenkinsServers, UserDetails user) {
         List<JenkinsInputParam> existJenkinses = new ArrayList<>();
         if (jenkinsServers != null && jenkinsServers.size() > 0) {
             for (Server jenkinsServer : jenkinsServers) {
+                if (JiraConstants.LOGIN_MODE.CURR_USER.getModeCode().equals(jenkinsServer.getLoginMode())) {
+                    jenkinsServer.setLoginName(user.getUsername());
+                    jenkinsServer.setPasswd(user.getPassword());
+                }
                 jenkinsService.setServer(jenkinsServer);
                 existJenkinses.addAll(jenkinsService.fetchUnusedJekins());
             }

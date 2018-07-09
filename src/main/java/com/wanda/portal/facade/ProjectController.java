@@ -7,6 +7,8 @@ import com.wanda.portal.dao.jpa.ProjectRepository;
 import com.wanda.portal.dao.jpa.ServerRepository;
 import com.wanda.portal.dao.remote.*;
 import com.wanda.portal.dto.common.CommonHttpResponseBody;
+import com.wanda.portal.dto.jira.JiraProjectVersionDTO;
+import com.wanda.portal.entity.JiraProject;
 import com.wanda.portal.entity.Project;
 import com.wanda.portal.entity.ProjectMember;
 import com.wanda.portal.entity.Server;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -31,8 +34,10 @@ import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 @RequestMapping("/project")
@@ -58,6 +63,8 @@ public class ProjectController {
 
     @Autowired
     AsyncTaskService asyncTaskService;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @RequestMapping("/toAdd")
     public String toAdd(Model model, HttpSession session) {
@@ -77,6 +84,35 @@ public class ProjectController {
         setCommonServerInfoAsync(model, user);
 
         return "project/toAdd2";
+    }
+
+    @RequestMapping("/rename")
+    @ResponseBody
+    public String rename(String projectId, String projectKey, String projectName) {
+        if (StringUtils.isEmpty(projectId)) {
+            return "该项目不存在或已删除！";
+        }
+
+        Project project = projectService.getProjectById(Long.valueOf(projectId));
+
+        if (StringUtils.isNotEmpty(projectKey)) {
+            List<Project> projects = projectService.findByProjectKey(projectKey);
+            if (projects.size() > 0) {
+                return "项目英文名称已存在！";
+            }
+            project.setProjectKey(projectKey);
+        }
+
+        if (StringUtils.isNotEmpty(projectName)) {
+            List<Project> projects = projectService.findByProjectName(projectName);
+            if (projects.size() > 0) {
+                return "项目中文名称已存在！";
+            }
+            project.setProjectName(projectName);
+        }
+
+        projectService.updateProject(project);
+        return "ok";
     }
 
     @RequestMapping("/findAllProjects/{optype}")
@@ -108,6 +144,62 @@ public class ProjectController {
         Project project = new Project();
         try {
             project = projectService.getProjectById(Long.valueOf(projectId));
+            if (project != null) {
+                Set<JiraProject> jiraProjects = project.getJiraProjects();
+                for (JiraProject jiraProject : jiraProjects) {
+                    Long versionExpire = redisTemplate.getExpire(jiraProject.getJiraProjectKey() + "_versions");
+                    List<JiraProjectVersionDTO> versions;
+
+                    List<Server> jiraServers = serverRepository.findByServerType(ServerType.JIRA);
+                    for (Server server : jiraServers) {
+                        if (jiraProject.getWebui().contains(server.getOuterServerIpAndPort())) {
+                            jiraService.setServer(server);
+                            break;
+                        }
+                    }
+
+                    if (versionExpire <= 0) {
+                        versions = jiraService.fetchProjectVersions(jiraProject.getJiraProjectKey());
+                        if (versions.size() > 0) {
+                            redisTemplate.opsForList().leftPush(jiraProject.getJiraProjectKey() + "_versions", versions);
+                            redisTemplate.expire(jiraProject.getJiraProjectKey() + "_versions", 5, TimeUnit.MINUTES);
+                        }
+                    } else {
+                        versions = (List<JiraProjectVersionDTO>) redisTemplate.opsForList().leftPop(jiraProject.getJiraProjectKey() + "_versions");
+                    }
+
+                    jiraProject.setProjectVersions(versions);
+
+                    Long allIssuesExpire = redisTemplate.getExpire(jiraProject.getJiraProjectKey() + "_allIssues");
+                    Integer allIssues;
+
+                    if (allIssuesExpire <= 0) {
+                        allIssues = jiraService.fetchProjectAllIssues(jiraProject.getJiraProjectKey());
+                        if (allIssues != null) {
+                            redisTemplate.opsForList().leftPush(jiraProject.getJiraProjectKey() + "_allIssues", allIssues);
+                            redisTemplate.expire(jiraProject.getJiraProjectKey() + "_allIssues", 3, TimeUnit.MINUTES);
+                        }
+                    } else {
+                        allIssues = (Integer) redisTemplate.opsForList().leftPop(jiraProject.getJiraProjectKey() + "_allIssues");
+                    }
+
+                    jiraProject.setAllIssues(allIssues);
+
+                    Long finishIssuesExpire = redisTemplate.getExpire(jiraProject.getJiraProjectKey() + "_finishIssues");
+                    Integer finishIssues;
+                    if (finishIssuesExpire <= 0) {
+                        finishIssues = jiraService.fetchProjectAllIssues(jiraProject.getJiraProjectKey());
+                        if (finishIssues != null) {
+                            redisTemplate.opsForList().leftPush(jiraProject.getJiraProjectKey() + "_finishIssues", finishIssues);
+                            redisTemplate.expire(jiraProject.getJiraProjectKey() + "_finishIssues", 3, TimeUnit.MINUTES);
+                        }
+                    } else {
+                        finishIssues = (Integer) redisTemplate.opsForList().leftPop(jiraProject.getJiraProjectKey() + "_finishIssues");
+                    }
+
+                    jiraProject.setFinishIssues(finishIssues);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -277,6 +369,26 @@ public class ProjectController {
         return response;
     }
 
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonHttpResponseBody save(@RequestBody ProjectInputParam projectInputParam,
+                                       RedirectAttributes redirectAttributes) {
+        CommonHttpResponseBody response = CommonHttpResponseBody.packSuccess();
+        logger.info("input" + JSON.toJSONString(projectInputParam));
+        Project project;
+        try {
+            // 调远程服务创建
+            project = projectService.createProject(projectInputParam);
+            response.setResponseMsg(project != null ? project.getProjectId().toString() : "");
+        } catch (Exception e) {
+            response.setResponseCode(CommonHttpResponseBody.FAIL_CODE);
+            response.setResponseMsg(e.getMessage());
+            return response;
+        }
+        logger.info("------Current path:/project/save:操作成功");
+        return response;
+    }
+
     @RequestMapping(value = "/toEditProjectX", method = RequestMethod.POST)
     @ResponseBody
     public CommonHttpResponseBody toEditProjectX(Model model, @RequestBody ProjectInputParam projectInputParam, RedirectAttributes redirectAttributes) {
@@ -323,7 +435,7 @@ public class ProjectController {
         //创建项目时需要选择已有项目id来进行创建
         fetchAllConfluences(model);
         //创建项目时需要新建key来进行创建
-        fetchAllJenkinses(model);
+        fetchAllJenkinses(model, user);
         //创建项目时需要选择已有项目key来进行创建
         fetchAllSvnAndTemplates(model);
         //创建项目时需要选择已有项目template来进行创建
@@ -332,6 +444,7 @@ public class ProjectController {
 
     /**
      * 上述代码的线程池并行改造
+     *
      * @param model
      */
     public void setCommonServerInfoAsync(Model model, UserDetails user) {
@@ -347,7 +460,7 @@ public class ProjectController {
             // 先从db中获取jenkins的所有Server
             List<Server> jenkinsServers = serverRepository.findByServerType(ServerType.JENKINS);
             // 再轮询外部jenkins，过滤
-            Future<List<JenkinsInputParam>> existJenkinses = asyncTaskService.fetchAllJenkinses(jenkinsServers);
+            Future<List<JenkinsInputParam>> existJenkinses = asyncTaskService.fetchAllJenkinses(jenkinsServers, user);
             // 先从db获取svn的所有Server
             List<Server> svnServers = serverRepository.findByServerType(ServerType.SVN);
             // 轮询外部svn，过滤
@@ -372,8 +485,11 @@ public class ProjectController {
         if (jiraServers != null && jiraServers.size() > 0) {
             for (Server jiraServer : jiraServers) {
                 jiraService.setServer(jiraServer);
-
-                existJiras.addAll(jiraService.fetchUnusedJiraProject(user));
+                if (JiraConstants.LOGIN_MODE.CURR_USER.getModeCode().equals(jiraServer.getLoginMode())) {
+                    jiraServer.setLoginName(user.getUsername());
+                    jiraServer.setPasswd(user.getPassword());
+                }
+                existJiras.addAll(jiraService.fetchUnusedJiraProject());
             }
         }
         model.addAttribute("existJiras", existJiras);
@@ -391,11 +507,15 @@ public class ProjectController {
         model.addAttribute("existConfs", existConfs);
     }
 
-    public void fetchAllJenkinses(Model model) {
+    public void fetchAllJenkinses(Model model, UserDetails user) {
         List<Server> jenkinsServers = serverRepository.findByServerType(ServerType.JENKINS);
         List<JenkinsInputParam> existJenkinses = new ArrayList<>();
         if (jenkinsServers != null && jenkinsServers.size() > 0) {
             for (Server jenkinsServer : jenkinsServers) {
+                if (JiraConstants.LOGIN_MODE.CURR_USER.getModeCode().equals(jenkinsServer.getLoginMode())) {
+                    jenkinsServer.setLoginName(user.getUsername());
+                    jenkinsServer.setPasswd(user.getPassword());
+                }
                 jenkinsService.setServer(jenkinsServer);
                 existJenkinses.addAll(jenkinsService.fetchUnusedJekins());
             }

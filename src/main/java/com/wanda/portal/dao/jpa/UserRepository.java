@@ -6,5 +6,5 @@ import com.wanda.portal.entity.User;
 
 public interface UserRepository  extends JpaRepository<User, Long>{
 
-//	SysUser findByUserName(String username);
+    User findByUserkey(String userkey);
 }

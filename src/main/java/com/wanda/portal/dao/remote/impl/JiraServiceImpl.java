@@ -1,13 +1,14 @@
 package com.wanda.portal.dao.remote.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import com.wanda.portal.config.biz.JiraConfig;
 import com.wanda.portal.constants.JiraConstants;
 import com.wanda.portal.dao.jpa.JiraProjectRepository;
+import com.wanda.portal.dao.remote.AbstractRestService;
 import com.wanda.portal.dao.remote.JiraService;
-import com.wanda.portal.dto.jira.GenericJiraProjectDTO;
-import com.wanda.portal.dto.jira.JiraInputDTO;
-import com.wanda.portal.dto.jira.JiraOutputDTO;
+import com.wanda.portal.dto.jira.*;
 import com.wanda.portal.entity.JiraProject;
 import com.wanda.portal.entity.Server;
 import com.wanda.portal.exception.JiraProjectCreateFailureException;
@@ -21,15 +22,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.*;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+
 @Primary
 @Service("JiraServiceImpl")
 @Scope("prototype")
-public class JiraServiceImpl implements JiraService {
+public class JiraServiceImpl extends AbstractRestService implements JiraService {
     private static Logger logger = LoggerFactory.getLogger(JiraServiceImpl.class);
     private static final String JIRA_ALREADY_EXISTS_ERROR_MSG = "jira project already exists";
     private static final String JIRA_CREATE_ERROR_MSG = "error occurred during creating for jira project";
@@ -39,6 +40,8 @@ public class JiraServiceImpl implements JiraService {
     RestTemplate restTemplate;
 
     private Server server;
+    @Autowired
+    JiraProjectRepository jiraProjectRepository;
 
     /*
      * 入参1 JiraInputDTO 入参2 isCheckExist是否事先检查jira的KEY是否存在
@@ -117,20 +120,8 @@ public class JiraServiceImpl implements JiraService {
      * 此方法轮询所有Project，不返还Exception，目的是为了安全的轮询一下JIRA获得所有Project
      */
     @Override
-    public List<GenericJiraProjectDTO> fetchAllJiraProjects(UserDetails user) {
-        String username = "";
-        String password = "";
-        if (JiraConstants.LOGIN_MODE.CURR_USER.getModeCode().equals(server.getLoginMode())) {
-            username = user.getUsername();
-            password = user.getPassword();
-        }
-
-        if (JiraConstants.LOGIN_MODE.DB_USER.getModeCode().equals(server.getLoginMode())) {
-            username = server.getLoginName();
-            password = server.getPasswd();
-        }
-
-        HttpHeaders headers = RestUtils.packBasicAuthHeader(username, password);
+    public List<GenericJiraProjectDTO> fetchAllJiraProjects() {
+        HttpHeaders headers = RestUtils.packBasicAuthHeader(server.getLoginName(), server.getPasswd());
         HttpEntity<String> request = new HttpEntity<String>(headers);
         ResponseEntity<String> response;
         try {
@@ -151,8 +142,83 @@ public class JiraServiceImpl implements JiraService {
     }
 
     @Override
+    public Integer fetchProjectAllIssues(final String projectId) {
+        Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
+        String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + jiraConfig.getGenericApi() + "/search?jql=project=" + projectId;
+        return restRequest(values, "{}", url, HttpMethod.GET, (t) ->
+        {
+            JSONObject jb = JSONObject.parseObject(t);
+            return (Integer) JSONPath.eval(jb, "$.total");
+        });
+    }
+
+    @Override
+    public Integer fetchProjectFinishIssues(final String projectId) {
+        Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
+        String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + jiraConfig.getGenericApi() + "/search?jql=project=" + projectId +" AND status = 5";
+        return restRequest(values, "{}", url, HttpMethod.GET, (t) ->
+        {
+            JSONObject jb = JSONObject.parseObject(t);
+            return (Integer) JSONPath.eval(jb, "$.total");
+        });
+    }
+
+    @Override
+    public List<JiraProjectVersionDTO> fetchProjectVersions(final String projectId) {
+        Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
+        String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + jiraConfig.getGenericApi() + "/project/" + projectId + "/versions";
+        return restRequest(values, "{}", url, HttpMethod.GET, (t) ->
+                JSONObject.parseArray(t, JiraProjectVersionDTO.class));
+    }
+
+    @Override
+    public List<JiraProjectComponentDTO> fetchProjectComponents(final String projectId) {
+        Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
+        String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + jiraConfig.getGenericApi() + "/project/" + projectId + "/components";
+
+        return restRequest(values, "{}", url, HttpMethod.GET, (t) ->
+        {
+            JSONArray ja = JSONObject.parseArray(t);
+            List<JiraProjectComponentDTO> list = new ArrayList<>();
+            for (Object o : ja) {
+                JiraProjectComponentDTO dto = new JiraProjectComponentDTO();
+                Map<String, Object> map = (Map<String, Object>) o;
+                Object obj = map.get("realAssignee");
+                if (obj != null) {
+                    Map<String, Object> map2 = (Map<String, Object>) obj;
+                    dto.setDisplayName(map2.get("displayName").toString());
+                }
+                dto.setId(Long.valueOf(map.get("id").toString()));
+                String reUrl = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                        + jiraConfig.getGenericApi() + "/component/" + dto.getId() + "/relatedIssueCounts";
+                Integer issueCount = restRequest(values, "{}", reUrl, HttpMethod.GET, (t1) -> {
+                    JSONObject jb = JSONObject.parseObject(t1);
+                    return (Integer) JSONPath.eval(jb, "$.issueCount");
+                });
+                dto.setIssues(issueCount);
+                dto.setName(map.get("name").toString());
+                String self = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                        + "/issues/?jql=project %3D " + projectId + " AND component %3D " + dto.getName();
+                dto.setSelf(self);
+                dto.setDescription(map.get("description").toString());
+                list.add(dto);
+            }
+            return  list;
+        });
+    }
+
+    @Override
+    public JiraProject findById(String jiraProjectId) {
+        return jiraProjectRepository.findById(Long.valueOf(jiraProjectId)).get();
+    }
+
+    @Override
     public Long createJiraProjectUsingExistingProject(Long existingProjectId, String key, String leader,
-            String projectName, boolean isCheckExist) throws Exception {
+                                                      String projectName, boolean isCheckExist) throws Exception {
         if (isCheckExist) {
             boolean templateIsExist = rawCheckExistence(existingProjectId.toString());
             if (!templateIsExist) { // 模板Id不存在，肯定不支持创建
@@ -175,7 +241,7 @@ public class JiraServiceImpl implements JiraService {
         String jiraInputParam = JSONObject.toJSONString(dto);
         HttpEntity<String> requestEntity = new HttpEntity<String>(jiraInputParam, headers);
         ResponseEntity<String> response = restTemplate.exchange(server.getProtocol() + "://"
-                + server.getOuterServerIpAndPort() + jiraConfig.getOldCreateApi() + "/" + existingProjectId,
+                        + server.getOuterServerIpAndPort() + jiraConfig.getOldCreateApi() + "/" + existingProjectId,
                 HttpMethod.POST, requestEntity, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
@@ -197,7 +263,7 @@ public class JiraServiceImpl implements JiraService {
 
         HttpHeaders headers = RestUtils.packBasicAuthHeader(jiraConfig.getUsername(), jiraConfig.getPassword());
         headers.setContentType(MediaType.APPLICATION_JSON);
-        List<MediaType>acceptableMediaTypes=new ArrayList<>();
+        List<MediaType> acceptableMediaTypes = new ArrayList<>();
         acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
         headers.setAccept(acceptableMediaTypes);
         Map<String, Object> dto = new HashMap<>();
@@ -217,15 +283,12 @@ public class JiraServiceImpl implements JiraService {
             logger.error("create failed");
             throw new JiraProjectCreateFailureException(JIRA_CREATE_ERROR_MSG);
         }
-       return  response.getStatusCode().toString();
+        return response.getStatusCode().toString();
     }
 
-    @Autowired
-    JiraProjectRepository jiraProjectRepository;
-
     @Override
-    public List<JiraProjectInputParam> fetchUnusedJiraProject(UserDetails user) {
-        List<GenericJiraProjectDTO> allJiras = this.fetchAllJiraProjects(user);
+    public List<JiraProjectInputParam> fetchUnusedJiraProject() {
+        List<GenericJiraProjectDTO> allJiras = this.fetchAllJiraProjects();
         List<JiraProject> usedJiras = jiraProjectRepository.findAll();
         List<JiraProjectInputParam> retJiras = new ArrayList<>();
 

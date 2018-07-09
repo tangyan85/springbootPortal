@@ -41,7 +41,8 @@
                         <th>操作</th>
                     </tr>
                     <tr th:each="jenkins : ${project.jenkinsProjects}" th:object="${jenkins}" th:data="*{jenkinsProjectId}">
-                        <td th:text="*{jenkinsProjKey}"></td>
+                        <td><a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
+                            <span th:text="*{jenkinsProjKey}"></td>
                         <td>成功</td>
                         <td><i class="fa fa-eye text-blue" th:onclick="'showIframe(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'\')'">任务</i>
                             <i class="fa fa-eye text-blue" th:onclick="'showIframe(\''+*{server.protocol}+'://'+*{server.domain}+'/me/my-views/view/all/job/'+*{jenkinsProjKey}+'/ws\')'" style="margin-left: 10px;">工作空间</i>
@@ -71,59 +72,22 @@
         let projectId = /*[[${project.projectId}]]*/ null;
 
         if (value === "") {
-            jQuery.alert({
-                type: 'blue',
-                title: '系统提示',
-                content: "请选择需要删除的Jenkins Job！",
-                icon:'glyphicon glyphicon-info-sign'
-            });
+            alert("请选择需要解绑的Jenkins Job！！");
         } else {
-            jQuery.confirm({
-                title: '系统提示',
-                content: '确认要删除吗？',
-                type: 'blue',
-                icon:'glyphicon glyphicon-question-sign',
-                buttons: {
-                    ok: {
-                        text: '确认',
-                        btnClass: 'btn-primary',
-                        action: function(){
-                            $.ajax({
-                                type: "POST",
-                                url: "/ci/remove",
-                                data: {"jenkinsId": value},
-                                success: function(data){
-                                    if (data != null) {
-                                        showDetail(projectId);
-                                    }
-                                }
-                            });
+            confirm('确认要解绑吗？',
+                function(){
+                    $.ajax({
+                        type: "POST",
+                        url: "/ci/remove",
+                        data: {"jenkinsId": value},
+                        success: function(data){
+                            if (data != null) {
+                                showDetail(projectId);
+                            }
                         }
-                    },
-                    cancel: {
-                        text: '取消',
-                        btnClass: 'btn-primary',
-                        action: function(){
-
-                        }
-                    },
-                }
-            });
+                    });
+                });
         }
-    }
-
-    function showPart(url) {
-        $("#mainframe", parent.document.body).attr("src", url);
-    }
-
-    function showIframe(url) {
-        layer.open({
-            type: 2,
-            area: ['700px', '450px'],
-            fixed: false, //不固定
-            maxmin: true,
-            content: url
-        });
     }
 
     /*]]>*/

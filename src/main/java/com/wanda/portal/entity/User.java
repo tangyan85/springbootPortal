@@ -18,6 +18,9 @@ public class User implements Serializable, UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @Column(name = "user_key")
+    private String userkey;
+
     @Column(name = "user_name")
     private String username;
     
@@ -26,6 +29,15 @@ public class User implements Serializable, UserDetails {
     
     @Column(name = "raw_password")
     private String rawPassword;
+
+	@Column(name = "mobile")
+	private String mobile;
+
+	@Column(name = "mail")
+	private String mail;
+
+	@Column(name = "dept")
+	private String dept;
 
 	@Override
 	public boolean isAccountNonExpired() {
@@ -65,6 +77,14 @@ public class User implements Serializable, UserDetails {
 		this.id = id;
 	}
 
+	public String getUserkey() {
+		return userkey;
+	}
+
+	public void setUserkey(String userkey) {
+		this.userkey = userkey;
+	}
+
 	@Override
 	public String getUsername() {
 		return username;
@@ -91,4 +111,27 @@ public class User implements Serializable, UserDetails {
 		this.rawPassword = rawPassword;
 	}
 
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public String getMail() {
+		return mail;
+	}
+
+	public void setMail(String mail) {
+		this.mail = mail;
+	}
+
+	public String getDept() {
+		return dept;
+	}
+
+	public void setDept(String dept) {
+		this.dept = dept;
+	}
 }

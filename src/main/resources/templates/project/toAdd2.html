@@ -41,41 +41,54 @@
                                     <div>
                                         <ul class="steps" style="margin-left: 0">
                                             <li data-step="1" class="active">
-                                                <span class="step"><i class="glyphicon glyphicon-tree-conifer"
-                                                                      style="top:3px;color:#3c763d;"></i></span>
+                                            <span class="step">
+                                                <i class="glyphicon glyphicon-tree-conifer"
+                                                   style="top:3px;color:#3c763d;"></i>
+                                            </span>
                                                 <span class="title">项目详情</span>
                                             </li>
 
                                             <li data-step="2">
-                                                <span class="step"><i class="glyphicon glyphicon-user"
-                                                                      style="top:3px;color:#0897ea;"></i></span>
+                                            <span class="step">
+                                                <i class="glyphicon glyphicon-user" style="top:3px;color:#0897ea;"></i>
+                                            </span>
                                                 <span class="title">项目团队</span>
                                             </li>
 
                                             <li data-step="3">
-                                                <span class="step"><i class="glyphicon glyphicon-tasks"
-                                                                      style="top:3px;color:#f44336;"></i></span>
+                                            <span class="step">
+                                                <i class="glyphicon glyphicon-tasks" style="top:3px;color:#f44336;"></i>
+                                            </span>
                                                 <span class="title">任务跟踪</span>
                                             </li>
 
                                             <li data-step="4">
-                                                <span class="step"><i class="glyphicon glyphicon-leaf"
-                                                                      style="top:3px;color:#63ba3c;"></i></span>
+                                            <span class="step">
+                                                <i class="glyphicon glyphicon-leaf" style="top:3px;color:#63ba3c;"></i>
+                                            </span>
                                                 <span class="title">文档协同</span>
                                             </li>
+
                                             <li data-step="5">
-                                                <span class="step"><i class="glyphicon glyphicon-list-alt"
-                                                                      style="top:3px;color:#cd8b51;"></i></span>
+                                            <span class="step">
+                                                <i class="glyphicon glyphicon-list-alt"
+                                                   style="top:3px;color:#cd8b51;"></i>
+                                            </span>
                                                 <span class="title">源代码管理</span>
                                             </li>
+
                                             <li data-step="6">
-                                                <span class="step"><i class="glyphicon glyphicon-duplicate"
-                                                                      style="top:3px;color:#c33625;"></i></span>
+                                            <span class="step">
+                                                <i class="glyphicon glyphicon-duplicate"
+                                                   style="top:3px;color:#c33625;"></i>
+                                            </span>
                                                 <span class="title">持续集成</span>
                                             </li>
+
                                             <li data-step="7">
-                                                <span class="step"><i class="glyphicon glyphicon-grain"
-                                                                      style="top:3px;color:#f5db53;"></i></span>
+                                            <span class="step">
+                                                <i class="glyphicon glyphicon-grain" style="top:3px;color:#f5db53;"></i>
+                                            </span>
                                                 <span class="title">产出物管理</span>
                                             </li>
                                         </ul>
@@ -535,9 +548,8 @@
                                                         <th id="inputActionType">操作类型</th>
                                                         <th id="serverId">服务器地址</th>
                                                         <th data-ingore="true">Jenkins Job模板</th>
-                                                        <th id="jenkinsProjectId" style="display:none">
-                                                            jenkinsProjectId
-                                                        </th>
+                                                        <th id="jenkinsProjUrl" style="display:none">jenkinsProjUrl</th>
+                                                        <th id="jenkinsProjectId" style="display:none">jenkinsProjectId</th>
                                                         <th id="referProj" style="display:none">referProj</th>
                                                         <th id="jenkinsProjKey">Jenkins Job英文简称</th>
                                                         <th data-ingore="true"></th>
@@ -577,9 +589,15 @@
                                                                         name="jenkin" data-ingore="true">
                                                                     <option value="">------请选择------</option>
                                                                     <option th:each="jenkin : ${existJenkins}"
+                                                                            th:data="${jenkin.jenkinsProjUrl}"
                                                                             th:value="${jenkin.jenkinsProjKey}"
                                                                             th:text="${jenkin.jenkinsProjKey}"/>
                                                                 </select>
+                                                            </div>
+                                                        </td>
+                                                        <td style="display:none">
+                                                            <div class="form-group">
+                                                                <input class="form-control selectChange" type="hidden" id="jenkinsProjUrl" name="jenkinsProjUrl"/>
                                                             </div>
                                                         </td>
                                                         <td style="display:none">
@@ -722,12 +740,7 @@
             })
             .on('finished.fu.wizard', function (e) {
                 if (!$('#validation-form').valid()) {
-                    jQuery.alert({
-                        type: 'blue',
-                        title: '系统提示',
-                        content: "表单验证不通过！",
-                        icon:'glyphicon glyphicon-info-sign'
-                    });
+                    alert("表单验证不通过！");
                     e.preventDefault();
                     return;
                 }
@@ -1026,12 +1039,7 @@
             }
         });
         if (!flag) {
-            jQuery.alert({
-                type: 'blue',
-                title: '系统提示',
-                content: "至少添加一个项目经理！",
-                icon:'glyphicon glyphicon-info-sign'
-            });
+            alert("至少添加一个项目经理！");
             return flag;
         }
 
@@ -1044,46 +1052,25 @@
 
         var url = "/project/toAddProjectX";
 
-        jQuery.confirm({
-            title: '请确认',
-            content: '<div style="text-align:center">确认是否提交项目信息？</div>',
-            buttons: {
-                confirm: {
-                    text: '确认',
-                    action: function () {
-                        jQuery.ajax({
-                            type: "POST",
-                            url: url,
-                            contentType: 'application/json;charset=utf-8', //设置请求头信息
-                            dataType: "json",
-                            data: jsondata,
-                            success: function (msg) {
-                                if (msg.responseCode == "0000") {
-                                    jQuery.alert({
-                                        type: 'blue',
-                                        title: '系统提示',
-                                        content: successMsg,
-                                        icon:'glyphicon glyphicon-info-sign'
-                                    });
-                                    $("#mainframe", parent.document.body).attr("src", "project/toList");
-                                    //top.location.href = "/index";
-                                } else {
-                                    jQuery.alert({
-                                        type: 'blue',
-                                        title: '系统提示',
-                                        content: "错误: " + msg.responseMsg,
-                                        icon:'glyphicon glyphicon-info-sign'
-                                    });
-                                }
-                            }
-                        });
+        confirm('确认是否提交项目信息？',
+            function () {
+                jQuery.ajax({
+                    type: "POST",
+                    url: url,
+                    contentType: 'application/json;charset=utf-8', //设置请求头信息
+                    dataType: "json",
+                    data: jsondata,
+                    success: function (msg) {
+                        if (msg.responseCode == "0000") {
+                            alert(successMsg);
+                            $("#mainframe", parent.document.body).attr("src", "project/toList");
+                            //top.location.href = "/index";
+                        } else {
+                            alert("错误: " + msg.responseMsg);
+                        }
                     }
-                },
-                cancel: {
-                    text: '取消'
-                }
-            }
-        });
+                });
+            });
 
     };
 
@@ -1307,6 +1294,17 @@
                 jQuery(this).val('');
                 jQuery(this).attr("disabled", true);
             });
+        }
+    });
+
+    $(document).on("change", ".selectJenkins", function () {
+        let checked = jQuery(this).children('option:selected');
+        let parentTr = jQuery(this).parents('tr');
+
+        let action = parentTr.find(".actionJenkins").children('option:selected').val();
+        if (action == "ATTACH_OLD") {
+            parentTr.find("#jenkinsProjUrl").val(checked.attr("data"));
+            parentTr.find("#jenkinsProjKey").val(checked.val());
         }
     });
 

@@ -18,7 +18,9 @@ public class JenkinsInputParam extends AbstractInputParam implements Serializabl
 
     private String remark;    
     
-    private Long serverId;  
+    private Long serverId;
+
+    private String jenkinsProjUrl;
 
     public Long getServerId() {
         return serverId;
@@ -74,6 +76,14 @@ public class JenkinsInputParam extends AbstractInputParam implements Serializabl
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public String getJenkinsProjUrl() {
+        return jenkinsProjUrl;
+    }
+
+    public void setJenkinsProjUrl(String jenkinsProjUrl) {
+        this.jenkinsProjUrl = jenkinsProjUrl;
     }
 
     @Override

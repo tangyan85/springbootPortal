@@ -90,38 +90,20 @@
 		<script>
 			function toEndProject(projectId) {
 				var url = "/project/toEndProject/" + projectId;
-				jQuery.confirm({
-					title: '请确认',
-					// content: '<div style="text-align:center">确认终止项目？</div>',
-					content: '<div style="text-align:center">确认终止项目？</div>',
-					buttons: {
-						confirm: {
-							text: '确认',
-							action: function () {
-								jQuery.ajax({
-									type: "POST",
-									url: url,
-									success: function (msg) {
-										if (msg.responseCode == "0000") {
-											$("#mainframe", parent.document.body).attr("src", "project/findAllProjects/end");
-										} else {
-                                            jQuery.alert({
-                                                type: 'blue',
-                                                title: '系统提示',
-                                                content: "错误: " + msg.responseMsg,
-                                                icon:'glyphicon glyphicon-info-sign'
-                                            });
-										}
-									}
-								});
+				confirm("确认终止项目？",
+					function () {
+						jQuery.ajax({
+							type: "POST",
+							url: url,
+							success: function (msg) {
+								if (msg.responseCode == "0000") {
+									$("#mainframe", parent.document.body).attr("src", "project/findAllProjects/end");
+								} else {
+									alert("错误: " + msg.responseMsg);
+								}
 							}
-						},
-						cancel: {
-							text: '取消'
-						}
-					}
-				});
-
+						});
+					});
 
 			}
 		</script>

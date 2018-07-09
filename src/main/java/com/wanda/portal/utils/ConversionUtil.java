@@ -203,6 +203,7 @@ public class ConversionUtil {
 			if (StringUtils.isNotEmpty(inputDto.getName())) {
 				outputDto.setJenkinsProjKey(inputDto.getName());
 				outputDto.setReferProj(inputDto.getName());
+				outputDto.setJenkinsProjUrl(inputDto.getUrl());
 			}
 			// outputDto.setRemark(JSON.toJSONString(inputDto));
 		}

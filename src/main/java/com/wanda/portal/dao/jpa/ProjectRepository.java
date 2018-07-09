@@ -7,4 +7,8 @@ import java.util.List;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findByProjectNameLike(String projectName);
+
+    List<Project> findByProjectKey(String projectKey);
+
+    List<Project> findByProjectName(String projectName);
 }

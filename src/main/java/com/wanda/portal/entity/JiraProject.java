@@ -3,10 +3,12 @@ package com.wanda.portal.entity;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.wanda.portal.constants.Constants;
 import com.wanda.portal.constants.InputActionType;
+import com.wanda.portal.dto.jira.JiraProjectVersionDTO;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "jira_project")
@@ -33,19 +35,19 @@ public class JiraProject implements Serializable {
 
     @Column(name = "remark")
     private String remark;
-    
+
     @Column(name = "server_ip")
     private String serverIP;
-    
+
     @Column(name = "team_leader")
     private String teamleader;
 
     @Column(name = "web_ui")
     private String webui;
-    
+
     @Column(name = "refer_jiraId")
     private Long referJiraId; // 参考id
-    
+
     @Column(name = "input_action_type")
     private InputActionType inputActionType;
 
@@ -58,8 +60,16 @@ public class JiraProject implements Serializable {
     @JoinColumn(name = "server_id") //这里记得配置id，否则会默认生成难看的project_project_id
     @JSONField(serialize=false)
     private Server server;
-    
-   
+
+    @Transient
+    private List<JiraProjectVersionDTO> projectVersions;
+
+    @Transient
+    private Integer allIssues;
+
+    @Transient
+    private Integer finishIssues;
+
 	public Server getServer() {
         return server;
     }
@@ -190,5 +200,29 @@ public class JiraProject implements Serializable {
 
     public void setWebui(String webui) {
         this.webui = webui;
+    }
+
+    public List<JiraProjectVersionDTO> getProjectVersions() {
+        return projectVersions;
+    }
+
+    public void setProjectVersions(List<JiraProjectVersionDTO> projectVersions) {
+        this.projectVersions = projectVersions;
+    }
+
+    public Integer getAllIssues() {
+        return allIssues;
+    }
+
+    public void setAllIssues(Integer allIssues) {
+        this.allIssues = allIssues;
+    }
+
+    public Integer getFinishIssues() {
+        return finishIssues;
+    }
+
+    public void setFinishIssues(Integer finishIssues) {
+        this.finishIssues = finishIssues;
     }
 }

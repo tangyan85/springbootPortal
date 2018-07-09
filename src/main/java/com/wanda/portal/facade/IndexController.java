@@ -63,6 +63,7 @@ public class IndexController {
 		model.addAttribute("currentUser", ud);
 		list = serverRepository.findAll();
 		model.addAttribute("servers", list);
+//		model.addAttribute("servers", list.stream().map(Server::getServerType));
 		for (Server s : list) {
 			model.addAttribute(s.getServerType().toString() + "_SERVER",
 					ConversionUtil.Con2ServerOutputParam(s));

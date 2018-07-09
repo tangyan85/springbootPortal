@@ -4,7 +4,7 @@ myprops:
   confluence: # confluence相关通用配置
     genericApi: /rest/api/
   jenkins: # jenkins相关通用配置
-    jsonQueryJobsApi: "/api/json?depth=1&tree=jobs[name,displayName]&pretty=true"
+    jsonQueryJobsApi: "/api/json?tree=jobs[name,url,displayName]&pretty=true"
     createItem: /createItem
   jira: # jira相关通用配置
     genericApi: /rest/api/2/

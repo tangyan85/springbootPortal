@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.wanda.portal.config.biz.JenkinsConfig;
 import com.wanda.portal.constants.JenkinsConstants;
 import com.wanda.portal.dao.jpa.JenkinsProjectRepository;
+import com.wanda.portal.dao.remote.AbstractRestService;
 import com.wanda.portal.dao.remote.JenkinsService;
 import com.wanda.portal.dto.jenkins.JenkinsJobDTO;
 import com.wanda.portal.entity.JenkinsProject;
@@ -23,15 +24,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Primary
 @Service("JenkinsServiceImpl")
 @Scope("prototype")
-public class JenkinsServiceImpl implements JenkinsService {
+public class JenkinsServiceImpl extends AbstractRestService implements JenkinsService {
     private static Logger LOGGER = LoggerFactory.getLogger(JenkinsServiceImpl.class);
     @Autowired
     JenkinsConfig jenkinsConfig;
@@ -44,28 +42,41 @@ public class JenkinsServiceImpl implements JenkinsService {
     
     @Override
     public List<JenkinsJobDTO> fetchAllJenkinsJobs() {
-        HttpHeaders headers = RestUtils.packBasicAuthHeader(jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
-        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        List<MediaType> accps = new ArrayList<>();
-        accps.add(MediaType.APPLICATION_JSON_UTF8);
-        headers.setAccept(accps);
-        HttpEntity<String> requestEntity = new HttpEntity<String>(JenkinsConstants.EMPTY_JSON_PARAM, headers);
-        ResponseEntity<String> response;
-        try {
-            response = restTemplate.exchange(server.getProtocol() + "://" + server.getOuterServerIpAndPort()
-                    + jenkinsConfig.getJsonQueryJobsApi(), HttpMethod.POST, requestEntity, String.class);
-            if (response.getStatusCode().is2xxSuccessful()) { // 创建成功
-                LOGGER.info(RestLogUtils.packSuccHTTPLogs("获得所有JenkinsJobs", response));
-                JSONObject jb = JSONObject.parseObject(response.getBody());
-                JSONArray ja = jb.getJSONArray("jobs");
-                return ja.toJavaList(JenkinsJobDTO.class);
-            } else {
-                LOGGER.info(RestLogUtils.packFailHTTPLogs("获得所有JenkinsJobs", response));
-                return new ArrayList<JenkinsJobDTO>();
+        Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
+        String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + jenkinsConfig.getJsonQueryJobsApi();
+        List<JenkinsJobDTO> result = new ArrayList<>();
+        getJob(values, url, result, "");
+        result.sort((t1, t2) -> t1.getName().compareToIgnoreCase(t2.getName()));
+        return result;
+    }
+
+    private void getJob(Map<String, String> values, String url, List<JenkinsJobDTO> result, final String pathName) {
+        List<JenkinsJobDTO> list = restRequest(values,JenkinsConstants.EMPTY_JSON_PARAM, url, HttpMethod.POST, (t) -> {
+            JSONObject jb = JSONObject.parseObject(t);
+            JSONArray ja = jb.getJSONArray("jobs");
+            if (ja == null) {
+                return null;
             }
-        } catch (Exception e) {
-            LOGGER.info("fetchAllJenkinsJobs失败,错误码为: " + e.getLocalizedMessage());
-            return new ArrayList<JenkinsJobDTO>();
+            return ja.toJavaList(JenkinsJobDTO.class);
+        });
+
+        if (list != null) {
+            for (JenkinsJobDTO dto : list) {
+                String pathNameNew = pathName + "/" + dto.getName();
+
+                if ("".equals(pathName) || pathName == null) {
+                    pathNameNew = dto.getName();
+                }
+
+                dto.setName(pathNameNew);
+
+                if (dto.getUrl() != null) {
+                    getJob(values, dto.getUrl() + jenkinsConfig.getJsonQueryJobsApi(), result, pathNameNew);
+                }
+            }
+
+            result.addAll(list);
         }
     }
 

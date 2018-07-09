@@ -45,4 +45,8 @@ public interface ProjectService {
     void createArtifact(List<ArtifactInputParam> list, Project proj) throws Exception;
 
     Project findById(Long projectId);
+
+    List<Project> findByProjectKey(String projectKey);
+
+    List<Project> findByProjectName(String projectName);
 }

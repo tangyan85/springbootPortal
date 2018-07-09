@@ -109,9 +109,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project createProject(ProjectInputParam projectInputParam) throws Exception {
-        projectInputParam.validateCreate();
+//        projectInputParam.validateCreate();
         Project proj = persistProjectOnly(projectInputParam); // 因为是创建Project，需要先持久化
-        executeDetailedTasks(projectInputParam, proj);
+//        executeDetailedTasks(projectInputParam, proj);
         return proj;
     }
 
@@ -166,6 +166,16 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project findById(Long projectId) {
         return projectRepository.findById(projectId).get();
+    }
+
+    @Override
+    public List<Project> findByProjectKey(String projectKey) {
+        return projectRepository.findByProjectKey(projectKey);
+    }
+
+    @Override
+    public List<Project> findByProjectName(String projectName) {
+        return projectRepository.findByProjectName(projectName);
     }
 
     @Override
@@ -423,6 +433,7 @@ public class ProjectServiceImpl implements ProjectService {
         jenk.setJenkinsProjKey(jenkins.getJenkinsProjKey());
         jenk.setRemark(jenkins.getRemark());
         jenk.setServerIP(jenkins.getServerIP());
+        jenk.setWebui(jenkins.getJenkinsProjUrl());
         return jenk;
     }
 

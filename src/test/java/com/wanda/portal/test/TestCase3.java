@@ -13,12 +13,15 @@ import com.wanda.portal.dao.AsyncTaskService;
 import com.wanda.portal.dao.jpa.*;
 import com.wanda.portal.dao.remote.*;
 import com.wanda.portal.dto.confluence.GenericConfluenceSpaceDTO;
-import com.wanda.portal.dto.jenkins.JenkinsJobDTO;
-import com.wanda.portal.dto.jira.GenericJiraProjectDTO;
 import com.wanda.portal.dto.svn.SubversionRepoDTO;
-import com.wanda.portal.entity.*;
+import com.wanda.portal.entity.ConfluenceSpace;
+import com.wanda.portal.entity.Project;
+import com.wanda.portal.entity.SCMRepo;
+import com.wanda.portal.entity.Server;
 import com.wanda.portal.facade.ProjectController;
-import com.wanda.portal.facade.model.input.*;
+import com.wanda.portal.facade.model.input.ConfluenceSpaceInputParam;
+import com.wanda.portal.facade.model.input.ProjectInputParam;
+import com.wanda.portal.facade.model.input.ScmRepoInputParam;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +29,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.ui.Model;
-import org.springframework.validation.support.BindingAwareModelMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -58,7 +59,7 @@ public class TestCase3 {
         param.setStatus("NORMAL");
         param.setRemark("haha this is good");
         param.setDescription("this is a bad project");
-        
+
         List<ScmRepoInputParam> sCMRepoLists = new ArrayList<>();
         ScmRepoInputParam scm = new ScmRepoInputParam();
         scm.setInputActionType(InputActionType.REMOTE_CREATE);
@@ -72,18 +73,18 @@ public class TestCase3 {
         scm.setRepoType(RepoType.SVN);
 //        scm.setProtocol(RepoProtocol.SVN);
         sCMRepoLists.add(scm);
-        param.setScmRepositories(sCMRepoLists);  
-        
+        param.setScmRepositories(sCMRepoLists);
+
         String requestBody = JSONObject.toJSONString(param);
         // 入参
         System.out.println(requestBody);
 
         Object[] x = {null};
-        //String result = testRestTemplate.postForObject("/project/toAddProjectX", param, String.class, x);     
+        //String result = testRestTemplate.postForObject("/project/toAddProjectX", param, String.class, x);
         //System.out.println(result);
-        
+
     }
-    
+
     /*
      * 测试带参添加已有 Project
      * */
@@ -97,7 +98,7 @@ public class TestCase3 {
 //        param.setStatus("NORMAL");
 //        param.setRemark("hehhe");
 //        param.setDescription("this is a money project");
-//        
+//
 //        List<ScmRepoInputParam> sCMRepoLists = new ArrayList<>();
 //        ScmRepoInputParam scm = new ScmRepoInputParam();
 //        scm.setInputActionType(InputActionType.ATTACH_OLD);
@@ -111,16 +112,16 @@ public class TestCase3 {
 //        scm.setServerIP("10.214.170.65:4434");
 //        scm.setServerRoot("svn");
 //        sCMRepoLists.add(scm);
-//        param.setScmRepositories(sCMRepoLists);  
-//        
+//        param.setScmRepositories(sCMRepoLists);
+//
 //        String requestBody = JSONObject.toJSONString(param);
 //        // 入参
 //        System.out.println("param json---" + requestBody);
 //
 //        Object[] x = {null};
-//        String result = testRestTemplate.postForObject("/project/toAddProjectX", param, String.class, x);     
+//        String result = testRestTemplate.postForObject("/project/toAddProjectX", param, String.class, x);
 //        System.out.println(result);
-//        
+//
 //    }
     /*
      * 获得server的信息
@@ -136,7 +137,7 @@ public class TestCase3 {
         System.out.println("ALL the JIRA servers are: " + serverRepository.findByServerType(ServerType.JIRA));
         System.out.println("The Selected Server is: " + serverRepository.findById(1l));
     }
-     
+
     @Test
     public void testjiraServer() {
 //        List<Server> s = serverRepository.findByServerType(ServerType.JIRA);
@@ -157,14 +158,14 @@ public class TestCase3 {
 //        System.out.println("===starting to purge JIRA AQS");
 //        jiraProjectRepository.delete(jira);
     }
-    
+
     @Autowired
     ProjectService projectService;
     @Test
     public void testProjectId() {
-        
-//       Long ix = Long.valueOf("1"); 
-//        
+
+//       Long ix = Long.valueOf("1");
+//
 //       Project k = projectService.getProjectById(ix);
 //      // ProjectInputParam pip=ConversionUtil.con2ProjectInputParam(k);
 //       System.out.println(k.getProjectName());
@@ -172,7 +173,7 @@ public class TestCase3 {
 //       for (SCMRepo s : a) {
 //           System.out.println(s.getRemark());
 //       }
-       
+
     }
     @Autowired
     ProjectMemberRepository projectMemberRepository;
@@ -189,7 +190,7 @@ public class TestCase3 {
 //        /*-------------------------------------------------------------------*/
 //        System.out.println("Begin deleteing the inserted huangshiren");
 //        projectMemberRepository.deleteById(zz.getProjectMemberId());
-//        
+//
     }
 
     @Autowired
@@ -198,7 +199,7 @@ public class TestCase3 {
     public void testWhoAmI() {
         System.out.println(idConfig.getWhoami());
     }
-    
+
     @Autowired
     ConfluenceConfig confluenceConfig;
     @Autowired
@@ -208,28 +209,28 @@ public class TestCase3 {
         System.out.println(confluenceConfig.getPureIp());
         System.out.println(confluenceConfig.getUrlHead());
         System.out.println(jenkinsConfig.getJsonQueryJobsApi());
-        
+
     }
-    
+
     @Autowired
     ProjectController pj;
-    @Test
+    /*@Test
     public void testFetchAll() {
         Long t1 = System.currentTimeMillis();
         Model model = new BindingAwareModelMap();
         pj.fetchAllConfluences(model);
-        pj.fetchAllJenkinses(model);
+        pj.fetchAllJenkinses(model, null);
         pj.fetchAllJiras(model, null);
         pj.fetchAllSvnAndTemplates(model);
         System.out.println(JSONObject.toJSONString(model));
         Long t2 = System.currentTimeMillis();
         System.out.println("Serial time is " + (t2 - t1) + "ms");
-    }
-    
+    }*/
+
     @Autowired
     AsyncTaskService asyncTaskService;
-    
-    @Test
+
+    /*@Test
     public void testFetchAllTogether() {
         Long t1 = System.currentTimeMillis();
         Model model1 = new BindingAwareModelMap();
@@ -237,16 +238,16 @@ public class TestCase3 {
         //System.out.println(JSONObject.toJSONString(model1));
         Long t2 = System.currentTimeMillis();
         System.out.println("Serial time is " + (t2 - t1) + "ms");
-        
+
         Long t3 = System.currentTimeMillis();
         Model model2 = new BindingAwareModelMap();
         pj.setCommonServerInfoAsync(model2, null);
         //System.out.println(JSONObject.toJSONString(model));
         Long t4 = System.currentTimeMillis();
         System.out.println("Async time is " + (t4 - t3) + "ms");
-        
-    }
-    
+
+    }*/
+
     @Test
     public void testprojectService() { // 测Project的排序
         List<Project> pro = projectService.findAllByRankDesc();
@@ -281,7 +282,7 @@ public class TestCase3 {
             retSvns.add(svn.getSCMRepo());
         }
         System.out.println("new res = " + JSONObject.toJSONString(retSvns));
-        
+
         Long t2 = System.currentTimeMillis();
         System.out.println("old algo time is " + (t2 - t1) + "ms");
         retSvns = new ArrayList<>();
@@ -301,19 +302,19 @@ public class TestCase3 {
         System.out.println("new algo time is " + (t4 - t3) + "ms");
         System.out.println("new res = " + JSONObject.toJSONString(retSvns));
     }
-    
+
     @Autowired
     JenkinsProjectRepository jenkinsProjectRepository;
     @Autowired
     JenkinsService jenkinsService;
-    @Test
+    /*@Test
     public void fetchUnusedJenkins() {
         List<Server> jenkServers = serverRepository.findByServerType(ServerType.JENKINS); // 先从db获取jenkins的所有Server
         jenkinsService.setServer(jenkServers.get(0));
         List<JenkinsJobDTO> allJenkins = jenkinsService.fetchAllJenkinsJobs();
         List<JenkinsProject> usedJenkins = jenkinsProjectRepository.findAll();
         List<JenkinsInputParam> retJenkins = new ArrayList<>();
-        
+
         Long t1 = System.currentTimeMillis();
         for (Iterator<JenkinsJobDTO> alljira = allJenkins.iterator(); alljira.hasNext();) {
             JenkinsJobDTO allJiraDto = (JenkinsJobDTO) alljira.next();
@@ -330,12 +331,12 @@ public class TestCase3 {
             retJenkins.add(jenkin.getJenkinsProject());
         }
         System.out.println("old res = " + JSONObject.toJSONString(retJenkins));
-        
+
         Long t2 = System.currentTimeMillis();
         System.out.println("old algo time is " + (t2 - t1) + "ms");
         retJenkins = new ArrayList<>();
         Long t3 = System.currentTimeMillis();
-        
+
         Set<String> usedJenkinsSet = new HashSet<String>();
         for (JenkinsProject usd : usedJenkins) {
             usedJenkinsSet.add(usd.getJenkinsProjKey());
@@ -348,8 +349,8 @@ public class TestCase3 {
         Long t4 = System.currentTimeMillis();
         System.out.println("new algo time is " + (t4 - t3) + "ms");
         System.out.println("new res = " + JSONObject.toJSONString(retJenkins));
-        
-    }
+
+    }*/
 
     @Autowired
     ConfluenceSpaceRepository confluenceSpaceRepository;
@@ -378,12 +379,12 @@ public class TestCase3 {
             retConfs.add(conf.getConfluenceSpace());
         }
         System.out.println("old res = " + JSONObject.toJSONString(retConfs));
-        
+
         Long t2 = System.currentTimeMillis();
         System.out.println("old algo time is " + (t2 - t1) + "ms");
         retConfs = new ArrayList<>();
         Long t3 = System.currentTimeMillis();
-        
+
         Set<String> usedConfSet = new HashSet<String>();
         for (ConfluenceSpace usd : usedConfs) {
             usedConfSet.add(usd.getSpaceKey());
@@ -397,16 +398,16 @@ public class TestCase3 {
         System.out.println("new algo time is " + (t4 - t3) + "ms");
         System.out.println("new res = " + JSONObject.toJSONString(retConfs));
     }
-    
+
     @Autowired
     JiraService jiraService;
     @Autowired
     JiraProjectRepository jiraProjectRepository;
-    @Test
+    /*@Test
     public void fetchUnusedJiraProject() {
         List<Server> jiraServers = serverRepository.findByServerType(ServerType.JIRA); // 先从db获取confluence的所有Server
         jiraService.setServer(jiraServers.get(0));
-        List<GenericJiraProjectDTO> allJiras = jiraService.fetchAllJiraProjects(null);
+        List<GenericJiraProjectDTO> allJiras = jiraService.fetchAllJiraProjects();
         List<JiraProject> usedJiras = jiraProjectRepository.findAll();
         List<JiraProjectInputParam> retJiras = new ArrayList<>();
         Long t1 = System.currentTimeMillis();
@@ -425,12 +426,12 @@ public class TestCase3 {
             retJiras.add(jira.getJiraProject());
         }
         System.out.println("old res = " + JSONObject.toJSONString(retJiras));
-        
+
         Long t2 = System.currentTimeMillis();
         System.out.println("old algo time is " + (t2 - t1) + "ms");
         retJiras = new ArrayList<>();
         Long t3 = System.currentTimeMillis();
-        
+
         Set<String> usedJirasSet = new HashSet<String>();
         for (JiraProject usd : usedJiras) {
             usedJirasSet.add(usd.getJiraProjectKey());
@@ -443,5 +444,5 @@ public class TestCase3 {
         Long t4 = System.currentTimeMillis();
         System.out.println("new algo time is " + (t4 - t3) + "ms");
         System.out.println("new res = " + JSONObject.toJSONString(retJiras));
-    }
+    }*/
 }
