@@ -18,6 +18,7 @@ import com.wanda.portal.component.LdapAuthenticationProvider;
 import com.wanda.portal.config.biz.IdConfig;
 import com.wanda.portal.config.biz.LdapConfig;
 import com.wanda.portal.config.biz.SwitchConfig;
+import com.wanda.portal.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
@@ -31,9 +32,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -68,6 +68,10 @@ public class SecurityConfigCrowd extends WebSecurityConfigurerAdapter {
     private UserDetailsService userService;
     // 本地测试，屏蔽sso的开关的
     //private boolean IsTest = false;
+    @Autowired
+    MyFilterSecutiryInterceptor secutiryInterceptor;
+    @Autowired
+    MyAccessDeniedHandler accessDeniedHandler;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -94,7 +98,7 @@ public class SecurityConfigCrowd extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         if (ldapConfig.isEnable()) { // 采用ldap
-            http.csrf().disable().exceptionHandling().accessDeniedPage("/403").and().authorizeRequests()
+            http.csrf().disable().exceptionHandling().accessDeniedHandler(accessDeniedHandler).and().authorizeRequests()
                     .antMatchers("/", "/login").permitAll()
                     .antMatchers(new String[]{"/static/**", "/js/**", "/vendor/**", "/css/**", "/img/**",
                             "/images/**", "/fonts/**", "/**/brand.ico",
@@ -105,15 +109,17 @@ public class SecurityConfigCrowd extends WebSecurityConfigurerAdapter {
                 public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                                     Authentication arg2) throws IOException, ServletException {
                     Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-                    if (principal != null && principal instanceof UserDetails) {
-                        UserDetails user = (UserDetails) principal;
+                    if (principal != null && principal instanceof User) {
+                        User user = (User) principal;
                         // 维护在session中
                         request.getSession().setAttribute(SESSION_KEY, user);
                         request.getRequestDispatcher("/index").forward(request, response);
 //								response.sendRedirect("index"); // 通过了就将用户名记录session，并且重定向到idx
                     }
                 }
-            }).permitAll().failureUrl("/loginError").and().logout().deleteCookies("JSESSIONID").permitAll();
+            }).permitAll().failureUrl("/loginError").and().rememberMe().tokenValiditySeconds(2419200)
+                    .and().logout().deleteCookies("JSESSIONID").permitAll();
+            http.addFilterBefore(secutiryInterceptor, FilterSecurityInterceptor.class);
         } else if (!switchConfig.isEnableSso()) {
             http.csrf().disable().exceptionHandling().accessDeniedPage("/403").and().authorizeRequests()
                     .antMatchers("/", "/login").permitAll().anyRequest().authenticated()

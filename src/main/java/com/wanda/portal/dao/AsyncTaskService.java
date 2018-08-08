@@ -1,6 +1,5 @@
 package com.wanda.portal.dao;
 
-import com.wanda.portal.constants.JiraConstants;
 import com.wanda.portal.dao.jpa.ServerRepository;
 import com.wanda.portal.dao.remote.ConfluenceService;
 import com.wanda.portal.dao.remote.JenkinsService;
@@ -12,9 +11,7 @@ import com.wanda.portal.facade.model.input.JenkinsInputParam;
 import com.wanda.portal.facade.model.input.JiraProjectInputParam;
 import com.wanda.portal.facade.model.input.ScmRepoInputParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -37,75 +34,58 @@ public class AsyncTaskService {
     @Autowired
     RepoService repoService;
     
-    @Async
-    public Future<List<JiraProjectInputParam>> fetchAllJiras(List<Server> jiraServers, UserDetails user) {
+//    @Async
+    public Future<List<JiraProjectInputParam>> fetchAllJiras(List<Server> jiraServers) {
         List<JiraProjectInputParam> existJiras = new ArrayList<>();
         if (jiraServers != null && jiraServers.size() > 0) {
             for (Server jiraServer : jiraServers) {
-                jiraService.setServer(jiraServer);
-                if (JiraConstants.LOGIN_MODE.CURR_USER.getModeCode().equals(jiraServer.getLoginMode())) {
-                    jiraServer.setLoginName(user.getUsername());
-                    jiraServer.setPasswd(user.getPassword());
-                }
-                existJiras.addAll(jiraService.fetchUnusedJiraProject());
+                existJiras.addAll(jiraService.fetchUnusedJiraProject(jiraServer));
             }
         }
         return new AsyncResult<>(existJiras);
     }
     
-    @Async
-    public Future<List<ConfluenceSpaceInputParam>> fetchAllConfluences(List<Server> confServers ) {       
+//    @Async
+    public Future<List<ConfluenceSpaceInputParam>> fetchAllConfluences(List<Server> confServers) {
         List<ConfluenceSpaceInputParam> existConfs = new ArrayList<>();
         if (confServers != null && confServers.size() > 0) {
             for (Server confServer : confServers) {
-                confluenceService.setServer(confServer);
-                existConfs.addAll(confluenceService.fetchUnusedConfs());
+                existConfs.addAll(confluenceService.fetchUnusedConfs(confServer));
             }              
         }
-        // model.addAttribute("existConfs", existConfs);
-        return new AsyncResult<List<ConfluenceSpaceInputParam>>(existConfs);
+        return new AsyncResult<>(existConfs);
     }
     
-    @Async
-    public Future<List<JenkinsInputParam>> fetchAllJenkinses(List<Server> jenkinsServers, UserDetails user) {
+//    @Async
+    public Future<List<JenkinsInputParam>> fetchAllJenkinses(List<Server> jenkinsServers) {
         List<JenkinsInputParam> existJenkinses = new ArrayList<>();
         if (jenkinsServers != null && jenkinsServers.size() > 0) {
             for (Server jenkinsServer : jenkinsServers) {
-                if (JiraConstants.LOGIN_MODE.CURR_USER.getModeCode().equals(jenkinsServer.getLoginMode())) {
-                    jenkinsServer.setLoginName(user.getUsername());
-                    jenkinsServer.setPasswd(user.getPassword());
-                }
-                jenkinsService.setServer(jenkinsServer);
-                existJenkinses.addAll(jenkinsService.fetchUnusedJekins());
+                existJenkinses.addAll(jenkinsService.fetchUnusedJekins(jenkinsServer));
             }
         }
-        // model.addAttribute("existJenkins", existJenkinses);
-        return new AsyncResult<List<JenkinsInputParam>>(existJenkinses);
+        return new AsyncResult<>(existJenkinses);
     }
     
-    @Async
+//    @Async
     public Future<List<ScmRepoInputParam>> fetchAllSvnRepos(List<Server> svnServers) {
         List<ScmRepoInputParam> existSvns = new ArrayList<>();
         if (svnServers != null && svnServers.size() > 0) {            
             for (Server svnServer : svnServers) {
-                repoService.setServer(svnServer);
-                existSvns.addAll(repoService.fetchUnusedSvnRepos());
+                existSvns.addAll(repoService.fetchUnusedSvnRepos(svnServer));
             }              
         }
-        // model.addAttribute("existSvns", existSvns);
-        return new AsyncResult<List<ScmRepoInputParam>>(existSvns); 
+        return new AsyncResult<>(existSvns);
     }
     
-    @Async
+//    @Async
     public Future<List<ScmRepoInputParam>> fetchAllSvnTemplates(List<Server> svnServers) {
         List<ScmRepoInputParam> svnTemplates = new ArrayList<>();
         if (svnServers != null && svnServers.size() > 0) {            
             for (Server svnServer : svnServers) {
-                repoService.setServer(svnServer);
-                svnTemplates.addAll(repoService.fetchAllTemplates());
+                svnTemplates.addAll(repoService.fetchAllTemplates(svnServer));
             }              
         }
-        // model.addAttribute("svnTemplates", svnTemplates);
-        return new AsyncResult<List<ScmRepoInputParam>>(svnTemplates);
+        return new AsyncResult<>(svnTemplates);
     }
 }

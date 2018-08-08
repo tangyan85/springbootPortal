@@ -6,7 +6,7 @@
 
 	<groupId>com.wanda-fg</groupId>
 	<artifactId>portalboot</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.3.1-snapshot</version>
 	<packaging>war</packaging> <!-- mvn spring-boot:run本机开发启动 -->
 
 	<parent>
@@ -192,6 +192,11 @@
 			<groupId>io.projectreactor</groupId>
 			<artifactId>reactor-core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.4</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -242,4 +247,30 @@
 		</resources>
 	</build>
 
+	<repositories>
+		<repository>
+			<id>nexus</id>
+			<name>Nexus</name>
+			<url>http://10.215.4.166:8081/repository/COMMON_GROUP</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>nexus</id>
+			<name>Nexus</name>
+			<url>http://10.215.4.166:8081/repository/COMMON_GROUP</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
 </project>

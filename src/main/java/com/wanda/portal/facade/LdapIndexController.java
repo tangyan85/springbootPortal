@@ -1,16 +1,10 @@
 package com.wanda.portal.facade;
 
-import javax.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import com.wanda.portal.config.biz.IdConfig;
 import com.wanda.portal.dao.jpa.ServerRepository;
 import com.wanda.portal.dao.remote.JiraService;
-import com.wanda.portal.security.SecurityConfigCrowd;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 
 
 @Controller

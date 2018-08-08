@@ -8,6 +8,7 @@ import com.wanda.portal.dao.jpa.ServerRepository;
 import com.wanda.portal.dao.remote.ConfluenceService;
 import com.wanda.portal.dao.remote.ProjectService;
 import com.wanda.portal.dto.common.CommonHttpResponseBody;
+import com.wanda.portal.entity.ConfluenceSpace;
 import com.wanda.portal.entity.Project;
 import com.wanda.portal.entity.Server;
 import com.wanda.portal.facade.model.input.ConfluenceSpaceInputParam;
@@ -22,12 +23,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 @Controller
 @RequestMapping("/doc")
-public class DocController {
+public class DocController extends BaseController {
     @Autowired
     ProjectService projectService;
     @Autowired
@@ -51,6 +53,20 @@ public class DocController {
         try {
             if (StringUtils.isNotEmpty(projectId)) {
                 project = projectService.getProjectById(Long.valueOf(projectId));
+                if (project != null) {
+                    Set<ConfluenceSpace> confProjects = project.getConfluenceSpaces();
+                    for (ConfluenceSpace confProject : confProjects) {
+                        Server server = null;
+                        List<Server> confServers = serverRepository.findByServerType(ServerType.CONFLUENCE);
+                        for (Server s : confServers) {
+                            if (confProject.getWebui().contains(s.getDomain())) {
+                                server = s;
+                                break;
+                            }
+                        }
+                        setConfProject(confProject, server);
+                    }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -59,6 +75,31 @@ public class DocController {
         model.addAttribute("backPath", backPath);
 
         return "doc/toDetail";
+    }
+
+    private void setConfProject(ConfluenceSpace confProject, Server server) {
+        String allPagesLink, createPagesLink, modifyPagesLink;
+        allPagesLink = server.getProtocol() + "://" + server.getDomain()
+                + "/collector/pages.action?key=" + confProject.getSpaceKey();
+        createPagesLink = server.getProtocol() + "://" + server.getDomain()
+                + "/dosearchsite.action?cql=space+%3D+\"" + confProject.getSpaceKey() + "\"+and+created+>%3D+now(%27-1d%27)";
+        modifyPagesLink = server.getProtocol() + "://" + server.getDomain()
+                + "/dosearchsite.action?cql=space+%3D+\"" + confProject.getSpaceKey() + "\"+and+lastmodified+>%3D+now(%27-1d%27)";
+        confProject.setAllPagesLink(allPagesLink);
+        confProject.setCreatePagesLink(createPagesLink);
+        confProject.setModifyPagesLink(modifyPagesLink);
+
+        String allPagesKey = confProject.getSpaceKey() + "_allPages";
+        Integer allPages = getForCache(allPagesKey, () -> confluenceService.fetchAllPages(confProject.getSpaceKey(), server));
+        confProject.setAllPages(allPages);
+
+        String createPagesKey = confProject.getSpaceKey() + "_createPages";
+        Integer createPages = getForCache(createPagesKey, () -> confluenceService.fetchAllPagesByCreated(confProject.getSpaceKey(), server));
+        confProject.setCreatePages(createPages);
+
+        String modifyPagesKey = confProject.getSpaceKey() + "_modifyPages";
+        Integer modifyPages = getForCache(modifyPagesKey, () -> confluenceService.fetchAllPagesByModified(confProject.getSpaceKey(), server));
+        confProject.setModifyPages(modifyPages);
     }
 
     @RequestMapping("/remove")

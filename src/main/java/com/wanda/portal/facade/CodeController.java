@@ -1,5 +1,6 @@
 package com.wanda.portal.facade;
 
+import com.alibaba.fastjson.JSONArray;
 import com.wanda.portal.constants.InputActionType;
 import com.wanda.portal.constants.ProjectStatus;
 import com.wanda.portal.constants.RepoType;
@@ -10,6 +11,7 @@ import com.wanda.portal.dao.remote.ProjectService;
 import com.wanda.portal.dao.remote.RepoService;
 import com.wanda.portal.dto.common.CommonHttpResponseBody;
 import com.wanda.portal.entity.Project;
+import com.wanda.portal.entity.SCMRepo;
 import com.wanda.portal.entity.Server;
 import com.wanda.portal.facade.model.input.ProjectInputParam;
 import com.wanda.portal.facade.model.input.ScmRepoInputParam;
@@ -79,6 +81,17 @@ public class CodeController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        List<Server> gitServer = serverRepository.findByServerType(ServerType.GIT);
+        for (SCMRepo repo : project.getScmRepositories()) {
+            for (Server server : gitServer) {
+                if (repo.getWebui().contains(server.getInnerServerIpAndPort())) {
+                    JSONArray result = repoService.fetchAllBranches(server, repo.getRepoRemoteId());
+                    repo.setBranches(result);
+                }
+            }
+        }
+
         model.addAttribute("project", project);
         model.addAttribute("backPath", backPath);
 

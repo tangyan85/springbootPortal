@@ -180,8 +180,9 @@
                                                         </td>
                                                         <td>
                                                             <div class="form-group">
-                                                                <input class="form-control" type="text" name="username"
-                                                                       id="username"/>
+                                                                <select class="form-control select2 selectMember" id="username" name="username">
+                                                                    <option value="">------请选择------</option>
+                                                                </select>
                                                             </div>
                                                         </td>
                                                         <td>
@@ -751,6 +752,17 @@
     jQuery(function ($) {
         $('[data-rel=tooltip]').tooltip();
 
+        select2($(".selectMember"), '/member/pull', function(data) {
+            let results = [];
+            for (let i = 0; i < data.length; i++) {
+                let temp = {};
+                temp["id"] = data[i].username;
+                temp["text"] = data[i].username + '[' + data[i].dept + ']';
+                results.push(temp);
+            }
+            return results;
+        });
+
         $('#fuelux-wizard-container')
             .ace_wizard({
                 step: 1
@@ -859,9 +871,7 @@
             ignore: "",
             rules: {
                 username: {
-                    required: true,
-                    rangelength: [2, 25],
-                    projectName: true
+                    required: true
                 },
                 role: {
                     required: true
@@ -1222,7 +1232,22 @@
             "handleFirst": true,
             "del": " <span class='glyphicon glyphicon-remove text-red' style='font-size:20px;'></span> ",
             "add": " <span class='glyphicon glyphicon-plus text-blue' style='font-size:20px;'></span> ",
-            "operatePos": -1
+            "operatePos": -1,
+            "copyBefore": function(data) {
+                data.find(".selectMember").select2('destroy');
+            },
+            "copyAfter": function (data) {
+                select2(data.parent().find(".selectMember"), '/member/pull', function(data) {
+                    let results = [];
+                    for (let i = 0; i < data.length; i++) {
+                        let temp = {};
+                        temp["id"] = data[i].username;
+                        temp["text"] = data[i].username + '[' + data[i].dept + ']';
+                        results.push(temp);
+                    }
+                    return results;
+                });
+            }
         });
 
         $('#editable_repo').handleTable({
@@ -1257,6 +1282,7 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
+    let teamleader;
 
     (function ($) {
         $.fn.serializeJson = function () {
@@ -1398,7 +1424,9 @@
             jQuery("#jiraProjectName").val(jiraProjectName.substring(0, jiraProjectName.lastIndexOf('[')));
         } else {
             jQuery("div[data-step='3']").find(".selectChange").each(function () {
-                jQuery(this).val('');
+                if (this.name !== 'referJiraId') {
+                    jQuery(this).val('');
+                }
             });
         }
     });

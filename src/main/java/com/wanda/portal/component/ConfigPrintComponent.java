@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.Properties;
 
 /**
- * 配置信息打印組件
+ * 配置信息打印组件
  *
  * @author cloud He
  * @since 1.0.0 2018/5/11

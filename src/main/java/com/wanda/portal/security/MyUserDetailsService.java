@@ -12,7 +12,7 @@ public class MyUserDetailsService extends CrowdUserDetailsServiceImpl{
 	
 	@Override
 	public CrowdUserDetails loadUserByUsername(String username) throws UsernameNotFoundException, DataAccessException{
-		
+
 		CrowdUserDetails e = super.loadUserByUsername(username);
 		logger.info(e.toString());
 		logger.info(e.getPassword());

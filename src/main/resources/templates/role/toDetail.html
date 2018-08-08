@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="section/header :: head"></head>
+<link rel="stylesheet" th:href="@{/plugins/bootstrap-duallistbox/bootstrap-duallistbox.css}"/>
+<script th:src="@{/plugins/bootstrap-duallistbox/jquery.bootstrap-duallistbox.js}"></script>
+<body style="background: #ffffff">
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <span class="glyphicon glyphicon-user" style="color:#0897ea;"></span>&nbsp;角色详情</h3>
+
+                <div class="box-tools pull-right">
+
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body table-responsive no-padding">
+                <select multiple="multiple" size="10" name="duallistbox_menu" class="menu" title="分配菜单">
+                    <option th:each="menu : ${role.menus}" th:object="${menu}" th:value="*{menuId}"
+                            th:text="*{menuName}" th:selected="*{selected}"></option>
+                </select>
+            </div>
+            <hr>
+            <div class="wizard-actions">
+                <button class="btn btn-success btn-next" id="finished">
+                    保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    jQuery(function ($) {
+        $('.menu').bootstrapDualListbox({
+            nonSelectedListLabel: '未分配',
+            selectedListLabel: '已分配',
+            infoText: '显示所有 {0}',
+            infoTextEmpty: '空列表',
+            preserveSelectionOnMove: 'moved',
+            moveOnSelect: false,
+            nonSelectedFilter: ''
+        });
+
+        $("#finished").click(function () {
+            let jsondata = {};
+            let roleId = /*[[${role.roleId}]]*/ null;
+            let menus = $('[name="duallistbox_menu"]').val();
+            if (menus.length <= 0) {
+                alert("已分配列表不能为空");
+                return;
+            }
+            jsondata['roleId'] = roleId;
+            jsondata['menus'] = menus;
+            confirm('确认是否提交角色信息？',
+                function () {
+                    jQuery.ajax({
+                        type: "POST",
+                        url: '/role/addMenu',
+                        contentType: 'application/json;charset=utf-8', //设置请求头信息
+                        dataType: "json",
+                        data: JSON.stringify(jsondata),
+                        success: function (msg) {
+                            if (msg.responseCode == "0000") {
+                                alert(successMsg);
+                                $("#mainframe", parent.document.body).attr("src", "/role/toList");
+                            } else {
+                                alert("错误: " + msg.responseMsg);
+                            }
+                        }
+                    });
+                });
+        });
+
+    });
+
+    /*]]>*/
+</script>
+</body>
+
+</html>

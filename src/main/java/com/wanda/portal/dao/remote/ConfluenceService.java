@@ -10,20 +10,22 @@ import java.util.List;
 
 public interface ConfluenceService {
 
-    public String createSpace(CreateConfluenceSpaceParamDTO confluenceSpace) throws Exception;
+    public String createSpace(CreateConfluenceSpaceParamDTO confluenceSpace, Server server) throws Exception;
     
     @Deprecated
     public ConfluenceSpace getConfluenceSpaceByKey(String spaceKey);
 
-    public List<GenericConfluenceSpaceDTO> fetchAllConfluenceSpaces();
+    public List<GenericConfluenceSpaceDTO> fetchAllConfluenceSpaces(Server server);
 
-	List<ConfluenceSpaceInputParam> fetchUnusedConfs();
-
-    public void setServer(Server server);
-
-    public Server getServer();
+	List<ConfluenceSpaceInputParam> fetchUnusedConfs(Server server);
 
     void deleteByConfluenceId(Long confluenceId);
 
-    String findSpace(CreateConfluenceSpaceParamDTO confluenceSpace) throws Exception;
+    String findSpace(CreateConfluenceSpaceParamDTO confluenceSpace, Server server) throws Exception;
+
+    Integer fetchAllPages(final String projectId, Server server);
+
+    Integer fetchAllPagesByCreated(final String projectId, Server server);
+
+    Integer fetchAllPagesByModified(final String projectId, Server server);
 }

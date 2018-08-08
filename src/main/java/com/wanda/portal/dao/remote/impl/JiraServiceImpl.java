@@ -29,7 +29,7 @@ import java.util.*;
 
 @Primary
 @Service("JiraServiceImpl")
-@Scope("prototype")
+@Scope
 public class JiraServiceImpl extends AbstractRestService implements JiraService {
     private static Logger logger = LoggerFactory.getLogger(JiraServiceImpl.class);
     private static final String JIRA_ALREADY_EXISTS_ERROR_MSG = "jira project already exists";
@@ -38,8 +38,6 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
     JiraConfig jiraConfig;
     @Autowired
     RestTemplate restTemplate;
-
-    private Server server;
     @Autowired
     JiraProjectRepository jiraProjectRepository;
 
@@ -47,11 +45,11 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
      * 入参1 JiraInputDTO 入参2 isCheckExist是否事先检查jira的KEY是否存在
      */
     @Override
-    public JiraOutputDTO createJiraProjectUsingTemplate(JiraInputDTO dto, boolean isCheckExist) throws Exception {
+    public JiraOutputDTO createJiraProjectUsingTemplate(JiraInputDTO dto, boolean isCheckExist, Server server) throws Exception {
         logger.info("===Begin create Jira project" + JSONObject.toJSONString(dto) + "isCheckExist:" + isCheckExist);
 
         if (isCheckExist) { // 是否事先检查jira项目已经存在？
-            boolean isExist = checkIfJiraProjectExist(dto.getKey());
+            boolean isExist = checkIfJiraProjectExist(dto.getKey(), server);
             if (isExist) { // 存在，则抛异常，创建失败
                 throw new JiraProjectCreateFailureException(JIRA_ALREADY_EXISTS_ERROR_MSG);
             }
@@ -84,17 +82,17 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
      * 项目的密钥必须以大写字母开头, 后跟一条或更多的大写字母数字字符
      */
     @Override
-    public boolean checkIfJiraProjectExist(String jiraKey) throws Exception {
+    public boolean checkIfJiraProjectExist(String jiraKey, Server server) throws Exception {
         if (!RegexUtils.isValidJiraProject(jiraKey)) { // 如果不合法的jiraKey，直接抛异常
             throw new JiraProjectCreateFailureException("ILLEGAL JIRA NAME " + jiraKey);
         }
-        return rawCheckExistence(jiraKey);
+        return rawCheckExistence(jiraKey, server);
     }
 
     /*
      * 轮询JIRA Project的key或id是否存在
      */
-    private boolean rawCheckExistence(String jiraKeyOrId) {
+    private boolean rawCheckExistence(String jiraKeyOrId, Server server) {
         HttpHeaders headers = RestUtils.packBasicAuthHeader(jiraConfig.getUsername(), jiraConfig.getPassword());
         HttpEntity<String> request = new HttpEntity<String>(headers);
         ResponseEntity<String> response = new ResponseEntity<>(HttpStatus.OK);
@@ -120,7 +118,7 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
      * 此方法轮询所有Project，不返还Exception，目的是为了安全的轮询一下JIRA获得所有Project
      */
     @Override
-    public List<GenericJiraProjectDTO> fetchAllJiraProjects() {
+    public List<GenericJiraProjectDTO> fetchAllJiraProjects(Server server) {
         HttpHeaders headers = RestUtils.packBasicAuthHeader(server.getLoginName(), server.getPasswd());
         HttpEntity<String> request = new HttpEntity<String>(headers);
         ResponseEntity<String> response;
@@ -142,7 +140,7 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
     }
 
     @Override
-    public Integer fetchProjectAllIssues(final String projectId) {
+    public Integer fetchProjectAllIssues(final String projectId, Server server) {
         Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
         String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
                 + jiraConfig.getGenericApi() + "/search?jql=project=" + projectId;
@@ -154,7 +152,7 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
     }
 
     @Override
-    public Integer fetchProjectFinishIssues(final String projectId) {
+    public Integer fetchProjectFinishIssues(final String projectId, Server server) {
         Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
         String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
                 + jiraConfig.getGenericApi() + "/search?jql=project=" + projectId +" AND status = 5";
@@ -166,7 +164,7 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
     }
 
     @Override
-    public List<JiraProjectVersionDTO> fetchProjectVersions(final String projectId) {
+    public List<JiraProjectVersionDTO> fetchProjectVersions(final String projectId, Server server) {
         Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
         String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
                 + jiraConfig.getGenericApi() + "/project/" + projectId + "/versions";
@@ -175,7 +173,7 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
     }
 
     @Override
-    public List<JiraProjectComponentDTO> fetchProjectComponents(final String projectId) {
+    public List<JiraProjectComponentDTO> fetchProjectComponents(final String projectId, Server server) {
         Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
         String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
                 + jiraConfig.getGenericApi() + "/project/" + projectId + "/components";
@@ -218,14 +216,14 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
 
     @Override
     public Long createJiraProjectUsingExistingProject(Long existingProjectId, String key, String leader,
-                                                      String projectName, boolean isCheckExist) throws Exception {
+                                                      String projectName, boolean isCheckExist, Server server) throws Exception {
         if (isCheckExist) {
-            boolean templateIsExist = rawCheckExistence(existingProjectId.toString());
+            boolean templateIsExist = rawCheckExistence(existingProjectId.toString(), server);
             if (!templateIsExist) { // 模板Id不存在，肯定不支持创建
                 throw new JiraProjectCreateFailureException(
                         "template project id: " + existingProjectId + " not exists!");
             }
-            boolean keyIsExist = checkIfJiraProjectExist(key);
+            boolean keyIsExist = checkIfJiraProjectExist(key, server);
             if (keyIsExist) { // 待创建key存在，也不支持创建
                 throw new JiraProjectCreateFailureException("project key to be created: " + key + " already exists!");
             }
@@ -259,7 +257,7 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
     }
 
     @Override
-    public String loginJira(String username, String password) throws Exception {
+    public String loginJira(String username, String password, Server server) throws Exception {
 
         HttpHeaders headers = RestUtils.packBasicAuthHeader(jiraConfig.getUsername(), jiraConfig.getPassword());
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -287,8 +285,8 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
     }
 
     @Override
-    public List<JiraProjectInputParam> fetchUnusedJiraProject() {
-        List<GenericJiraProjectDTO> allJiras = this.fetchAllJiraProjects();
+    public List<JiraProjectInputParam> fetchUnusedJiraProject(Server server) {
+        List<GenericJiraProjectDTO> allJiras = this.fetchAllJiraProjects(server);
         List<JiraProject> usedJiras = jiraProjectRepository.findAll();
         List<JiraProjectInputParam> retJiras = new ArrayList<>();
 
@@ -318,16 +316,6 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
         }
 
         return retJiras;
-    }
-
-    @Override
-    public void setServer(Server server) {
-        this.server = server;
-    }
-
-    @Override
-    public Server gerServer() {
-        return this.server;
     }
 
     @Override

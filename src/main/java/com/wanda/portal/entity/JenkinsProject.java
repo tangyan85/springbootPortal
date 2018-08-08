@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-@Table(name = "jenkins_project")
+@Table(name = "t_jenkins_project")
 public class JenkinsProject implements Serializable {
 
     private static final long serialVersionUID = 1L;

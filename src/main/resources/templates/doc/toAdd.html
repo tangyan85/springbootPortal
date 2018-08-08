@@ -174,31 +174,15 @@
 
 <script type="text/javascript">
     jQuery(function ($) {
-        $('#projectId').select2({
-            width: '100%',
-            dataType: 'json',
-            delay: 1500,
-            ajax: {
-                url: '/project/pull',
-                data: function (params) {
-                    let query = {
-                        search: params.term
-                    }
-                    return query;
-                },
-                processResults: function (data) {
-                    let results = [];
-                    for (let i = 0; i < data.length; i++) {
-                        let temp = {};
-                        temp["id"] = data[i].projectId;
-                        temp["text"] = data[i].projectName;
-                        results.push(temp);
-                    }
-                    return {
-                        results: results
-                    };
-                }
+        select2($('#projectId'), '/project/pull', function(data) {
+            let results = [];
+            for (let i = 0; i < data.length; i++) {
+                let temp = {};
+                temp["id"] = data[i].projectId;
+                temp["text"] = data[i].projectName;
+                results.push(temp);
             }
+            return results;
         });
 
         $("#finished").click(function () {

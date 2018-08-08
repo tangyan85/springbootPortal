@@ -49,4 +49,8 @@ public interface ProjectService {
     List<Project> findByProjectKey(String projectKey);
 
     List<Project> findByProjectName(String projectName);
+
+    Page<Project> findTop3();
+
+    List<Object> aggregatePoject();
 }

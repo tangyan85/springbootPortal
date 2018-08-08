@@ -35,4 +35,7 @@ public class RestUtils {
         return headers;
     }
 
+    public static void main(String[] args) {
+        basicAuthHeader("admin","admin@uat").forEach((k, v) -> System.out.println(k + v));
+    }
 }

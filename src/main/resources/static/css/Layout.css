@@ -1,0 +1,557 @@
+/**{outline: 1px dotted darkred}*/
+
+/*头部区域*/
+header {
+    width: 100%;
+    height: 80px;
+    /*background-image: linear-gradient(90deg, #1B78F0 13%, #26A4FA 56%);*/
+    /*background: rgba(33, 112, 222, 0.2);*/
+    /*position: fixed;*/
+    z-index: 99;
+}
+
+.header-wrap {
+    width: 1140px;
+    min-width: 800px;
+    height: 80px;
+    margin: 0 auto;
+}
+
+#header-logo {
+    float: left;
+    height: 80px;
+}
+
+#header-logo img {
+    width: 200px;
+    /*height: 22px;*/
+    margin: 30px 0;
+    opacity: 1
+}
+
+header ul {
+    float: right;
+    padding: 34px 0 0 0;
+    font-size: 14px;
+}
+
+header li {
+    float: left;
+    list-style: none;
+    padding: 0 20px;
+    color: #D2EAFE;
+    /*transition:opacity 0.2s;*/
+    /*-moz-transition:opacity 0.2s; !* Firefox 4 *!*/
+    /*-webkit-transition:color 2s; !* Safari and Chrome *!*/
+    /*-o-transition:opacity 0.2s; !* Opera *!*/
+    cursor: default;
+}
+
+header li:hover {
+    /*opacity:1*/
+    color: #ffffff;
+}
+
+.header-btn {
+    width: 138px;
+    height: 36px;
+    background: #FC5F3A;
+    border-radius: 30px;
+    position: relative;
+    top: -8px;
+    cursor: pointer;
+    /*padding: 9px 0 9px 15px;*/
+    box-shadow: 0 3px 4px 1px rgba(0, 0, 0, 0.05);
+    color: #FAFCFF;
+}
+
+.header-btn:hover {
+    background: #F24F28;
+    box-shadow: 0 3px 10px 1px rgba(0, 0, 0, 0.20);
+    -webkit-transition: box-shadow 0.3s; /* Safari and Chrome */
+    /*-webkit-transition: background 0.3s; !* Safari and Chrome *!*/
+    color: #fff;
+}
+
+.header-btn img {
+    width: 14px;
+    padding: 12px 6px 9px 22px;
+    float: left;
+}
+
+.header-btn a {
+    color: #FAFCFF;
+    float: left;
+    padding-top: 9px;
+}
+
+.contentwrap {
+    background: #F8FBFE;
+}
+
+/*---------------------------------------------  主功能菜单区域  --------------------------------------------------*/
+
+/*----------------------------  主功能菜单区域  -----------------------------*/
+.content_item {
+    /*height: 1030px;*/
+}
+
+.content_head_bg {
+    /*background-image: linear-gradient(180deg, #1B78F0 13%, #26A4FA);*/
+    position: absolute;
+    top: -0px;
+    bottom: -15px;
+    width: 100%;
+    margin-top: -40px;
+    /*transform: skewY(-2deg);*/
+    transform-origin: center;
+    height: 768px;
+    display: block;
+    z-index: -1;
+}
+
+.content_head h1 {
+    color: #fff;
+    width: inherit;
+    text-align: center;
+    margin: 0 auto;
+    font-size: 24px;
+    font-weight: 500;
+    padding-top: 0px;
+}
+
+.content_head h2 {
+    color: #CFE8FC;
+    width: 600px;
+    text-align: center;
+    margin: 0 auto;
+    font-size: 18px;
+    font-weight: 400;
+    padding-top: 8px;
+}
+
+.content_body {
+    padding-top: 150px;
+}
+
+.content_wrap {
+    width: 1140px;
+    margin: 0 auto;
+
+}
+
+.content_ul {
+    padding-top: 15px;
+}
+
+.content_ul h1 {
+    /* 协作平台 copy: */
+    font-size: 12px;
+    color: #464E62;
+    line-height: 20px;
+    font-weight: 600;
+}
+
+.content_ul h2 {
+    /* SharePoint: */
+    font-size: 16px;
+    color: #828998;
+    line-height: 30px;
+    font-weight: 400;
+}
+
+.content_li {
+    width: 126px;
+    height: 120px;
+    background: #ffffff;
+    box-shadow: 0 0 30px 1px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    /*cursor: pointer;*/
+
+}
+
+.content_ul li:hover {
+    box-shadow: 0 0 80px 4px rgba(0, 0, 0, 0.14);
+    z-index: 3;
+    position: relative;
+    -webkit-transition: box-shadow 2s; /* Safari and Chrome */
+}
+
+.content_ul img {
+	height: 40px;
+    width: 40px;
+    padding-top: 30px;
+}
+
+.content_ul h1 {
+    padding-top: 35px
+}
+
+.content_ul img h1 h2 {
+    margin: 0 auto;
+}
+
+.content_top {
+    /*display: none;*/
+    position: absolute;
+    z-index: 2;
+    width: 126px;
+    height: 120px;
+    background: #fff;
+    box-shadow: 0 0 30px 1px rgba(0, 0, 0, 0.04);
+
+}
+
+.content_bottom {
+    /*display: none;*/
+    position: absolute;
+    z-index: 1;
+    width: 126px;
+    height: 120px;
+
+}
+
+.content_bottom h1 {
+    padding-top: 30px;
+}
+
+.content_bottom p {
+    padding-top: 10px;
+    text-align: justify
+}
+
+.content_ul p {
+    padding: 0 5px 0px 5px;
+    text-align: left;
+    font-size: 11px;
+    color: #828998;
+    overflow: auto;
+    height: 70px;
+}
+
+.content_liucheng{
+    padding:0 20px
+}
+
+.content_liucheng a {
+    font-size: 14px;
+    color: #555;
+    display: block;
+    margin: 10px 0px 10px 6px;
+    float: left;
+    font-weight: 400;
+}
+
+.content_liucheng a:hover {
+    color: #1B78F0;
+    font-weight: 700;
+
+}
+
+.content_a {
+    background: #FC5F3A;
+    box-shadow: 0 3px 4px 1px rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
+    width: 50px;
+    height: 24px;
+    color: #fff;
+    font-size: 12px;
+    line-height: 24px;
+    font-weight: 500;
+    display: block;
+    position: absolute;
+    margin-left: 40px;
+}
+
+.content_a:hover {
+    background: #F7512A;
+    box-shadow: 0 3px 20px 1px rgba(252, 95, 58, 0.32);
+    -webkit-transition: box-shadow 0.2s; /* Safari and Chrome */
+}
+
+/*---------------------------------------------技术支持区域--------------------------------------------------*/
+
+.support {
+    min-height: 400px;
+    width: 1140px;
+    margin: 0 auto;
+}
+
+.support_wrap {
+    background-color: #F8FBFE;
+}
+
+.support h2 {
+    width: 300px;
+    margin: 0 auto;
+    color: #464E62;
+    font-size: 32px;
+    font-weight: 600;
+    padding-top: 80px;
+    text-align: center;
+}
+
+.support p {
+    color: #828998;
+    font-size: 14px;
+    width: 760px;
+    text-align: center;
+    margin: 0 auto;
+    padding-top: 10px;
+}
+
+.support ul {
+    padding: 50px 0 0 0;
+    height: 150px;
+}
+
+.support_mosaic img {
+    width: 110px;
+    float: left;
+}
+
+.support_mosaic {
+    width: 340px;
+    float: left;
+    padding-right: 30px;
+}
+
+.support_mosaic h1 {
+    color: #464E62;
+    font-size: 20px;
+    font-weight: 500;
+    float: left;
+    width: 200px;
+    clear: right;
+    padding-top: 30px;
+}
+
+.support_mosaic h2 {
+    color: #828998;
+    font-size: 16px;
+    font-weight: 400;
+
+}
+
+/*---------------------------------------------   Footer  --------------------------------------------------*/
+footer p {
+    font-size: 14px;
+}
+
+.footermain_wrap {
+    height: 190px;
+    background-color: #292C33;
+}
+
+.footercopyright_wrap {
+    height: 80px;
+    background-color: #23262C;
+}
+
+.footermain {
+    width: 1140px;
+    margin: 0 auto;
+    padding-top: 50px;
+
+}
+
+.footer_left_part {
+    width: 640px;
+    float: left;
+}
+
+.footer_logo img {
+    width: 180px;
+    opacity: 0.8;
+}
+
+.footer_left_part p {
+    padding-top: 20px;
+    width: 530px;
+}
+
+.footer_right_part {
+    width: 400px;
+    float: left;
+    color: inherit;
+    position: relative;
+    top: 2px;
+}
+
+.footercopyright {
+    width: 1140px;
+    margin: 0 auto;
+}
+
+.footercopyright p {
+    color: #65686B;
+    font-size: 12px;
+    top: 32px;
+    position: relative;
+}
+
+.footer_right_part ul {
+    padding: 20px 0;
+}
+
+.footer_right_part li {
+    float: left;
+    padding-right: 40px;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+/*=========================*/
+#top {
+    height: 60px;
+    background: #399bff;
+    color: #fff;
+    width: 100%;
+    position: fixed;
+    z-index: 900;
+    top: 0;
+}
+
+.login-form {
+    width: 360px;
+	height: 400px;
+    padding-right: 6.6px;
+    margin: 0px auto;
+    text-shadow: none;
+}
+
+.login-form form {
+	background: #fff;
+	border-radius: 3px;
+}
+
+.login-form form img {
+	margin-bottom: 18px;
+}
+
+.login-form form .profile {
+	border-radius: 999px;
+}
+
+.login-form form .top {
+	border-bottom: 1px solid #ddd;
+	text-align: center;
+	padding: 30px 0;
+}
+
+.login-form form .top .icon {
+	width: 100px;
+	height: 100px;
+}
+
+.login-form form .top h1,
+.login-form form .top h4 {
+	margin: 0;	
+}
+
+.login-form form .top h1 {
+	color: #37363E;
+	font-size: 24px;
+	font-family: 'Montserrat', sans-serif;
+	font-weight: bold;
+	margin-top: -14px;
+}
+
+.login-form form .top h4 {
+	font-weight: normal;
+	color: #76757B;
+	font-size: 15px;
+}
+
+.login-form form .form-area {
+	padding: 40px;
+}
+
+.login-form form .form-area .group {
+	position: relative;
+	margin-bottom: 20px;
+}
+
+.login-form form .form-area .form-control {
+	padding-left: 38px;
+	height: 40px;
+}
+
+.login-form form .form-area .fa {
+	position: absolute;
+	top: 11px;
+	left: 13px;
+	font-size: 16px;
+	color: #C3C3C3;
+}
+
+.login-form form .form-area .btn {
+	height: 42px;
+	font-weight: 600;
+}
+
+.login-form form .form-area .checkbox {
+	margin-bottom: 20px;
+}
+
+.login-form .footer-links {
+	color: #76757B;
+	padding: 10px 5px;
+}
+
+.login-form .footer-links a {
+	color: #76757B;
+}
+
+.login-form .footer-links a:hover {
+	color: #37363e;
+}
+
+/* Form Control */
+.form-control {
+	height: 34px;
+	border-radius: 3px;
+	padding-left: 10px;
+	font-size: 14px;
+	background: #fff;
+	border: 1px solid #BDC4C9;
+	display: block;
+	box-shadow: inset 0px 1px 0px #F1F0F1;
+}
+
+.form-control:focus {
+	background: #f7f7f7;
+	border-color: #BDC4C9;
+	box-shadow: none;
+	border-top: 1px solid #B7B7B7;
+}
+
+.form-label {
+	font-weight: 500;
+}
+
+/* Fieldset Form */
+.fieldset-form fieldset {
+	padding: 20px;
+	margin: 0 2px;
+	border-radius: 3px;
+	border: 1px solid #ccc;
+	padding-top: 10px;
+}
+
+.fieldset-form legend {
+	width: auto;
+	padding: 0px 10px;
+	margin-bottom: 20px;
+	font-size: 16px;
+	line-height: inherit;
+	color: #333;
+	border: 0;
+	font-weight: 600;
+	border-bottom: none;
+}
+
+.btn-default {
+	background-color: #399bff;
+	color: #fff;
+}

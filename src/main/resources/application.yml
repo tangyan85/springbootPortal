@@ -19,11 +19,6 @@ server:
 spring:
   profiles:
     active: uat
-  datasource: 
-    driver-class-name: com.mysql.jdbc.Driver
-#    type: com.alibaba.druid.pool.DruidDataSource
-    hikari:
-      maximumPoolSize: 40
 
 #    filters: stat
 #    maxActive: 20
@@ -38,15 +33,7 @@ spring:
 #    testOnReturn: false
 #    poolPreparedStatements: true
 #    maxOpenPreparedStatements: 20
-  jpa:
-    properties:
-      hibernate:
-        show_sql: 'fasle'
-        format_sql: 'true' 
-        dialect: org.hibernate.dialect.MySQL5Dialect
-        hbm2ddl:
-          auto: update
-  thymeleaf:  
+  thymeleaf:
     cache: false  
     prefix: classpath:/templates/
     suffix: .html  

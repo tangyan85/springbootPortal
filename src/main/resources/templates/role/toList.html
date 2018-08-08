@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="section/header :: head"></head>
+
+<body>
+<div th:fragment="dashboard">
+    <section class="content-header">
+        <h1>
+            角色列表
+            <small>preview</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
+            <li><a href="#">系统管理</a></li>
+            <li class="active">查询角色</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="box">
+                    <div class="box-header">
+                        <small>按 名称 排序</small>
+                        <div class="box-tools" id="project-list-paging">
+
+                        </div>
+                    </div>
+
+                    <!-- /.box-header -->
+                    <div class="box-body no-padding">
+                        <ul class="nav nav-pills nav-stacked" id="project-list-ul">
+                            <li th:each="role ,roleStat : ${roles.content}">
+                                <a href="#" th:style="${roleId} eq ${role.roleId} ? 'background-color: #ebf2f9;' : ''"
+                                   th:onclick="'javascript:showDetail(\''+${role.roleId}+'\');'">
+                                    <i th:class="${role.enable == '1'} ? 'fa fa-fw fa-check-circle-o text-success' : 'fa fa-fw fa-ban text-danger'" style="text-align:left;width:100%;">&nbsp;
+                                        <span th:text="${role.enable == '1'} ? '已启用' : '已禁用'"></span>
+                                    </i>
+                                    <p th:text="${role.roleName}" class="text-primary list-group-item-text"></p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-md-9" id="project-detail">
+
+            </div>
+        </div>
+    </section>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    let roleId = /*[[${roleId}]]*/ null;
+
+    $(function () {
+        $("#project-list-paging").Page({
+            totalPages: 7,//分页总数
+            liNums: 3,//分页的数字按钮数(建议取奇数)
+            activeClass: 'activP', //active 类样式定义
+            hasFirstPage: false,
+            hasLastPage: false,
+            callBack: function (page) {
+                showPage("/role/page/" + page + "/10");
+            }
+        });
+
+        $(".nav > li > a").click(function () {
+            $(".nav > li > a").removeAttr("style");
+            $(this).attr("style", "background-color: #ebf2f9;");
+        });
+
+        if (roleId == null) {
+            $("#project-list-ul li:eq(0)").find("a").click();
+        } else {
+            showDetail(roleId);
+        }
+
+    });
+
+    function showPage(url) {
+        jQuery.ajax({
+            type: "POST",
+            url: url,
+            success: function (data) {
+                if (data != null) {
+                    jQuery("#project-list-ul li").remove();
+                    var htm = '';
+                    for (let i in data.content) {
+                        htm += '<li><a href="#" ';
+                        if (roleId === data.content[i].roleId) {
+                            htm += 'style="background-color: #ebf2f9;" ';
+                        }
+                        htm += 'onclick="showDetail(' + data.content[i].roleId + ')">';
+                        htm += '<i class="' + (data.content[i].enable === '1' ? 'fa fa-fw fa-check-circle-o text-success' : 'fa fa-fw fa-ban text-danger')
+                            + '" style="text-align:left;width:100%;">&nbsp;<span>' + (data.content[i].enable === '1' ? '已启用' : '已禁用') + '</span></i>';
+                        htm += '<p class="text-primary list-group-item-text">' + data.content[i].roleName + '</p>';
+                        htm += '</a></li>';
+                    }
+                    jQuery("#project-list-ul").append(htm);
+                }
+            }
+        });
+
+    }
+
+    function showDetail(roleId) {
+        $("#project-detail").load("/role/preview/" + roleId, {}, function () {
+        });
+    }
+
+    /*]]>*/
+</script>
+
+</body>
+<footer th:include="section/footer :: footer"></footer>
+
+</html>

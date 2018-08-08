@@ -6,19 +6,11 @@ import com.wanda.portal.config.biz.JiraConfig;
 import com.wanda.portal.constants.InputActionType;
 import com.wanda.portal.constants.ProjectMemberRole;
 import com.wanda.portal.constants.RepoType;
-import com.wanda.portal.constants.ServerType;
 import com.wanda.portal.dao.jpa.ServerRepository;
 import com.wanda.portal.dao.remote.ConfluenceService;
 import com.wanda.portal.dao.remote.JenkinsService;
 import com.wanda.portal.dao.remote.JiraService;
 import com.wanda.portal.dao.remote.RepoService;
-import com.wanda.portal.dto.confluence.CreateConfluenceSpaceParamDTO;
-import com.wanda.portal.dto.confluence.GenericConfluenceSpaceDTO;
-import com.wanda.portal.dto.jenkins.JenkinsJobDTO;
-import com.wanda.portal.dto.jira.GenericJiraProjectDTO;
-import com.wanda.portal.dto.svn.SubversionRepoDTO;
-import com.wanda.portal.dto.svn.SvnTemplateWrapperDTO;
-import com.wanda.portal.entity.Server;
 import com.wanda.portal.facade.model.input.*;
 import com.wanda.portal.utils.RegexUtils;
 import org.junit.Assert;
@@ -62,7 +54,7 @@ public class TestCase2 {
     @Autowired
     RepoService repoService;
 
-    @Test
+    /*@Test
     public void checkIfExist() throws Exception {
         System.out.println("bigdata-2017存在吗？" + repoService.checkIfSvnRepoExists("bigdata-2017"));
         System.out.println("bigdata-2016存在吗？" + repoService.checkIfSvnRepoExists("bigdata-2016"));
@@ -71,21 +63,21 @@ public class TestCase2 {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void querySubversionTemplate() throws Exception {
         SvnTemplateWrapperDTO z = repoService.findSubversionTemplates();
         System.out.println("Query For all templates: " + JSONObject.toJSONString(z));
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void fetchAllSvnRepos() throws Exception {
         List<Server> ll = serverRepository.findByServerType(ServerType.SVN);
         repoService.setServer(ll.get(0));
         List<SubversionRepoDTO> z = repoService.fetchAllSvnRepos();
         System.out.println("Query For all repos: " + JSONObject.toJSONString(z));
-    }
+    }*/
     //
     // // 参考此建立repo
     // // 入参repoName
@@ -130,7 +122,7 @@ public class TestCase2 {
     }
 
 
-    @Test
+    /*@Test
     public void checkJira() throws Exception {
         boolean x = jiraService.checkIfJiraProjectExist("TTT");
         boolean y = jiraService.checkIfJiraProjectExist("BBCC");
@@ -143,7 +135,7 @@ public class TestCase2 {
 //        Assert.assertEquals(false, y);
         System.out.println("TTT 这个JIRA存在吗？" + x);
         System.out.println("BBCC 这个JIRA存在吗？" + y);
-    }
+    }*/
 
     @Test
     public void testJiraRegex() {
@@ -156,13 +148,13 @@ public class TestCase2 {
         Assert.assertEquals(false, RegexUtils.isValidJiraProject("1A")); // 不允许
     }
 
-    @Test
+    /*@Test
     public void findAllJiraFromRemote() throws Exception {
         List<Server> ll = serverRepository.findByServerType(ServerType.JIRA);
         jiraService.setServer(ll.get(0));
         List<GenericJiraProjectDTO> z = jiraService.fetchAllJiraProjects();
         System.out.println("Query For all JIRAs: " + JSONObject.toJSONString(z));
-    }
+    }*/
 
     @Test
     public void createJiraProjectUsingExistingProject() throws Exception {
@@ -178,16 +170,16 @@ public class TestCase2 {
     ConfluenceService confluenceService;
 
     /* 获得所有confluence的space */
-    @Test
+   /* @Test
     public void fetchAllConfluenceSpaces() {
         List<Server> ll = serverRepository.findByServerType(ServerType.CONFLUENCE);
         confluenceService.setServer(ll.get(0));
         List<GenericConfluenceSpaceDTO> zzz = confluenceService.fetchAllConfluenceSpaces();
         System.out.println("fetchAllConfluenceSpaces res=" + JSONObject.toJSONString(zzz));
-    }
+    }*/
 
     /* 创建confluence的space */
-    @Test
+    /*@Test
     public void createSpace() throws Exception {
         List<Server> ll = serverRepository.findByServerType(ServerType.CONFLUENCE);
         confluenceService.setServer(ll.get(0));
@@ -203,7 +195,7 @@ public class TestCase2 {
             System.out.println(e);
         }
         System.out.println("view = " + view);
-    }
+    }*/
 
     @Autowired
     JenkinsService jenkinsService;
@@ -213,23 +205,23 @@ public class TestCase2 {
     
     
     /* query jenkins所有job */
-    @Test
+    /*@Test
     public void fetchAllJenkinsJobs() {
         List<Server> ll = serverRepository.findByServerType(ServerType.JENKINS);
         jenkinsService.setServer(ll.get(0));
         List<JenkinsJobDTO> list = jenkinsService.fetchAllJenkinsJobs();
         System.out.println("Query for all jenkins jobs: " + list);
-    }
+    }*/
 
     /* query jenkins所有job */
-    @Test
+    /*@Test
     public void createJenkinsUsingCopy() {
 //        try {
 //            jenkinsService.createJenkinsUsingCopy("mammoth2", "TRIAL/DEMO_FREESTYLE");
 //        } catch (Exception e) {
 //            System.out.println(e);
 //        }
-    }
+    }*/
 
     @Autowired
     private TestRestTemplate testRestTemplate;

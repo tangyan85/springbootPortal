@@ -1,12 +1,40 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <title>Error page</title>
-        <meta charset="utf-8" />
-        <link rel="stylesheet" href="css/main.css" th:href="@{/css/main.css}" />
-    </head>
-    <body>
-        <h1>FORBIDDEN</h1>
-        <a href="index.html" th:href="@{/index.html}">Back to Home Page</a>
-    </body>
+<head th:replace="section/header :: head"></head>
+
+<body style="background: #ffffff">
+<!-- Content Wrapper. Contains page content -->
+<div>
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            403 Error Page
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 首页</a></li>
+            <li class="active">403 error</li>
+        </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="error-page">
+            <h2 class="headline text-yellow"> 403</h2>
+            <div class="error-content">
+                <h3><i class="fa fa-warning text-yellow"></i> 哎呀! 拒绝访问.</h3>
+
+                <p>
+                    您没有访问该资源的权限，请联系管理员。<a href="#" th:href="@{/index}">返回首页</a>
+                </p>
+            </div>
+            <!-- /.error-content -->
+        </div>
+        <!-- /.error-page -->
+    </section>
+    <!-- /.content -->
+</div>
+
+<!-- ./wrapper -->
+</body>
+<footer th:include="section/footer :: footer"></footer>
 </html>

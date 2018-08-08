@@ -91,11 +91,12 @@
                     <tr th:each="jira : ${project.jiraProjects}" th:object="${jira}" th:data="*{jiraProjectId}">
                         <td><a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
                             <span th:text="*{jiraProjectKey}"></span></a></td>
-                        <td>任务总数（<label class="text-blue" th:text="*{allIssues}"></label>）&nbsp;/&nbsp;已完成（<label class="text-green" th:text="*{finishIssues}"></label>）</td>
+                        <td>任务总数（<a href="#" th:onclick="'window.open(\''+${allIssuesLink}+'\')'"><span class="text-blue" th:text="*{allIssues}"></span></a>）&nbsp;/&nbsp;
+                            已完成（<a href="#" th:onclick="'window.open(\''+${finishIssuesLink}+'\')'"><span class="text-green" th:text="*{finishIssues}"></span></a>）</td>
                         <td>
                             <ul class="chart-legend clearfix">
                                 <li th:each="version : *{projectVersions}" th:object="${version}">
-                                    <i class="fa fa-arrow-circle-o-up text-green" th:text="*{name}"></i>
+                                    <i class="fa fa-arrow-circle-o-up text-green">&nbsp;<a href="#" th:onclick="'window.open(\''+*{url}+'\')'"><span th:text="*{name}"></span></a></i>
                                     <small class="label-primary" style="margin-left: 30px;" th:if="*{archived == true}">归档</small>
                                     <small class="label-danger" style="margin-left: 30px;" th:if="*{archived == false} and *{released == false}">未发布</small>
                                     <small class="label-info" style="margin-left: 30px;" th:if="*{archived == false} and *{released == true}">已发布</small>
@@ -284,6 +285,19 @@
                     <tr th:each="conf : ${project.confluenceSpaces}" th:object="${conf}" th:data="*{spaceId}">
                         <td><a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
                             <span th:text="*{spaceKey}"></span></a>
+                        </td>
+                        <td>
+                            <ul class="chart-legend clearfix">
+                                <li>
+                                    页面总数（<a href="#"><span class="text-blue" th:onclick="'window.open(\''+*{allPagesLink}+'\')'" th:text="*{allPages}"></span></a>）
+                                </li>
+                                <li>
+                                    当天新建页面数（<a href="#"><span class="text-blue" th:onclick="'window.open(\''+*{createPagesLink}+'\')'" th:text="*{createPages}"></span></a>）
+                                </li>
+                                <li>
+                                    当天修改页面数（<a href="#"><span class="text-blue" th:onclick="'window.open(\''+*{modifyPagesLink}+'\')'" th:text="*{modifyPages}"></span></a>）
+                                </li>
+                            </ul>
                         </td>
                     </tr>
                 </table>

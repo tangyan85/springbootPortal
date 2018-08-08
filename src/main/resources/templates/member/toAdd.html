@@ -79,8 +79,9 @@
                                             </td>
                                             <td>
                                                 <div class="form-group">
-                                                    <input class="form-control" type="text" name="username"
-                                                           id="username"/>
+                                                    <select class="form-control select2 selectMember" id="username" name="username">
+                                                        <option value="">------请选择------</option>
+                                                    </select>
                                                 </div>
                                             </td>
                                             <td>
@@ -133,31 +134,26 @@
 
 <script type="text/javascript">
     jQuery(function ($) {
-        $('#projectId').select2({
-            width: '100%',
-            dataType: 'json',
-            delay: 1500,
-            ajax: {
-                url: '/project/pull',
-                data: function (params) {
-                    let query = {
-                        search: params.term
-                    }
-                    return query;
-                },
-                processResults: function (data) {
-                    let results = [];
-                    for (let i = 0; i < data.length; i++) {
-                        let temp = {};
-                        temp["id"] = data[i].projectId;
-                        temp["text"] = data[i].projectName;
-                        results.push(temp);
-                    }
-                    return {
-                        results: results
-                    };
-                }
+        select2($('#projectId'), '/project/pull', function(data) {
+            let results = [];
+            for (let i = 0; i < data.length; i++) {
+                let temp = {};
+                temp["id"] = data[i].projectId;
+                temp["text"] = data[i].projectName;
+                results.push(temp);
             }
+            return results;
+        });
+
+        select2($(".selectMember"), '/member/pull', function(data) {
+            let results = [];
+            for (let i = 0; i < data.length; i++) {
+                let temp = {};
+                temp["id"] = data[i].username;
+                temp["text"] = data[i].username + '[' + data[i].dept + ']';
+                results.push(temp);
+            }
+            return results;
         });
 
         $("#finished").click(function () {
@@ -167,10 +163,6 @@
             }
             btnSumbit();
         });
-
-        jQuery.validator.addMethod("projectName", function (value, element) {
-            return this.optional(element) || /^[a-zA-Z\d\u4e00-\u9fa5]+$/.test(value);
-        }, "只支持汉字，大小写字母和数字");
 
         $('#validation-form').validate({
             errorElement: 'div',
@@ -182,9 +174,7 @@
                     required: true
                 },
                 username: {
-                    required: true,
-                    rangelength: [2, 25],
-                    projectName: true
+                    required: true
                 },
                 role: {
                     required: true
@@ -235,7 +225,22 @@
             "handleFirst": true,
             "del": " <span class='glyphicon glyphicon-remove text-red' style='font-size:20px;'></span> ",
             "add": " <span class='glyphicon glyphicon-plus text-blue' style='font-size:20px;'></span> ",
-            "operatePos": -1
+            "operatePos": -1,
+            "copyBefore": function(data) {
+                data.find(".selectMember").select2('destroy');
+            },
+            "copyAfter": function (data) {
+                select2(data.parent().find(".selectMember"), '/member/pull', function(data) {
+                    let results = [];
+                    for (let i = 0; i < data.length; i++) {
+                        let temp = {};
+                        temp["id"] = data[i].username;
+                        temp["text"] = data[i].username + '[' + data[i].dept + ']';
+                        results.push(temp);
+                    }
+                    return results;
+                });
+            }
         });
     })
 </script>

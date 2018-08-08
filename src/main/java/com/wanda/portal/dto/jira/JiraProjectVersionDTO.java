@@ -21,6 +21,7 @@ public class JiraProjectVersionDTO implements Serializable {
     private String userStartDate;
     private String userReleaseDate;
     private Long projectId;
+    private String url;
 
     public String getSelf() {
         return self;
@@ -118,6 +119,14 @@ public class JiraProjectVersionDTO implements Serializable {
         this.projectId = projectId;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     @Override
     public String toString() {
         return "JiraProjectVersionDTO{" +
@@ -133,6 +142,7 @@ public class JiraProjectVersionDTO implements Serializable {
                 ", userStartDate='" + userStartDate + '\'' +
                 ", userReleaseDate='" + userReleaseDate + '\'' +
                 ", projectId=" + projectId +
+                ", url='" + url + '\'' +
                 '}';
     }
 }

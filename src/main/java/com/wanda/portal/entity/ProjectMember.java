@@ -1,17 +1,16 @@
 package com.wanda.portal.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Objects;
-
-import javax.persistence.*;
-
 import com.alibaba.fastjson.annotation.JSONField;
 import com.wanda.portal.constants.Constants;
 import com.wanda.portal.constants.ProjectMemberRole;
 
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Objects;
+
 @Entity
-@Table(name = "project_member")
+@Table(name = "t_project_member")
 public class ProjectMember implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -61,20 +61,6 @@ public class JiraConstants {
         }
     }
 
-    public enum LOGIN_MODE {
-        CURR_USER("1"),
-        DB_USER("2");
-        private String modeCode;
-
-        LOGIN_MODE(String modeCode) {
-            this.modeCode = modeCode;
-        }
-
-        public String getModeCode() {
-            return modeCode;
-        }
-    }
-    
     public static void main(String[] args) {
         System.out.println(JiraConstants.TEMPLATE.SOFTWARE_BASIC_DEV.genFullString());
         System.out.println(JiraConstants.TEMPLATE.SOFTWARE_KANBAN.genFullString());

@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONPath;
 import com.wanda.portal.config.biz.ConfluenceConfig;
 import com.wanda.portal.constants.ConfluenceConstants;
 import com.wanda.portal.dao.jpa.ConfluenceSpaceRepository;
+import com.wanda.portal.dao.remote.AbstractRestService;
 import com.wanda.portal.dao.remote.ConfluenceService;
 import com.wanda.portal.dto.confluence.CreateConfluenceSpaceParamDTO;
 import com.wanda.portal.dto.confluence.GenericConfluenceSpaceDTO;
@@ -29,8 +30,8 @@ import java.util.*;
 
 @Primary
 @Service("ConfluenceSeviceImpl")
-@Scope("prototype")
-public class ConfluenceSeviceImpl implements ConfluenceService {
+@Scope
+public class ConfluenceSeviceImpl extends AbstractRestService implements ConfluenceService {
     private static Logger LOGGER = LoggerFactory.getLogger(ConfluenceSeviceImpl.class);
 
     @Autowired
@@ -38,16 +39,14 @@ public class ConfluenceSeviceImpl implements ConfluenceService {
     @Autowired
     RestTemplate restTemplate;
 
-    private Server server;
-
     /*
      * { "key" : "ZZRR", "name" : "打时空的金卡", "description": { "plain": {
      * "representation":"software-project", "value": "very good" } } }
      */
     @Override
-    public String createSpace(CreateConfluenceSpaceParamDTO confluenceSpace) throws Exception {
+    public String createSpace(CreateConfluenceSpaceParamDTO confluenceSpace, Server server) throws Exception {
         HttpHeaders headers =
-                RestUtils.packBasicAuthHeader(confluenceConfig.getUsername(), confluenceConfig.getPassword());
+                RestUtils.packBasicAuthHeader(server.getLoginName(), server.getPasswd());
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         List<MediaType> accps = new ArrayList<>();
         accps.add(MediaType.APPLICATION_JSON_UTF8);
@@ -83,9 +82,9 @@ public class ConfluenceSeviceImpl implements ConfluenceService {
     }
 
     @Override
-    public String findSpace(CreateConfluenceSpaceParamDTO confluenceSpace) throws Exception {
+    public String findSpace(CreateConfluenceSpaceParamDTO confluenceSpace, Server server) throws Exception {
         HttpHeaders headers =
-                RestUtils.packBasicAuthHeader(confluenceConfig.getUsername(), confluenceConfig.getPassword());
+                RestUtils.packBasicAuthHeader(server.getLoginName(), server.getPasswd());
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         List<MediaType> accps = new ArrayList<>();
         accps.add(MediaType.APPLICATION_JSON_UTF8);
@@ -143,9 +142,9 @@ public class ConfluenceSeviceImpl implements ConfluenceService {
      * 此方法轮询所有ConfluenceSpace，不返还Exception，目的是为了安全的轮询一下Confluence获得所有Space
      */
     @Override
-    public List<GenericConfluenceSpaceDTO> fetchAllConfluenceSpaces() {
+    public List<GenericConfluenceSpaceDTO> fetchAllConfluenceSpaces(Server server) {
         HttpHeaders headers =
-                RestUtils.packBasicAuthHeader(confluenceConfig.getUsername(), confluenceConfig.getPassword());
+                RestUtils.packBasicAuthHeader(server.getLoginName(), server.getPasswd());
         //List<Charset> acceptableCharsets = new ArrayList<>();
         //acceptableCharsets.add(Charset.defaultCharset());
         List<MediaType> acceptableMediaTypes = new ArrayList<>();
@@ -168,6 +167,7 @@ public class ConfluenceSeviceImpl implements ConfluenceService {
                 response = restTemplate.exchange(url.trim(), HttpMethod.GET, request, String.class);
             } catch (Exception e) {
                 LOGGER.error("Query for all confluence spaces error: " + e);
+                e.printStackTrace();
             }
             // 说明有Confluence Space
             if (response.getStatusCode().is2xxSuccessful()) {
@@ -189,6 +189,7 @@ public class ConfluenceSeviceImpl implements ConfluenceService {
                     }
                 } catch (Exception e) {
                     LOGGER.error("Query for all confluence spaces get 200, but parse json error: " + e);
+                    e.printStackTrace();
                 }
             } else {
                 LOGGER.error("ConfluenceSpace列表轮询不存在合法数据,HTTP返回状态码为: {}, HTTP返回body为: {}"
@@ -202,8 +203,8 @@ public class ConfluenceSeviceImpl implements ConfluenceService {
     @Autowired
     ConfluenceSpaceRepository confluenceSpaceRepository;
     @Override
-    public List<ConfluenceSpaceInputParam> fetchUnusedConfs() {
-        List<GenericConfluenceSpaceDTO> allConfs = this.fetchAllConfluenceSpaces();
+    public List<ConfluenceSpaceInputParam> fetchUnusedConfs(Server server) {
+        List<GenericConfluenceSpaceDTO> allConfs = this.fetchAllConfluenceSpaces(server);
         List<ConfluenceSpace> usedConfs = confluenceSpaceRepository.findAll();
         List<ConfluenceSpaceInputParam> retConfs = new ArrayList<>();
 
@@ -236,17 +237,51 @@ public class ConfluenceSeviceImpl implements ConfluenceService {
     }
 
     @Override
-    public void setServer(Server server) {
-        this.server = server;
-    }
-
-    @Override
-    public Server getServer() {
-        return this.server;
-    }
-
-    @Override
     public void deleteByConfluenceId(Long confluenceId) {
         confluenceSpaceRepository.deleteById(confluenceId);
     }
+
+    @Override
+    public Integer fetchAllPages(final String projectId, Server server) {
+        return fetchAllPages(projectId, server, " and type=page");
+    }
+
+    @Override
+    public Integer fetchAllPagesByCreated(final String projectId, Server server) {
+        return fetchAllPages(projectId, server, " and type=page and created > endOfDay(\"-1d\")");
+    }
+
+    @Override
+    public Integer fetchAllPagesByModified(final String projectId, Server server) {
+        return fetchAllPages(projectId, server, " and type=page and lastmodified > endOfDay(\"-1d\")");
+    }
+
+    private Integer fetchAllPages(final String projectId, Server server, String fields) {
+        Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
+        String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + confluenceConfig.getGenericApi() + "/content/search?limit=26&start=0&cql=space =" + projectId + fields;
+        Integer total = 0;
+        boolean next;
+
+        do {
+            next = false;
+
+            JSONObject jb = restRequest(values, "{}", url, HttpMethod.GET, JSONObject::parseObject);
+            Object sizeObj = JSONPath.eval(jb, "$.size");
+            if (sizeObj != null) {
+                total += Integer.parseInt(sizeObj.toString());
+            }
+            Object baseObj = JSONPath.eval(jb, "$._links.base");
+            Object nextObj = JSONPath.eval(jb, "$._links.next");
+            if (baseObj != null && nextObj != null) {
+                next = true;
+                url = baseObj.toString() + nextObj.toString();
+                url = url.replace("%20", " ");
+                url = url.replace("%3D", "=");
+            }
+        } while (next);
+
+        return total;
+    }
+
 }

@@ -28,9 +28,9 @@
     <script th:src="@{/vendor/jquery-confirm/js/jquery-confirm.js}"></script>
     <script th:src="@{/plugins/jQueryPage/jquery.page.js}"></script>
     <script th:src="@{/plugins/layer/layer.js}"></script>
-    <!-- Google Font -->
+    <!-- Google Font
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
-
+-->
     <style>
         .nav >li >a:visited{
             color: aqua;
@@ -89,6 +89,28 @@
                 area: ['100%', '100%'],
                 fixed: false, //不固定
                 content: url
+            });
+        }
+
+        function select2(element, url, func) {
+            element.select2({
+                width: '100%',
+                dataType: 'json',
+                delay: 1500,
+                ajax: {
+                    url: url,
+                    data: function (params) {
+                        let query = {
+                            search: params.term
+                        }
+                        return query;
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: func(data)
+                        };
+                    }
+                }
             });
         }
 

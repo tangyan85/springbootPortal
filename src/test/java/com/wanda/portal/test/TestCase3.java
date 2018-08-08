@@ -8,18 +8,10 @@ import com.wanda.portal.config.biz.JenkinsConfig;
 import com.wanda.portal.config.biz.JiraConfig;
 import com.wanda.portal.constants.InputActionType;
 import com.wanda.portal.constants.RepoType;
-import com.wanda.portal.constants.ServerType;
 import com.wanda.portal.dao.AsyncTaskService;
 import com.wanda.portal.dao.jpa.*;
 import com.wanda.portal.dao.remote.*;
-import com.wanda.portal.dto.confluence.GenericConfluenceSpaceDTO;
-import com.wanda.portal.dto.svn.SubversionRepoDTO;
-import com.wanda.portal.entity.ConfluenceSpace;
-import com.wanda.portal.entity.Project;
-import com.wanda.portal.entity.SCMRepo;
-import com.wanda.portal.entity.Server;
 import com.wanda.portal.facade.ProjectController;
-import com.wanda.portal.facade.model.input.ConfluenceSpaceInputParam;
 import com.wanda.portal.facade.model.input.ProjectInputParam;
 import com.wanda.portal.facade.model.input.ScmRepoInputParam;
 import org.junit.Test;
@@ -31,7 +23,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = RootApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -131,12 +124,12 @@ public class TestCase3 {
     @Autowired
     ProjectRepository projectRepository;
 
-    @Test
-    public void testServer() {
-        System.out.println("ALL the servers are: " + serverRepository.findAll());
-        System.out.println("ALL the JIRA servers are: " + serverRepository.findByServerType(ServerType.JIRA));
-        System.out.println("The Selected Server is: " + serverRepository.findById(1l));
-    }
+//    @Test
+//    public void testServer() {
+//        System.out.println("ALL the servers are: " + serverRepository.findAll());
+//        System.out.println("ALL the JIRA servers are: " + serverRepository.findByServerType(ServerType.JIRA));
+//        System.out.println("The Selected Server is: " + serverRepository.findById(1l));
+//    }
 
     @Test
     public void testjiraServer() {
@@ -248,17 +241,17 @@ public class TestCase3 {
 
     }*/
 
-    @Test
-    public void testprojectService() { // 测Project的排序
-        List<Project> pro = projectService.findAllByRankDesc();
-        System.out.println(JSONObject.toJSONString(pro));
-    }
+//    @Test
+//    public void testprojectService() { // 测Project的排序
+//        List<Project> pro = projectService.findAllByRankDesc();
+//        System.out.println(JSONObject.toJSONString(pro));
+//    }
 
     @Autowired
     RepoService repoService;
     @Autowired
     SCMRepoRepository sCMRepoRepository;
-    @Test
+    /*@Test
     public void fetchUnusedSvnRepos() {
         List<Server> svnServers = serverRepository.findByServerType(ServerType.SVN); // 先从db获取svn的所有Server
         repoService.setServer(svnServers.get(0));
@@ -301,7 +294,7 @@ public class TestCase3 {
         Long t4 = System.currentTimeMillis();
         System.out.println("new algo time is " + (t4 - t3) + "ms");
         System.out.println("new res = " + JSONObject.toJSONString(retSvns));
-    }
+    }*/
 
     @Autowired
     JenkinsProjectRepository jenkinsProjectRepository;
@@ -356,7 +349,7 @@ public class TestCase3 {
     ConfluenceSpaceRepository confluenceSpaceRepository;
     @Autowired
     ConfluenceService confluenceService;
-    @Test
+    /*@Test
     public void fetchUnusedConfs() {
         List<Server> confServers = serverRepository.findByServerType(ServerType.CONFLUENCE); // 先从db获取confluence的所有Server
         confluenceService.setServer(confServers.get(0));
@@ -397,7 +390,7 @@ public class TestCase3 {
         Long t4 = System.currentTimeMillis();
         System.out.println("new algo time is " + (t4 - t3) + "ms");
         System.out.println("new res = " + JSONObject.toJSONString(retConfs));
-    }
+    }*/
 
     @Autowired
     JiraService jiraService;

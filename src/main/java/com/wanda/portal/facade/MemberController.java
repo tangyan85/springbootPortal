@@ -2,20 +2,24 @@ package com.wanda.portal.facade;
 
 import com.wanda.portal.constants.ProjectMemberRole;
 import com.wanda.portal.constants.ProjectStatus;
+import com.wanda.portal.dao.jpa.UserRepository;
 import com.wanda.portal.dao.remote.ProjectMemberService;
 import com.wanda.portal.dao.remote.ProjectService;
 import com.wanda.portal.dto.common.CommonHttpResponseBody;
 import com.wanda.portal.entity.Project;
+import com.wanda.portal.entity.User;
 import com.wanda.portal.facade.model.input.ProjectInputParam;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.EnumSet;
+import java.util.List;
 
 @RequestMapping("/member")
 @Controller
@@ -24,6 +28,8 @@ public class MemberController {
     ProjectService projectService;
     @Autowired
     ProjectMemberService projectMemberService;
+    @Autowired
+    UserRepository userRepository;
 
     @RequestMapping("/toList")
     public String toList(Model model, String projectId) {
@@ -31,6 +37,12 @@ public class MemberController {
         model.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
         model.addAttribute("projectId", projectId);
         return "member/toList";
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/pull", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public List<User> pull(String search) {
+        return userRepository.findByUserKeyLike("%" + search + "%");
     }
 
     @RequestMapping("/remove")

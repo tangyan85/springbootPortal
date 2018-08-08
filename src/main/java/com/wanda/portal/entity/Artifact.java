@@ -1,27 +1,15 @@
 package com.wanda.portal.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import com.alibaba.fastjson.annotation.JSONField;
 import com.wanda.portal.constants.AritifactType;
 import com.wanda.portal.constants.Constants;
 
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
+
 @Entity
-@Table(name = "nexus_artifacts")
+@Table(name = "t_nexus_artifacts")
 public class Artifact implements Serializable {
 
     private static final long serialVersionUID = 1L;

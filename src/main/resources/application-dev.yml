@@ -32,17 +32,23 @@ myprops:
     url: ldap://10.215.4.108:389/
   switch: #功能开关
     enableSso: true
-      
+
 spring:
   jpa:
     show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
   datasource:
-    password: root
+    driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/portal?useSSL=false #dev环境切换到local库
     username: root
+    password: root
   redis:
     database: 0
-    host: 10.215.4.111
+    host: localhost
     port: 6379
     password:
 

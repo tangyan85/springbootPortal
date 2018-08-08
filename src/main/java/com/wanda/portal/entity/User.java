@@ -1,6 +1,7 @@
 package com.wanda.portal.entity;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
@@ -8,9 +9,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
-@Table(name = "user")
+@Table(name = "t_user")
 public class User implements Serializable, UserDetails {
     private static final long serialVersionUID = 1L;
     @Id
@@ -18,8 +20,8 @@ public class User implements Serializable, UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "user_key")
-    private String userkey;
+    @Column(name = "user_key", unique = true)
+    private String userKey;
 
     @Column(name = "user_name")
     private String username;
@@ -38,6 +40,10 @@ public class User implements Serializable, UserDetails {
 
 	@Column(name = "dept")
 	private String dept;
+
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH, targetEntity = Role.class)
+	@JoinTable(name = "t_user_role", joinColumns = @JoinColumn(name = "user_key", referencedColumnName = "user_key"), inverseJoinColumns = @JoinColumn(name = "role_key", referencedColumnName = "role_key"))
+	private List<Role> roles = new ArrayList<>();
 
 	@Override
 	public boolean isAccountNonExpired() {
@@ -61,12 +67,14 @@ public class User implements Serializable, UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		List<GrantedAuthority> auths = new ArrayList<>();
-//		List<SysRole> roles = this.getRoles();
-//		for (SysRole role : roles) {
-//			auths.add(new SimpleGrantedAuthority(role.getName()));
-//		}
-		return auths;
+		List<GrantedAuthority> ga = new ArrayList<>();
+		for (Role role : this.getRoles()) {
+			ga.add(new SimpleGrantedAuthority(role.getRoleKey()));
+		}
+		if (ga.size() <= 0) {
+			ga.add(new SimpleGrantedAuthority("ROLE_NORMAL_USER"));
+		}
+		return ga;
 	}
 
 	public Long getId() {
@@ -77,12 +85,12 @@ public class User implements Serializable, UserDetails {
 		this.id = id;
 	}
 
-	public String getUserkey() {
-		return userkey;
+	public String getUserKey() {
+		return userKey;
 	}
 
-	public void setUserkey(String userkey) {
-		this.userkey = userkey;
+	public void setUserKey(String userKey) {
+		this.userKey = userKey;
 	}
 
 	@Override
@@ -134,4 +142,43 @@ public class User implements Serializable, UserDetails {
 	public void setDept(String dept) {
 		this.dept = dept;
 	}
+
+	public List<Role> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<Role> roles) {
+		this.roles = roles;
+	}
+
+	@Override
+	public String toString() {
+		return "User{" +
+				"id=" + id +
+				", userkey='" + userKey + '\'' +
+				", username='" + username + '\'' +
+				", password='" + password + '\'' +
+				", rawPassword='" + rawPassword + '\'' +
+				", mobile='" + mobile + '\'' +
+				", mail='" + mail + '\'' +
+				", dept='" + dept + '\'' +
+				'}';
+	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return  Objects.equals(username, user.username) &&
+                Objects.equals(mobile, user.mobile) &&
+                Objects.equals(mail, user.mail) &&
+                Objects.equals(dept, user.dept);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(username, mobile, mail, dept);
+    }
 }

@@ -8,12 +8,8 @@ import com.wanda.portal.dao.jpa.ServerRepository;
 import com.wanda.portal.dao.remote.*;
 import com.wanda.portal.dto.common.CommonHttpResponseBody;
 import com.wanda.portal.dto.jira.JiraProjectVersionDTO;
-import com.wanda.portal.entity.JiraProject;
-import com.wanda.portal.entity.Project;
-import com.wanda.portal.entity.ProjectMember;
-import com.wanda.portal.entity.Server;
+import com.wanda.portal.entity.*;
 import com.wanda.portal.facade.model.input.*;
-import com.wanda.portal.security.SecurityConfigCrowd;
 import com.wanda.portal.utils.ConversionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -24,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -37,11 +32,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 @Controller
 @RequestMapping("/project")
-public class ProjectController {
+public class ProjectController extends BaseController {
     private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
     @Autowired
@@ -67,21 +61,19 @@ public class ProjectController {
     private RedisTemplate redisTemplate;
 
     @RequestMapping("/toAdd")
-    public String toAdd(Model model, HttpSession session) {
+    public String toAdd(Model model) {
         logger.info("------Current path:/project/toAdd");
         setModelCommon(model);
-        UserDetails user = (UserDetails) session.getAttribute(SecurityConfigCrowd.SESSION_KEY);
-        setCommonServerInfoAsync(model, user);
+        setCommonServerInfoAsync(model);
 
         return "project/toAdd";
     }
 
     @RequestMapping("/toAdd2")
-    public String toAdd2(Model model, HttpSession session) {
+    public String toAdd2(Model model) {
         logger.info("------Current path:/project/toAdd2");
         setModelCommon(model);
-        UserDetails user = (UserDetails) session.getAttribute(SecurityConfigCrowd.SESSION_KEY);
-        setCommonServerInfoAsync(model, user);
+        setCommonServerInfoAsync(model);
 
         return "project/toAdd2";
     }
@@ -129,7 +121,7 @@ public class ProjectController {
     }
 
     @RequestMapping("/toList")
-    public String toList(Model model, String projectId) {
+    public String toList(Model model, String projectId, HttpSession session) {
         logger.info("------Current path:/project/toList");
         Sort sort = new Sort(Sort.Direction.DESC, "rank", "createTime");
         model.addAttribute("projects", projectService.findAll(PageRequest.of(0, 10, sort)));
@@ -142,70 +134,94 @@ public class ProjectController {
     public String preview(Model model, @PathVariable("projectId") String projectId) {
         logger.info("------Current path:/project/preview");
         Project project = new Project();
+        String allIssuesLink = "", finishIssuesLink = "";
+
         try {
             project = projectService.getProjectById(Long.valueOf(projectId));
             if (project != null) {
                 Set<JiraProject> jiraProjects = project.getJiraProjects();
                 for (JiraProject jiraProject : jiraProjects) {
-                    Long versionExpire = redisTemplate.getExpire(jiraProject.getJiraProjectKey() + "_versions");
-                    List<JiraProjectVersionDTO> versions;
-
+                    Server server = null;
                     List<Server> jiraServers = serverRepository.findByServerType(ServerType.JIRA);
-                    for (Server server : jiraServers) {
-                        if (jiraProject.getWebui().contains(server.getOuterServerIpAndPort())) {
-                            jiraService.setServer(server);
+                    for (Server s : jiraServers) {
+                        if (jiraProject.getWebui().contains(s.getDomain())) {
+                            server = s;
+                            allIssuesLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                                    + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey();
+                            finishIssuesLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                                    + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey() + " AND status %3D 5";
                             break;
                         }
                     }
+                    setJiraProject(jiraProject, server);
+                }
 
-                    if (versionExpire <= 0) {
-                        versions = jiraService.fetchProjectVersions(jiraProject.getJiraProjectKey());
-                        if (versions.size() > 0) {
-                            redisTemplate.opsForList().leftPush(jiraProject.getJiraProjectKey() + "_versions", versions);
-                            redisTemplate.expire(jiraProject.getJiraProjectKey() + "_versions", 5, TimeUnit.MINUTES);
+                Set<ConfluenceSpace> confProjects = project.getConfluenceSpaces();
+                for (ConfluenceSpace confProject : confProjects) {
+                    Server server = null;
+                    List<Server> confServers = serverRepository.findByServerType(ServerType.CONFLUENCE);
+                    for (Server s : confServers) {
+                        if (confProject.getWebui().contains(s.getDomain())) {
+                            server = s;
+                            break;
                         }
-                    } else {
-                        versions = (List<JiraProjectVersionDTO>) redisTemplate.opsForList().leftPop(jiraProject.getJiraProjectKey() + "_versions");
                     }
-
-                    jiraProject.setProjectVersions(versions);
-
-                    Long allIssuesExpire = redisTemplate.getExpire(jiraProject.getJiraProjectKey() + "_allIssues");
-                    Integer allIssues;
-
-                    if (allIssuesExpire <= 0) {
-                        allIssues = jiraService.fetchProjectAllIssues(jiraProject.getJiraProjectKey());
-                        if (allIssues != null) {
-                            redisTemplate.opsForList().leftPush(jiraProject.getJiraProjectKey() + "_allIssues", allIssues);
-                            redisTemplate.expire(jiraProject.getJiraProjectKey() + "_allIssues", 3, TimeUnit.MINUTES);
-                        }
-                    } else {
-                        allIssues = (Integer) redisTemplate.opsForList().leftPop(jiraProject.getJiraProjectKey() + "_allIssues");
-                    }
-
-                    jiraProject.setAllIssues(allIssues);
-
-                    Long finishIssuesExpire = redisTemplate.getExpire(jiraProject.getJiraProjectKey() + "_finishIssues");
-                    Integer finishIssues;
-                    if (finishIssuesExpire <= 0) {
-                        finishIssues = jiraService.fetchProjectAllIssues(jiraProject.getJiraProjectKey());
-                        if (finishIssues != null) {
-                            redisTemplate.opsForList().leftPush(jiraProject.getJiraProjectKey() + "_finishIssues", finishIssues);
-                            redisTemplate.expire(jiraProject.getJiraProjectKey() + "_finishIssues", 3, TimeUnit.MINUTES);
-                        }
-                    } else {
-                        finishIssues = (Integer) redisTemplate.opsForList().leftPop(jiraProject.getJiraProjectKey() + "_finishIssues");
-                    }
-
-                    jiraProject.setFinishIssues(finishIssues);
+                    logger.info("preview() server:" + server.getLoginName());
+                    setConfProject(confProject, server);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         model.addAttribute("project", project);
+        model.addAttribute("allIssuesLink", allIssuesLink);
+        model.addAttribute("finishIssuesLink", finishIssuesLink);
 
         return "project/toDetail";
+    }
+
+    private void setJiraProject(JiraProject jiraProject, Server server) {
+        String versionLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey() + " AND affectedVersion  %3D ";
+        String versionsKey = jiraProject.getJiraProjectKey() + "_versions";
+        List<JiraProjectVersionDTO> versions = getForCache(versionsKey, () -> jiraService.fetchProjectVersions(jiraProject.getJiraProjectKey(), server));
+        for (JiraProjectVersionDTO dto : versions) {
+            dto.setUrl(versionLink + dto.getName());
+        }
+        jiraProject.setProjectVersions(versions);
+
+        String allIssuesKey = jiraProject.getJiraProjectKey() + "_allIssues";
+        Integer allIssues = getForCache(allIssuesKey, () -> jiraService.fetchProjectAllIssues(jiraProject.getJiraProjectKey(), server));
+        jiraProject.setAllIssues(allIssues);
+
+        String finishIssuesKey = jiraProject.getJiraProjectKey() + "_finishIssues";
+        Integer finishIssues = getForCache(finishIssuesKey, () -> jiraService.fetchProjectAllIssues(jiraProject.getJiraProjectKey(), server));
+        jiraProject.setFinishIssues(finishIssues);
+    }
+
+    private void setConfProject(ConfluenceSpace confProject, Server server) {
+        String allPagesLink, createPagesLink, modifyPagesLink;
+        allPagesLink = server.getProtocol() + "://" + server.getDomain()
+                + "/collector/pages.action?key=" + confProject.getSpaceKey();
+        createPagesLink = server.getProtocol() + "://" + server.getDomain()
+                + "/dosearchsite.action?cql=space+%3D+\"" + confProject.getSpaceKey() + "\"+and+created+>%3D+now(%27-1d%27)";
+        modifyPagesLink = server.getProtocol() + "://" + server.getDomain()
+                + "/dosearchsite.action?cql=space+%3D+\"" + confProject.getSpaceKey() + "\"+and+lastmodified+>%3D+now(%27-1d%27)";
+        confProject.setAllPagesLink(allPagesLink);
+        confProject.setCreatePagesLink(createPagesLink);
+        confProject.setModifyPagesLink(modifyPagesLink);
+
+        String allPagesKey = confProject.getSpaceKey() + "_allPages";
+        Integer allPages = getForCache(allPagesKey, () -> confluenceService.fetchAllPages(confProject.getSpaceKey(), server));
+        confProject.setAllPages(allPages);
+
+        String createPagesKey = confProject.getSpaceKey() + "_createPages";
+        Integer createPages = getForCache(createPagesKey, () -> confluenceService.fetchAllPagesByCreated(confProject.getSpaceKey(), server));
+        confProject.setCreatePages(createPages);
+
+        String modifyPagesKey = confProject.getSpaceKey() + "_modifyPages";
+        Integer modifyPages = getForCache(modifyPagesKey, () -> confluenceService.fetchAllPagesByModified(confProject.getSpaceKey(), server));
+        confProject.setModifyPages(modifyPages);
     }
 
     @ResponseBody
@@ -228,7 +244,7 @@ public class ProjectController {
 
     @RequestMapping("/projects/{projectId}/{optype}")
     public String toEdit(Model model, @PathVariable("projectId") String projectId,
-                         @PathVariable("optype") String optype, HttpSession session) {
+                         @PathVariable("optype") String optype) {
         logger.info("------Current path:/project/projects" + projectId);
 
         if (StringUtils.isNotEmpty(optype)) {
@@ -239,8 +255,7 @@ public class ProjectController {
         model.addAttribute("project", ConversionUtil.Con2Project(project));
 
         setModelCommon(model);
-        UserDetails user = (UserDetails) session.getAttribute(SecurityConfigCrowd.SESSION_KEY);
-        setCommonServerInfoAsync(model, user);
+        setCommonServerInfoAsync(model);
 
 
         logger.debug("------Current path:/project/toAddProject:" + project);
@@ -257,17 +272,16 @@ public class ProjectController {
      * @return
      */
     @RequestMapping("/toImport")
-    public String toImport(Model model, HttpSession session) {
+    public String toImport(Model model) {
         logger.info("------Current path:/project/toImport");
         setModelCommon(model);
-        UserDetails user = (UserDetails) session.getAttribute(SecurityConfigCrowd.SESSION_KEY);
-        setCommonServerInfoAsync(model, user);
+        setCommonServerInfoAsync(model);
 
         return "project/toImport";
     }
 
     @RequestMapping(value = "/toAddProjectTest", method = RequestMethod.POST)
-    public String toAddProjectTest(Model model, @ModelAttribute(value = "project") Project project) throws Exception {
+    public String toAddProjectTest(@ModelAttribute(value = "project") Project project) throws Exception {
         projectService.createProject(project);
         return "forward:/";
     }
@@ -430,12 +444,12 @@ public class ProjectController {
         model.addAttribute("serverIPs", serverRepository.findAll());
     }
 
-    public Model setCommonServerInfo(Model model, UserDetails user) {
-        fetchAllJiras(model, user);
+    public Model setCommonServerInfo(Model model) {
+        fetchAllJiras(model);
         //创建项目时需要选择已有项目id来进行创建
         fetchAllConfluences(model);
         //创建项目时需要新建key来进行创建
-        fetchAllJenkinses(model, user);
+        fetchAllJenkinses(model);
         //创建项目时需要选择已有项目key来进行创建
         fetchAllSvnAndTemplates(model);
         //创建项目时需要选择已有项目template来进行创建
@@ -447,12 +461,12 @@ public class ProjectController {
      *
      * @param model
      */
-    public void setCommonServerInfoAsync(Model model, UserDetails user) {
+    public void setCommonServerInfoAsync(Model model) {
         try {
             // 先从db中获取jira的所有Server
             List<Server> jiraServers = serverRepository.findByServerType(ServerType.JIRA);
             // 再轮询外部jira，过滤
-            Future<List<JiraProjectInputParam>> existJiras = asyncTaskService.fetchAllJiras(jiraServers, user);
+            Future<List<JiraProjectInputParam>> existJiras = asyncTaskService.fetchAllJiras(jiraServers);
             // 先从db中获取confluence的所有Server
             List<Server> confServers = serverRepository.findByServerType(ServerType.CONFLUENCE);
             // 再轮询外部confluence，过滤
@@ -460,7 +474,7 @@ public class ProjectController {
             // 先从db中获取jenkins的所有Server
             List<Server> jenkinsServers = serverRepository.findByServerType(ServerType.JENKINS);
             // 再轮询外部jenkins，过滤
-            Future<List<JenkinsInputParam>> existJenkinses = asyncTaskService.fetchAllJenkinses(jenkinsServers, user);
+            Future<List<JenkinsInputParam>> existJenkinses = asyncTaskService.fetchAllJenkinses(jenkinsServers);
             // 先从db获取svn的所有Server
             List<Server> svnServers = serverRepository.findByServerType(ServerType.SVN);
             // 轮询外部svn，过滤
@@ -478,18 +492,13 @@ public class ProjectController {
         }
     }
 
-    public void fetchAllJiras(Model model, UserDetails user) {
+    public void fetchAllJiras(Model model) {
         List<Server> jiraServers = serverRepository.findByServerType(ServerType.JIRA);
         List<JiraProjectInputParam> existJiras = new ArrayList<>();
 
         if (jiraServers != null && jiraServers.size() > 0) {
             for (Server jiraServer : jiraServers) {
-                jiraService.setServer(jiraServer);
-                if (JiraConstants.LOGIN_MODE.CURR_USER.getModeCode().equals(jiraServer.getLoginMode())) {
-                    jiraServer.setLoginName(user.getUsername());
-                    jiraServer.setPasswd(user.getPassword());
-                }
-                existJiras.addAll(jiraService.fetchUnusedJiraProject());
+                existJiras.addAll(jiraService.fetchUnusedJiraProject(jiraServer));
             }
         }
         model.addAttribute("existJiras", existJiras);
@@ -500,24 +509,18 @@ public class ProjectController {
         List<ConfluenceSpaceInputParam> existConfs = new ArrayList<>();
         if (confServers != null && confServers.size() > 0) {
             for (Server confServer : confServers) {
-                confluenceService.setServer(confServer);
-                existConfs.addAll(confluenceService.fetchUnusedConfs());
+                existConfs.addAll(confluenceService.fetchUnusedConfs(confServer));
             }
         }
         model.addAttribute("existConfs", existConfs);
     }
 
-    public void fetchAllJenkinses(Model model, UserDetails user) {
+    public void fetchAllJenkinses(Model model) {
         List<Server> jenkinsServers = serverRepository.findByServerType(ServerType.JENKINS);
         List<JenkinsInputParam> existJenkinses = new ArrayList<>();
         if (jenkinsServers != null && jenkinsServers.size() > 0) {
             for (Server jenkinsServer : jenkinsServers) {
-                if (JiraConstants.LOGIN_MODE.CURR_USER.getModeCode().equals(jenkinsServer.getLoginMode())) {
-                    jenkinsServer.setLoginName(user.getUsername());
-                    jenkinsServer.setPasswd(user.getPassword());
-                }
-                jenkinsService.setServer(jenkinsServer);
-                existJenkinses.addAll(jenkinsService.fetchUnusedJekins());
+                existJenkinses.addAll(jenkinsService.fetchUnusedJekins(jenkinsServer));
             }
         }
         model.addAttribute("existJenkins", existJenkinses);
@@ -529,9 +532,8 @@ public class ProjectController {
         List<ScmRepoInputParam> svnTemplates = new ArrayList<>();
         if (svnServers != null && svnServers.size() > 0) {
             for (Server svnServer : svnServers) {
-                repoService.setServer(svnServer);
-                existSvns.addAll(repoService.fetchUnusedSvnRepos());
-                svnTemplates.addAll(repoService.fetchAllTemplates());
+                existSvns.addAll(repoService.fetchUnusedSvnRepos(svnServer));
+                svnTemplates.addAll(repoService.fetchAllTemplates(svnServer));
             }
         }
         model.addAttribute("existSvns", existSvns);

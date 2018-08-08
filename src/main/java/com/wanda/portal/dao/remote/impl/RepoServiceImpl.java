@@ -7,6 +7,7 @@ import com.wanda.portal.config.biz.SvnConfig;
 import com.wanda.portal.constants.RepoType;
 import com.wanda.portal.dao.jpa.ProjectRepository;
 import com.wanda.portal.dao.jpa.SCMRepoRepository;
+import com.wanda.portal.dao.remote.AbstractRestService;
 import com.wanda.portal.dao.remote.RepoService;
 import com.wanda.portal.dto.git.GitRepoDTO;
 import com.wanda.portal.dto.svn.SubversionRepoDTO;
@@ -35,15 +36,13 @@ import java.util.*;
 
 @Primary
 @Service
-@Scope("prototype")
-public class RepoServiceImpl implements RepoService {
+@Scope
+public class RepoServiceImpl extends AbstractRestService implements RepoService {
 
     private static final String errorMessage = "errorMessage";
     private static final String message = "message";
 
     private static Logger LOGGER = LoggerFactory.getLogger(RepoServiceImpl.class);
-
-    private Server server;
 
     @Autowired
     SvnConfig svnConfig;
@@ -56,13 +55,13 @@ public class RepoServiceImpl implements RepoService {
     @Autowired
 	ProjectRepository projectRepository;
     @Override
-    public boolean checkIfSvnRepoExists(String repoName) throws Exception {
+    public boolean checkIfSvnRepoExists(String repoName, Server server) throws Exception {
         LOGGER.info("===Begin query SVN for reponame-" + repoName);
         if (StringUtils.isNullOrEmpty(repoName) || !RegexUtils.isValidRepo(repoName)) { // 如果仓库名为空或者不合法，则直接拒绝
             throw new SvnRepoCreateFailureException(REPO_PARAM_ILLEGAL_ERROR_MSG);
         }
 
-        List<SubversionRepoDTO> allRepos = fetchAllSvnRepos();
+        List<SubversionRepoDTO> allRepos = fetchAllSvnRepos(server);
         for (SubversionRepoDTO rpo : allRepos) { // 遍历已有repo
             if (repoName.equals(rpo.getName())) { // 找到则返回存在
                 LOGGER.info("repoName " + repoName + " exists!");
@@ -77,14 +76,14 @@ public class RepoServiceImpl implements RepoService {
     }
 
     @Override
-    public SubversionRepoDTO findSvnRepo(String repoName) throws Exception {
+    public SubversionRepoDTO findSvnRepo(String repoName, Server server) throws Exception {
         LOGGER.info("===Begin query SVN for reponame-" + repoName);
         // 如果仓库名为空或者不合法，则直接拒绝
         if (StringUtils.isNullOrEmpty(repoName) || !RegexUtils.isValidRepo(repoName)) {
             throw new SvnRepoCreateFailureException(REPO_PARAM_ILLEGAL_ERROR_MSG);
         }
 
-        List<SubversionRepoDTO> allRepos = fetchAllSvnRepos();
+        List<SubversionRepoDTO> allRepos = fetchAllSvnRepos(server);
         // 遍历已有repo
         for (SubversionRepoDTO rpo : allRepos) {
             // 找到则返回存在
@@ -97,14 +96,14 @@ public class RepoServiceImpl implements RepoService {
     }
 
     @Override
-    public GitRepoDTO findGitRepo(String repoName) throws Exception {
+    public GitRepoDTO findGitRepo(String repoName, Server server) throws Exception {
         LOGGER.info("===Begin query SVN for reponame-" + repoName);
         // 如果仓库名为空或者不合法，则直接拒绝
         if (StringUtils.isNullOrEmpty(repoName) || !RegexUtils.isValidRepo(repoName)) {
             throw new SvnRepoCreateFailureException(REPO_PARAM_ILLEGAL_ERROR_MSG);
         }
 
-        List<GitRepoDTO> allRepos = fetchAllGitRepos();
+        List<GitRepoDTO> allRepos = fetchAllGitRepos(server);
         // 遍历已有repo
         for (GitRepoDTO rpo : allRepos) {
             // 找到则返回存在
@@ -123,13 +122,13 @@ public class RepoServiceImpl implements RepoService {
      * 创建途中失败抛出SvnRepoCreateFailureException异常，创建成功返回SubversionRepoDTO
      */
     @Override
-    public final SubversionRepoDTO createSvnRepo(String repoName, Long applyTemplateId, boolean applyStandardLayout)
+    public final SubversionRepoDTO createSvnRepo(String repoName, Long applyTemplateId, boolean applyStandardLayout, Server server)
             throws Exception {
         LOGGER.info("===Begin create Subversion, name = " + repoName + ", applyTemplateId = " + applyTemplateId
                 + ", applyStandardLayout = " + applyStandardLayout);
         // templateId和applyStandardLayout二者并非都必填，如果选择templateId
         // 则根据模板进行创建，否则根据applyStandardLayout=true/false，进行默认风格的建立
-        boolean isExist = checkIfSvnRepoExists(repoName); // 存在吗？
+        boolean isExist = checkIfSvnRepoExists(repoName, server); // 存在吗？
         if (isExist) {
             LOGGER.warn("End create Subversion Abnormally==="); // 存在就不能创建了
             throw new SvnRepoCreateFailureException(REPO_ALREADY_EXIST_MSG);
@@ -183,9 +182,9 @@ public class RepoServiceImpl implements RepoService {
      * 轮询subversion查找所有的template 不返回Exception
      */
     @Override
-    public SvnTemplateWrapperDTO findSubversionTemplates() {
+    public SvnTemplateWrapperDTO findSubversionTemplates(Server server) {
         LOGGER.info("===Begin query Subversion for all templates");
-        HttpHeaders headers = RestUtils.packBasicAuthHeader(svnConfig.getUsername(), svnConfig.getPassword());
+        HttpHeaders headers = RestUtils.packBasicAuthHeader(server.getLoginName(), server.getPasswd());
         HttpEntity<String> request = new HttpEntity<String>(headers);
         ResponseEntity<SvnTemplateWrapperDTO> response = new ResponseEntity<>(HttpStatus.OK);
         try {
@@ -209,7 +208,7 @@ public class RepoServiceImpl implements RepoService {
      * 轮询svnrepo,不抛异常，如果查不到则返回空ArrayList
      */
     @Override
-    public List<SubversionRepoDTO> fetchAllSvnRepos() {
+    public List<SubversionRepoDTO> fetchAllSvnRepos(Server server) {
         HttpHeaders headers = RestUtils.packBasicAuthHeader(svnConfig.getUsername(), svnConfig.getPassword());
         HttpEntity<String> request = new HttpEntity<String>(headers);
         ResponseEntity<SubversionRepoWrapperDTO> response = new ResponseEntity<>(HttpStatus.OK);
@@ -234,7 +233,7 @@ public class RepoServiceImpl implements RepoService {
     }
 
     @Override
-    public List<GitRepoDTO> fetchAllGitRepos() {
+    public List<GitRepoDTO> fetchAllGitRepos(Server server) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Private-Token", server.getLoginName());
         HttpEntity<String> request = new HttpEntity<>(headers);
@@ -273,18 +272,9 @@ public class RepoServiceImpl implements RepoService {
                     }
                     result.addAll(list);
 
-                    HttpHeaders head = response.getHeaders();
-                    List<String> links = head.get("Link");
-                    for (String link : links) {
-                        String[] linkFirstSplit = link.split(",");
-                        for (String sp : linkFirstSplit) {
-                            String[] linkSecondSplit = sp.split(";");
-                            if (linkSecondSplit.length > 1 && linkSecondSplit[1].contains("next")) {
-                                next = true;
-                                url = linkSecondSplit[0].replaceAll("[<>]","");
-                                break;
-                            }
-                        }
+                    url = getNextUrl(response.getHeaders());
+                    if (StringUtils.isNullOrEmpty(url)) {
+                        next = true;
                     }
                 } catch (Exception e) {
                     LOGGER.error("Query for all git get 200, but parse json error: " + e);
@@ -305,8 +295,8 @@ public class RepoServiceImpl implements RepoService {
     @Autowired
     SCMRepoRepository sCMRepoRepository;
 	@Override
-    public List<ScmRepoInputParam> fetchUnusedSvnRepos() {
-        List<SubversionRepoDTO> allSvns = this.fetchAllSvnRepos(); // subversion所有的
+    public List<ScmRepoInputParam> fetchUnusedSvnRepos(Server server) {
+        List<SubversionRepoDTO> allSvns = this.fetchAllSvnRepos(server); // subversion所有的
         List<SCMRepo> usedSvns = sCMRepoRepository.findAll(); // 本地已经有的
         List<ScmRepoInputParam> retSvns = new ArrayList<>();
 
@@ -339,8 +329,8 @@ public class RepoServiceImpl implements RepoService {
     }
 
     @Override
-    public List<ScmRepoInputParam> fetchUnusedGitRepos() {
-        List<GitRepoDTO> allGits = this.fetchAllGitRepos();
+    public List<ScmRepoInputParam> fetchUnusedGitRepos(Server server) {
+        List<GitRepoDTO> allGits = this.fetchAllGitRepos(server);
         List<SCMRepo> usedSvns = sCMRepoRepository.findAll();
         List<ScmRepoInputParam> scmRepoInputParams = new ArrayList<>();
 
@@ -357,9 +347,9 @@ public class RepoServiceImpl implements RepoService {
     }
 
 	@Override
-	public List<ScmRepoInputParam> fetchAllTemplates() {
+	public List<ScmRepoInputParam> fetchAllTemplates(Server server) {
 		 List<ScmRepoInputParam> retSvns=new ArrayList<>();
-		 SvnTemplateWrapperDTO z = this.findSubversionTemplates();
+		 SvnTemplateWrapperDTO z = this.findSubversionTemplates(server);
 		 for(SvnTemplateDTO dto:z.getTemplates()){
 			 retSvns.add(ConversionUtil.Con2SCMRepo(dto));
 		 }
@@ -376,17 +366,6 @@ public class RepoServiceImpl implements RepoService {
 	}
 
     @Override
-    public void setServer(Server server) {
-        this.server = server;
-
-    }
-
-    @Override
-    public Server getServer() {
-        return this.server;
-    }
-
-    @Override
     public void deleteByRepoId(Long repoId) {
         sCMRepoRepository.deleteById(repoId);
     }
@@ -394,13 +373,12 @@ public class RepoServiceImpl implements RepoService {
     @Override
     public List<ScmRepoInputParam> fetchScmByRepoType(Server server, RepoType repoType) {
         List<ScmRepoInputParam> result = null;
-        this.server = server;
         switch (repoType) {
             case SVN:
-                result = fetchUnusedSvnRepos();
+                result = fetchUnusedSvnRepos(server);
                 break;
             case GIT:
-                result = fetchUnusedGitRepos();
+                result = fetchUnusedGitRepos(server);
                 break;
             default:
                 break;
@@ -409,9 +387,31 @@ public class RepoServiceImpl implements RepoService {
     }
 
     @Override
-    public GitRepoDTO createGitRepo(String repoName) throws Exception {
+    public List<ScmRepoInputParam> fetchAllScmByRepoType(Server server, RepoType repoType) {
+        List<ScmRepoInputParam> result =  new ArrayList<>();
+        switch (repoType) {
+            case SVN:
+                List<SubversionRepoDTO> allSvns = this.fetchAllSvnRepos(server);
+                for (SubversionRepoDTO svn : allSvns) {
+                    result.add(svn.getSCMRepo());
+                }
+                break;
+            case GIT:
+                List<GitRepoDTO> allGits = this.fetchAllGitRepos(server);
+                for (GitRepoDTO git : allGits) {
+                    result.add(git.getSCMRepo());
+                }
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+
+    @Override
+    public GitRepoDTO createGitRepo(String repoName, Server server) throws Exception {
         LOGGER.info("===Begin create Git, name = " + repoName);
-        boolean isExist = checkIfGitRepoExists(repoName); // 存在吗？
+        boolean isExist = checkIfGitRepoExists(repoName, server); // 存在吗？
         if (isExist) {
             LOGGER.warn("End create Git Abnormally==="); // 存在就不能创建了
             throw new SvnRepoCreateFailureException(REPO_ALREADY_EXIST_MSG);
@@ -459,10 +459,47 @@ public class RepoServiceImpl implements RepoService {
         return null;
     }
 
-    private boolean checkIfGitRepoExists(String repoName) {
+    private boolean checkIfGitRepoExists(String repoName, Server server) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Private-Token", server.getLoginName());
         return false;
     }
 
+    @Override
+    public JSONArray fetchAllBranches(Server server, Long id) {
+        Map<String, String> values = new HashMap<>(1);
+        values.put("Private-Token", server.getLoginName());
+        JSONArray result = new JSONArray();
+
+        String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + "/api/v4/projects/" + id + "/repository/branches";
+        boolean next;
+
+        do {
+            next = false;
+            ResponseEntity<String> response = restRequest2(values, "{}", url, HttpMethod.GET, t -> t);
+            JSONArray jsonArray = JSONArray.parseArray(response.getBody());
+            result.addAll(jsonArray);
+            url = getNextUrl(response.getHeaders());
+            if (!StringUtils.isNullOrEmpty(url)) {
+                next = true;
+            }
+        } while (next);
+
+        return result;
+    }
+
+    private String getNextUrl(HttpHeaders headers) {
+        List<String> links = headers.get("Link");
+        for (String link : links) {
+            String[] linkFirstSplit = link.split(",");
+            for (String sp : linkFirstSplit) {
+                String[] linkSecondSplit = sp.split(";");
+                if (linkSecondSplit.length > 1 && linkSecondSplit[1].contains("next")) {
+                    return linkSecondSplit[0].replaceAll("[<>]","");
+                }
+            }
+        }
+        return null;
+    }
 }

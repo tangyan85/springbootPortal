@@ -1,50 +1,466 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
 
 <head th:replace="section/header :: head"></head>
-<link rel="stylesheet" th:href="@{/css/login.css}" />
+<link rel="stylesheet" th:href="@{/css/Layout.css}"/>
+<link rel="stylesheet" th:href="@{/css/Reset.css}"/>
+<link rel="stylesheet" th:href="@{/css/Particle.css}"/>
 <style type="text/css">
     body {
         background: #F5F5F5;
     }
 </style>
-
 <body>
-    <div class="login-form">
-        <form id="loginForm" th:action="@{/login}" method="post">
-            <div class="top">
-                <h1>登录</h1>
-                <h4>请输入用户名与密码</h4>
-            </div>
-            <div class="form-area">
-                <div th:if="${loginError}" class="group">
-                    <span th:text="${loginMsg}">用户名或密码错误</span>
+
+<header>
+    <div class="header-wrap">
+        <div id="header-logo"><img th:src="@{/img/logo.png}"></div>
+    </div>
+</header>
+
+<!--
+研发管理辅助工具 标题区域
+-->
+<div class="content_item">
+    <!--头部倾斜渐变填充-->
+    <div class="content_head_bg" id="particles-js">
+        <canvas class="particles-js-canvas-el" style="width: 100%; height: 100%;" width="1841" height="768"></canvas>
+    </div>
+    <div class="content_wrap">
+        <!--研发管理辅助工具-标题-->
+        <div class="content_head">
+            <h1>应用研发全生命周期管理平台</h1>
+            <h2>高效 敏捷 智能</h2>
+
+            <ul class="content_ul">
+
+                <li class="content_li">
+
+                    <div class="content_top">
+
+                        <i class="glyphicon glyphicon-tasks" style="font-size:40px;top:30px;color:#3c8dbc;"></i>
+
+                        <h1>任务跟踪</h1>
+
+                    </div>
+
+                    <div class="content_bottom">
+
+                        <p>采用JIRA作为研发任务跟踪、缺陷跟踪、需求收集、项目跟踪和敏捷管理工具</p>
+
+                        <ul class="nav navbar-nav">
+                            <li role="presentation" th:if="${#lists.size(servers['JIRA']) == 1}">
+                                <a th:each="server : ${servers['JIRA']}" th:object="${server}"
+                                   th:href="|*{protocol}://*{domain}|"
+                                   style="padding-left: 10px;padding-right: 10px">任务跟踪</a>
+                            </li>
+                            <li role="presentation" class="dropdown" th:if="${#lists.size(servers['JIRA']) > 1}">
+                                <a class="dropdown-toggle" data-toggle="dropdown"
+                                   style="padding-left: 10px;padding-right: 10px">任务跟踪<span
+                                        class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li th:each="server : ${servers['JIRA']}" th:object="${server}">
+                                        <a th:href="|*{protocol}://*{domain}|" th:text="*{domain}"></a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </li>
+
+                <li class="content_li">
+
+                    <div class="content_top">
+
+                        <i class="glyphicon glyphicon-leaf" style="font-size:40px;top:30px;color:#3c8dbc;"></i>
+
+                        <h1>文档协同</h1>
+
+                    </div>
+
+                    <div class="content_bottom">
+
+                        <p>采用Confluence系统，为团队提供一个知识协同、Wiki、文档管理工具</p>
+
+                        <ul class="nav navbar-nav">
+                            <li role="presentation" th:if="${#lists.size(servers['CONFLUENCE']) == 1}">
+                                <a th:each="server : ${servers['CONFLUENCE']}" th:object="${server}"
+                                   th:href="|*{protocol}://*{domain}|"
+                                   style="padding-left: 10px;padding-right: 10px">文档协同</a>
+                            </li>
+                            <li role="presentation" class="dropdown" th:if="${#lists.size(servers['CONFLUENCE']) > 1}">
+                                <a class="dropdown-toggle" data-toggle="dropdown"
+                                   style="padding-left: 10px;padding-right: 10px">文档协同<span
+                                        class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li th:each="server : ${servers['CONFLUENCE']}" th:object="${server}">
+                                        <a th:href="|*{protocol}://*{domain}|" th:text="*{domain}"></a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </li>
+
+                <li class="content_li">
+
+                    <div class="content_top">
+
+                        <i class="glyphicon glyphicon-fire" style="font-size:40px;top:30px;color:#3c8dbc;"></i>
+
+                        <h1>测试管理</h1>
+
+                    </div>
+
+                    <div class="content_bottom">
+
+                        <p>使用TestLink进行测试管理</p>
+
+                        <ul class="nav navbar-nav">
+                            <li role="presentation">
+                                <a th:href="${TESTLINK_SERVER.loginUrl}" style="padding-left: 10px;padding-right: 10px">测试管理</a>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </li>
+
+                <li class="content_li">
+
+                    <div class="content_top">
+
+                        <i class="glyphicon glyphicon-duplicate" style="font-size:40px;top:30px;color:#3c8dbc;"></i>
+
+                        <h1>持续集成</h1>
+
+                    </div>
+
+                    <div class="content_bottom">
+
+                        <p>使用Jenkins进行持续集成</p>
+
+                        <ul class="nav navbar-nav">
+                            <li role="presentation" th:if="${#lists.size(servers['JENKINS']) == 1}">
+                                <a th:each="server : ${servers['JENKINS']}" th:object="${server}"
+                                   th:href="|*{protocol}://*{domain}|"
+                                   style="padding-left: 10px;padding-right: 10px">持续集成</a>
+                            </li>
+                            <li role="presentation" class="dropdown" th:if="${#lists.size(servers['JENKINS']) > 1}">
+                                <a class="dropdown-toggle" data-toggle="dropdown"
+                                   style="padding-left: 10px;padding-right: 10px">持续集成<span
+                                        class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li th:each="server : ${servers['JENKINS']}" th:object="${server}">
+                                        <a th:href="|*{protocol}://*{domain}|" th:text="*{domain}"></a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </li>
+
+                <li class="content_li">
+
+                    <div class="content_top">
+
+                        <i class="glyphicon glyphicon-folder-open" style="font-size:40px;top:30px;color:#3c8dbc;"></i>
+
+                        <h1>软件仓库</h1>
+
+                    </div>
+
+                    <div class="content_bottom">
+
+                        <p>使用Nexus进行各二进制/可执行文件的版本管理</p>
+
+                        <ul class="nav navbar-nav">
+                            <li role="presentation" th:if="${#lists.size(servers['ARTIFACT']) == 1}">
+                                <a th:each="server : ${servers['ARTIFACT']}" th:object="${server}"
+                                   th:onclick="|window.open('*{protocol}://*{domain}')|"
+                                   style="padding-left: 10px;padding-right: 10px">软件仓库</a>
+                            </li>
+                            <li role="presentation" class="dropdown" th:if="${#lists.size(servers['ARTIFACT']) > 1}">
+                                <a class="dropdown-toggle" data-toggle="dropdown"
+                                   style="padding-left: 10px;padding-right: 10px">软件仓库<span
+                                        class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li th:each="server : ${servers['ARTIFACT']}" th:object="${server}">
+                                        <a th:onclick="|window.open('*{protocol}://*{domain}')|"
+                                           th:text="*{domain}"></a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </li>
+
+                <li class="content_li">
+
+                    <div class="content_top">
+
+                        <i class="glyphicon glyphicon-list-alt" style="font-size:40px;top:30px;color:#3c8dbc;"></i>
+
+                        <h1>代码管理</h1>
+
+                    </div>
+
+                    <div class="content_bottom">
+
+                        <p>采用 SVN 作为源代码管理工具</p>
+
+                        <ul class="nav navbar-nav">
+                            <li role="presentation"
+                                th:if="${(#lists.size(servers['SVN']) + #lists.size(servers['GIT'])) == 1}">
+                                <a th:each="server : ${servers['SVN']}" th:object="${server}"
+                                   th:href="|*{protocol}://*{domain}|"
+                                   style="padding-left: 10px;padding-right: 10px"
+                                   th:if="${#lists.size(servers['SVN']) > 0}">代码管理</a>
+                                <a th:each="server : ${servers['GIT']}" th:object="${server}"
+                                   th:onclick="|window.open('*{protocol}://*{domain}')|"
+                                   style="padding-left: 10px;padding-right: 10px"
+                                   th:if="${#lists.size(servers['GIT']) > 0}">代码管理</a>
+                            </li>
+                            <li role="presentation" class="dropdown"
+                                th:if="${(#lists.size(servers['SVN']) + #lists.size(servers['GIT'])) > 1}">
+                                <a class="dropdown-toggle" data-toggle="dropdown"
+                                   style="padding-left: 10px;padding-right: 10px">代码管理<span
+                                        class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li th:each="server : ${servers['SVN']}" th:object="${server}">
+                                        <a th:href="|*{protocol}://*{domain}|" th:text="*{domain}"></a>
+                                    </li>
+                                    <li th:each="server : ${servers['GIT']}" th:object="${server}">
+                                        <a th:onclick="|window.open('*{protocol}://*{domain}')|"
+                                           th:text="*{domain}"></a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </li>
+
+                <li class="content_li">
+
+                    <div class="content_top">
+
+                        <i class="glyphicon glyphicon-hourglass" style="font-size:40px;top:30px;color:#3c8dbc;"></i>
+
+                        <h1>静态分析</h1>
+
+                    </div>
+
+                    <div class="content_bottom">
+
+                        <p>使用sonarqube对代码进行静态分析，披露潜在缺陷</p>
+
+                        <ul class="nav navbar-nav">
+                            <li role="presentation">
+                                <a th:onclick="'javascript:window.open(\''+${SONAR_SERVER.urlContext}+'\');'"
+                                   style="padding-left: 10px;padding-right: 10px">静态分析</a>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </li>
+
+                <li class="content_li">
+
+                    <div class="content_top">
+
+                        <i class="glyphicon glyphicon-th-large" style="font-size:40px;top:30px;color:#3c8dbc;"></i>
+
+                        <h1>监控管理</h1>
+
+                    </div>
+
+                    <div class="content_bottom">
+
+                        <p>使用Zabbix监控各环境</p>
+
+                        <ul class="nav navbar-nav">
+                            <li role="presentation">
+                                <a href="http://10.214.178.66/zabbix/" style="padding-left: 10px;padding-right: 10px">监控管理</a>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </li>
+
+                <li class="content_li">
+
+                    <div class="content_top">
+
+                        <i class="glyphicon glyphicon-modal-window" style="font-size:40px;top:30px;color:#3c8dbc;"></i>
+
+                        <h1>运维管理</h1>
+
+                    </div>
+
+                    <div class="content_bottom">
+
+                        <p>使用iTop管理事件、问题、变更</p>
+
+                        <ul class="nav navbar-nav">
+                            <li role="presentation">
+                                <a href="http://10.214.169.130/itopzh2/web/pages/UI.php"
+                                   style="padding-left: 10px;padding-right: 10px">运维管理</a>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </li>
+
+            </ul>
+        </div>
+
+        <div class="content_body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon"><i class="ion ion-ios-pricetag-outline"></i></span>
+
+                        <div class="info-box-content">
+                            <span class="info-box-text">在建项目</span>
+                            <span class="info-box-number" th:text="${aggregate['START']}"></span>
+                            <span class="progress-description"></span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                    <div class="info-box">
+                        <span class="info-box-icon"><i class="ion ion-ios-heart-outline"></i></span>
+
+                        <div class="info-box-content">
+                            <span class="info-box-text">文档空间</span>
+                            <span class="info-box-number" th:text="${confTotal}"></span>
+                            <span class="progress-description">
+
+                            </span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                    <div class="info-box">
+                        <span class="info-box-icon"><i class="ion ion-ios-cloud-download-outline"></i></span>
+
+                        <div class="info-box-content">
+                            <span class="info-box-text">JIRA项目</span>
+                            <span class="info-box-number" th:text="${jiraTotal}"></span>
+                            <span class="progress-description"></span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
                 </div>
-                <div th:if="${successLogout}" class="group">
-                    <span th:text="${loginMsg}">您已注销成功</span>
+
+                <div class="col-md-4">
+                    <div class="info-box">
+                        <span class="info-box-icon"><i class="ion ion-ios-pricetags-outline"></i></span>
+
+                        <div class="info-box-content">
+                            <span class="info-box-text">已完成项目</span>
+                            <span class="info-box-number" th:text="${aggregate['END']}"></span>
+                            <span class="progress-description"></span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                    <div class="info-box">
+                        <span class="info-box-icon"><i class="ion ion-ios-star-outline"></i></span>
+
+                        <div class="info-box-content">
+                            <span class="info-box-text">GIT代码库</span>
+                            <span class="info-box-number" th:text="${gitTotal}"></span>
+                            <span class="progress-description">
+
+                            </span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                    <div class="info-box">
+                        <span class="info-box-icon"><i class="ion ion-ios-star-half"></i></span>
+
+                        <div class="info-box-content">
+                            <span class="info-box-text">SVN代码库</span>
+                            <span class="info-box-number"  th:text="${svnTotal}"></span>
+                            <span class="progress-description"></span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
                 </div>
-                <div class="group">
-                    <input class="form-control" placeholder="username" name="username" type="text">
-                    <i class="fa fa-user"></i>
+
+                <div class="col-md-4">
+
+                    <div class="login-form">
+                        <form id="loginForm" th:action="@{/login}" method="post">
+                            <div class="top">
+                                <h1>登录</h1>
+                                <h4>请输入用户名与密码</h4>
+                            </div>
+                            <div class="form-area">
+                                <div th:if="${loginError}" class="group">
+                                    <span th:text="${loginMsg}">用户名或密码错误</span>
+                                </div>
+                                <div th:if="${successLogout}" class="group">
+                                    <span th:text="${loginMsg}">您已注销成功</span>
+                                </div>
+                                <div class="group">
+                                    <input class="form-control" placeholder="username" name="username" type="text">
+                                    <i class="fa fa-user"></i>
+                                </div>
+                                <div class="group">
+                                    <input class="form-control" placeholder="password" name="password" type="password">
+                                    <i class="fa fa-envelope-o"></i>
+                                </div>
+                                <button type="submit" class="btn btn-default btn-block">确定</button>
+                            </div>
+                        </form>
+                        <div class="footer-links row">
+                            <div class="col-xs-offset-6 col-xs-6 text-right">
+                                <a href="http://10.214.170.67/password/">
+                                    <i class="fa fa-external-link"></i>重置密码</a>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-                <div class="group">
-                    <input class="form-control" placeholder="password" name="password" type="password">
-                    <i class="fa fa-envelope-o"></i>
-                </div>
-                <button type="submit" class="btn btn-default btn-block">确定</button>
-            </div>
-        </form>
-        <div class="footer-links row">
-            <div class="col-xs-offset-6 col-xs-6 text-right">
-                <a href="http://10.214.170.67/password/">
-                    <i class="fa fa-external-link"></i>重置密码</a>
             </div>
         </div>
     </div>
+</div>
 </body>
 <footer th:include="section/footer :: footer"></footer>
+<script th:src="@{/js/common/particles.min.js}"></script>
+<script th:src="@{/js/common/particles.js}"></script>
 <script th:src="@{/js/common/objectUtil.js}"></script>
 <script>
+    //主列表区域鼠标悬停显示详情
+    $(document).ready(function () {
+        $(".content_li").each(function (index) {
+            $(".content_li").eq(index).mouseenter(function () {
+                $(this).find(".content_top").stop().fadeOut(400);
+            });
+            $(".content_li").eq(index).mouseleave(function () {
+                $(this).find(".content_top").stop().fadeIn(100);
+            });
+        });
+    });
+
     function loginload() {
         //logout时存在问题，暂时坐在login页面强制跳转登录
         var parent = jQuery("#wrapper", window.parent.document);
@@ -57,5 +473,4 @@
     };
     loginload();
 </script>
-
 </html>

@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "server")
+@Table(name = "t_server")
 public class Server implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -52,7 +52,6 @@ public class Server implements Serializable {
 
     @Column(name = "login_mode", length = 1)
     private String loginMode;
-
 
     public String getReserved() {
         return reserved;
@@ -112,11 +111,24 @@ public class Server implements Serializable {
 
     @Override
     public String toString() {
-        return "Server [serverId=" + serverId + ", serverType=" + serverType + ", innerServerIpAndPort="
-                + innerServerIpAndPort + ", outerServerIpAndPort=" + outerServerIpAndPort + ", remark=" + remark + "]";
+        return "Server{" +
+                "serverId=" + serverId +
+                ", serverType=" + serverType +
+                ", innerServerIpAndPort='" + innerServerIpAndPort + '\'' +
+                ", outerServerIpAndPort='" + outerServerIpAndPort + '\'' +
+                ", remark='" + remark + '\'' +
+                ", protocol='" + protocol + '\'' +
+                ", reserved='" + reserved + '\'' +
+                ", serverRoot='" + serverRoot + '\'' +
+                ", loginSuffix='" + loginSuffix + '\'' +
+                ", domain='" + domain + '\'' +
+                ", loginName='" + loginName + '\'' +
+                ", passwd='" + passwd + '\'' +
+                ", loginMode='" + loginMode + '\'' +
+                '}';
     }
 
-	public String getLoginSuffix() {
+    public String getLoginSuffix() {
 		return loginSuffix;
 	}
 

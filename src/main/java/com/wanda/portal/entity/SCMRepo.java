@@ -1,16 +1,18 @@
 package com.wanda.portal.entity;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.wanda.portal.constants.Constants;
 import com.wanda.portal.constants.InputActionType;
 import com.wanda.portal.constants.RepoType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-@Table(name = "scm_repository")
+@Table(name = "t_scm_repository")
 public class SCMRepo implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -76,6 +78,9 @@ public class SCMRepo implements Serializable {
 
     @Transient
     private String urlForBrowsing;
+
+    @Autowired
+    private JSONArray branches;
 
     public SCMRepo() {
     }
@@ -241,5 +246,13 @@ public class SCMRepo implements Serializable {
 
     public void setCheckout(String checkout) {
         this.checkout = checkout;
+    }
+
+    public JSONArray getBranches() {
+        return branches;
+    }
+
+    public void setBranches(JSONArray branches) {
+        this.branches = branches;
     }
 }

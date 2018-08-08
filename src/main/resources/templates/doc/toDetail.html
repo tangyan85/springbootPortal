@@ -42,6 +42,19 @@
                         <td><a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
                             <span th:text="*{spaceKey}"></span></a>
                         </td>
+                        <td>
+                            <ul class="chart-legend clearfix">
+                                <li>
+                                    页面总数（<a href="#"><span class="text-blue" th:onclick="'window.open(\''+*{allPagesLink}+'\')'" th:text="*{allPages}"></span></a>）
+                                </li>
+                                <li>
+                                    当天新建页面数（<a href="#"><span class="text-blue" th:onclick="'window.open(\''+*{createPagesLink}+'\')'" th:text="*{createPages}"></span></a>）
+                                </li>
+                                <li>
+                                    当天修改页面数（<a href="#"><span class="text-blue" th:onclick="'window.open(\''+*{modifyPagesLink}+'\')'" th:text="*{modifyPages}"></span></a>）
+                                </li>
+                            </ul>
+                        </td>
                     </tr>
                 </table>
             </div>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="section/header :: head"></head>
+<link rel="stylesheet" th:href="@{/assets/css/ace.min.css}"/>
+<script th:src="@{/assets/js/jquery.validate.min.js}"></script>
+<script th:src="@{/js/project/editable.js}"></script>
+
+<body style="background: #ffffff">
+<div th:fragment="dashboard">
+    <section class="content-header">
+        <h1>
+            新增角色
+            <small>preview</small>
+        </h1>
+        <ol class="breadcrumb" style="margin:0px;">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
+            <li><a href="#">系统管理</a></li>
+            <li class="active">新增角色</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="widget-box">
+                    <form class="form-horizontal" id="validation-form">
+                        <div class="widget-header widget-header-blue widget-header-flat">
+                            <h4 class="widget-title lighter">
+                                <i class="ace-icon fa fa-hand-o-right icon-animated-hand-pointer blue">创建向导</i>
+                            </h4>
+                        </div>
+
+                        <div class="widget-body">
+                            <div class="widget-main">
+                                <h3 class="lighter block green">创建角色</h3>
+                                <div class="form-group fg2">
+                                    <label for="roleName"
+                                           class="col-xs-12 col-sm-3 control-label no-padding-right">角色名称</label>
+
+                                    <div class="col-xs-12 col-sm-5">
+                                        <span class="block input-icon input-icon-right">
+                                            <input class="dropselectsec selectChange" type="text"
+                                                   name="roleName" id="roleName"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group fg2">
+                                    <label for="roleKey"
+                                           class="col-xs-12 col-sm-3 control-label no-padding-right">角色代码</label>
+
+                                    <div class="col-xs-12 col-sm-5">
+                                        <span class="block input-icon input-icon-right">
+                                            <input class="dropselectsec selectChange" type="text"
+                                                   name="roleKey" id="roleKey"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group fg2">
+                                    <label for="isAdmin"
+                                           class="col-xs-12 col-sm-3 control-label no-padding-right">是否为管理员</label>
+
+                                    <div class="col-xs-12 col-sm-5">
+                                        <span class="block input-icon input-icon-right">
+                                            <input class="dropselectsec selectChange" type="checkbox"
+                                                   name="isAdmin" id="isAdmin" value="0" onclick="this.value=(this.value==0)?1:0"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group fg2">
+                                    <label for="enable"
+                                           class="col-xs-12 col-sm-3 control-label no-padding-right">是否启用</label>
+
+                                    <div class="col-xs-12 col-sm-5">
+                                        <span class="block input-icon input-icon-right">
+                                            <input class="dropselectsec selectChange" type="checkbox"
+                                                   name="enable" id="enable" value="0" onclick="this.value=(this.value==0)?1:0"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <hr>
+                                <div class="wizard-actions">
+                                    <button class="btn btn-success btn-next" id="finished">
+                                        完成
+                                    </button>
+                                </div>
+
+                            </div><!-- /.widget-main -->
+                        </div><!-- /.widget-body -->
+                    </form>
+                </div>
+
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+
+    </section>
+</div><!-- /.main-container -->
+</body>
+
+<footer th:include="section/footer :: footer"></footer>
+<style type="text/css">
+    .form-horizontal .form-group {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    input[type="checkbox"], input[type="radio"] {
+        margin: 11px 0 0;
+    }
+</style>
+<script th:src="@{/js/common/objectUtil.js}"></script>
+<script th:src="@{/js/common/table2json.js}"></script>
+
+<script type="text/javascript">
+    jQuery(function ($) {
+        $("#finished").click(function () {
+            if (!$('#validation-form').valid()) {
+                alert("表单验证不通过！");
+                return;
+            }
+            btnSumbit();
+        });
+
+        jQuery.validator.addMethod("roleKey", function (value, element) {
+            return this.optional(element) || value.indexOf("ROLE_") === 0;
+        }, "角色代码必须已“ROLE_”开头");
+
+        $('#validation-form').validate({
+            errorElement: 'div',
+            errorClass: 'help-block',
+            focusInvalid: false,
+            ignore: "",
+            rules: {
+                roleName: {
+                    required: true,
+                    rangelength: [2, 25]
+                },
+                roleKey: {
+                    required: true,
+                    rangelength: [6, 25],
+                    roleKey: true
+                }
+            },
+
+            messages: {
+                roleName: {
+                    required: "请输入有效的角色名称",
+                    rangelength: "长度为2~25个字符"
+                },
+                roleKey: {
+                    required: "请输入有效的角色代码",
+                    rangelength: "长度为6~25个字符"
+                }
+            },
+
+            highlight: function (e) {
+                $(e).closest('.form-group').removeClass('has-info').addClass('has-error');
+            },
+
+            success: function (e) {
+                $(e).closest('.form-group').removeClass('has-error');
+                $(e).remove();
+            },
+
+            errorPlacement: function (error, element) {
+                if (element.is('input[type=checkbox]') || element.is('input[type=radio]')) {
+                    var controls = element.closest('div[class*="col-"]');
+                    if (controls.find(':checkbox,:radio').length > 1) controls.append(error);
+                    else error.insertAfter(element.nextAll('.lbl:eq(0)').eq(0));
+                }
+                else if (element.is('.select2')) {
+                    error.insertAfter(element.siblings('[class*="select2-container"]:eq(0)'));
+                }
+                else if (element.is('.chosen-select')) {
+                    error.insertAfter(element.siblings('[class*="chosen-container"]:eq(0)'));
+                }
+                else error.insertAfter(element);
+            },
+
+            submitHandler: function (form) {
+            },
+
+            invalidHandler: function (form) {
+            }
+        });
+
+    });
+</script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    (function ($) {
+        $.fn.serializeJson = function () {
+            var jsonData = {};
+
+            $(".widget-main").find("input,textarea,select").each(function () {
+                jsonData[this.name] = $(this).val();
+            });
+
+            return JSON.stringify(jsonData);
+        };
+    })(jQuery);
+
+    function btnSumbit() {
+        var jsondata = $("#validation-form").serializeJson(); //自动将form表单封装成json
+
+        var successMsg = "创建成功！";
+
+        var url = "/role/save";
+
+        confirm('确认是否提交角色信息？',
+            function () {
+                jQuery.ajax({
+                    type: "POST",
+                    url: url,
+                    contentType: 'application/json;charset=utf-8', //设置请求头信息
+                    dataType: "json",
+                    data: jsondata,
+                    success: function (msg) {
+                        if (msg.responseCode == "0000") {
+                            alert(successMsg);
+                            $("#mainframe", parent.document.body).attr("src", "/role/toList");
+                        } else {
+                            alert("错误: " + msg.responseMsg);
+                        }
+                    }
+                });
+            });
+
+    };
+
+    /*]]>*/
+</script>
+
+</html>

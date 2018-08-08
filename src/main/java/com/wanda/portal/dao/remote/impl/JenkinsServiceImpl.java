@@ -28,7 +28,7 @@ import java.util.*;
 
 @Primary
 @Service("JenkinsServiceImpl")
-@Scope("prototype")
+@Scope
 public class JenkinsServiceImpl extends AbstractRestService implements JenkinsService {
     private static Logger LOGGER = LoggerFactory.getLogger(JenkinsServiceImpl.class);
     @Autowired
@@ -38,10 +38,8 @@ public class JenkinsServiceImpl extends AbstractRestService implements JenkinsSe
     @Autowired
     JenkinsProjectRepository jenkinsProjectRepository;
 
-    private Server server;
-    
     @Override
-    public List<JenkinsJobDTO> fetchAllJenkinsJobs() {
+    public List<JenkinsJobDTO> fetchAllJenkinsJobs(Server server) {
         Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
         String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
                 + jenkinsConfig.getJsonQueryJobsApi();
@@ -81,7 +79,7 @@ public class JenkinsServiceImpl extends AbstractRestService implements JenkinsSe
     }
 
     @Override
-    public void createJenkinsUsingCopy(String newName, String fromName) throws Exception {
+    public void createJenkinsUsingCopy(String newName, String fromName, Server server) throws Exception {
         LOGGER.info("===Begin creating jenkins job from old job: " + fromName + " using new name: " + newName);
         HttpHeaders headers = RestUtils.packBasicAuthHeader(jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
@@ -91,7 +89,7 @@ public class JenkinsServiceImpl extends AbstractRestService implements JenkinsSe
         HttpEntity<String> requestEntity = new HttpEntity<String>(JenkinsConstants.EMPTY_JSON_PARAM, headers);
         ResponseEntity<String> response;
         try {
-            response = restTemplate.exchange(packCreateUrl(newName, fromName), HttpMethod.POST, requestEntity,
+            response = restTemplate.exchange(packCreateUrl(newName, fromName, server), HttpMethod.POST, requestEntity,
                     String.class);
             if (response.getStatusCode().is2xxSuccessful() || response.getStatusCode().is3xxRedirection()) { // 创建成功，不一定是200系列HTTP码
                 LOGGER.info(RestLogUtils.packSuccHTTPLogs("Jenkins项目创建", response));
@@ -113,15 +111,15 @@ public class JenkinsServiceImpl extends AbstractRestService implements JenkinsSe
         throw new JenkinsJobCreateFailureException("call jenkins error! with error: " + e.getLocalizedMessage());
     }
 
-    private String packCreateUrl(String newName, String fromName) {
+    private String packCreateUrl(String newName, String fromName, Server server) {
         return server.getProtocol() + "://" + server.getOuterServerIpAndPort() + jenkinsConfig.getCreateItem() + "?"
                 + JenkinsConstants.name + "=" + newName + "&" + JenkinsConstants.modecopy + "&" + JenkinsConstants.from
                 + "=" + fromName;
     }
     
     @Override
-    public List<JenkinsInputParam> fetchUnusedJekins() {
-        List<JenkinsJobDTO> allJenkins = this.fetchAllJenkinsJobs();
+    public List<JenkinsInputParam> fetchUnusedJekins(Server server) {
+        List<JenkinsJobDTO> allJenkins = this.fetchAllJenkinsJobs(server);
         List<JenkinsProject> usedJenkins = jenkinsProjectRepository.findAll();
         List<JenkinsInputParam> retJenkins = new ArrayList<>();
 //
@@ -151,16 +149,6 @@ public class JenkinsServiceImpl extends AbstractRestService implements JenkinsSe
         }
         
         return retJenkins;
-    }
-
-    @Override
-    public void setServer(Server server) {
-        this.server = server;
-    }
-
-    @Override
-    public Server getServer() {
-        return this.server;
     }
 
     @Override

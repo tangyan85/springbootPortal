@@ -265,6 +265,25 @@
                         text: '监控管理',
                         href: '#parent5',
                         iconClass: "fa fa-bar-chart-o"
+                    },
+                    {
+                        text: '系统管理',
+                        href: '#parent5',
+                        iconClass: "fa fa-sun-o",
+                        nodes: [
+                            {
+                                text: '新增角色',
+                                url: 'role/toAdd',
+                                iconClass: "fa fa-circle-thin"
+                            },{
+                                text: '查询角色',
+                                url: 'role/toList',
+                                iconClass: "fa fa-circle-thin"
+                            },{
+                                text: '查询用户',
+                                url: 'user/toList',
+                                iconClass: "fa fa-circle-thin"
+                            }]
                     }
                 ];
 

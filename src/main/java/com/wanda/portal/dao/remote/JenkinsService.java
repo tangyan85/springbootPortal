@@ -9,16 +9,12 @@ import java.util.List;
 public interface JenkinsService {
 
     /*获得所有Jenkins job*/
-	List<JenkinsJobDTO> fetchAllJenkinsJobs();
+	List<JenkinsJobDTO> fetchAllJenkinsJobs(Server server);
 	
 	/*根据已有job创建新的job*/
-	void createJenkinsUsingCopy(String newName, String fromName) throws Exception;
+	void createJenkinsUsingCopy(String newName, String fromName, Server server) throws Exception;
 
-	List<JenkinsInputParam> fetchUnusedJekins();
-
-    void setServer(Server server);
-    
-    Server getServer();
+	List<JenkinsInputParam> fetchUnusedJekins(Server server);
 
     void deleteByJenkinsId(Long jenkinsId);
 }

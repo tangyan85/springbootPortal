@@ -1,9 +1,11 @@
 package com.wanda.portal.dao.remote.impl;
 
+import com.wanda.portal.component.AopServletContext;
 import com.wanda.portal.config.biz.ConfluenceConfig;
 import com.wanda.portal.config.biz.JenkinsConfig;
 import com.wanda.portal.config.biz.JiraConfig;
 import com.wanda.portal.config.biz.SvnConfig;
+import com.wanda.portal.constants.Constants;
 import com.wanda.portal.constants.InputActionType.RESULT;
 import com.wanda.portal.constants.ProjectStatus;
 import com.wanda.portal.dao.jpa.*;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -45,6 +48,8 @@ public class ProjectServiceImpl implements ProjectService {
     ServerRepository serverRepository;
     @Autowired
     ProjectMemberRepository projectMemberRepository;
+    @Autowired
+    RoleRepository roleRepository;
     @Autowired
     ArtifactsRepository artifactsRepository;
 
@@ -179,6 +184,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public Page<Project> findTop3() {
+        Sort sort = new Sort(Sort.Direction.DESC, "rank", "createTime");
+        return projectRepository.findAll(PageRequest.of(0, 3, sort));
+    }
+
+    @Override
+    public List<Object> aggregatePoject() {
+        return projectRepository.aggregatePoject();
+    }
+
+    @Override
     public Project updateProject(ProjectInputParam projectInputParam) throws Exception {
         projectInputParam.validateModify();
         Project proj = projectRepository.findById(projectInputParam.getProjectId()).get(); // 因为是edit，需要查找之后再执行操作
@@ -209,12 +225,32 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Page<Project> findAll(PageRequest page) {
-        return projectRepository.findAll(page);
+        Object userObject = AopServletContext.getRequest().getSession().getAttribute("user");
+        User user = (User) userObject;
+        for (Role role : user.getRoles()) {
+            boolean isAdmin = Constants.IS_ADMIN.equals(role.getIsAdmin());
+            if (isAdmin) {
+                return projectRepository.findAll(page);
+            }
+        }
+
+        List<Project> result = projectRepository.findByUsername(user.getUsername());
+        long total = projectRepository.findCount();
+        return new PageImpl<>(result, page, total);
     }
 
     @Override
     public List<Project> findByProjectNameLike(String projectName) {
-        return projectRepository.findByProjectNameLike(projectName);
+        Object userObject = AopServletContext.getRequest().getSession().getAttribute("user");
+        User user = (User) userObject;
+        for (Role role : user.getRoles()) {
+            boolean isAdmin = Constants.IS_ADMIN.equals(role.getIsAdmin());
+            if (isAdmin) {
+                return projectRepository.findByProjectNameLike(projectName);
+            }
+        }
+
+        return projectRepository.findByUsernameAndProjectNameLike(projectName, user.getUsername());
     }
 
     private void executeDetailedTasks(ProjectInputParam projectInputParam, Project proj)
@@ -313,11 +349,10 @@ public class ProjectServiceImpl implements ProjectService {
         }
         for (ScmRepoInputParam repo : list) {
             Server server = serverRepository.findById(repo.getServerId()).get(); // 查询出对应的Server
-            repoService.setServer(server); // 设置server，非常重要！
             RESULT checkRes = repo.getInputActionType().checkWithMainId(repo.getRepoId());
             if (checkRes.equals(RESULT.VALID_REMOTE_CREATE)) { // 远程创建
                 LOGGER.info("创建");
-                SvnTemplateWrapperDTO tmps = repoService.findSubversionTemplates();
+                SvnTemplateWrapperDTO tmps = repoService.findSubversionTemplates(server);
                 Map<Long, String> tmpMap = new HashMap<>();
                 for (SvnTemplateDTO tmp : tmps.getTemplates()) {
                     tmpMap.put(tmp.getId(), tmp.getName());
@@ -325,7 +360,7 @@ public class ProjectServiceImpl implements ProjectService {
                 SCMRepo scmRepo = prepareScmRepo(repo);
                 switch (repo.getRepoType()) {
                     case SVN:
-                        SubversionRepoDTO srdto = repoService.createSvnRepo(repo.getRepoName(), repo.getTemplateId(), true);
+                        SubversionRepoDTO srdto = repoService.createSvnRepo(repo.getRepoName(), repo.getTemplateId(), true, server);
                         scmRepo.setWebui(srdto.getViewvcUrl());
                         scmRepo.setCheckout("svn co " + srdto.getSvnUrl() + " " + srdto.getName() +" --username=***");
                         Long tmpId = repo.getTemplateId();
@@ -334,8 +369,9 @@ public class ProjectServiceImpl implements ProjectService {
                         scmRepo.setRepoStyle(repoStyle);
                         break;
                     case GIT:
-                        GitRepoDTO grdto = repoService.createGitRepo(repo.getRepoName());
+                        GitRepoDTO grdto = repoService.createGitRepo(repo.getRepoName(), server);
                         scmRepo.setWebui(grdto.getWeb_url());
+                        scmRepo.setRepoRemoteId(grdto.getId());
                         scmRepo.setCheckout(grdto.getHttp_url_to_repo());
                         break;
                     default:
@@ -347,13 +383,14 @@ public class ProjectServiceImpl implements ProjectService {
                 SCMRepo scmRepo = prepareScmRepo(repo);
                 switch (repo.getRepoType()) {
                     case SVN:
-                        SubversionRepoDTO srdto = repoService.findSvnRepo(repo.getRepoName());
+                        SubversionRepoDTO srdto = repoService.findSvnRepo(repo.getRepoName(), server);
                         scmRepo.setWebui(srdto.getViewvcUrl());
                         scmRepo.setCheckout("svn co " + srdto.getSvnUrl() + " " + srdto.getName() +" --username=***");
                         break;
                     case GIT:
-                        GitRepoDTO grdto = repoService.findGitRepo(repo.getRepoName());
+                        GitRepoDTO grdto = repoService.findGitRepo(repo.getRepoName(), server);
                         scmRepo.setWebui(grdto.getWeb_url());
+                        scmRepo.setRepoRemoteId(grdto.getId());
                         scmRepo.setCheckout(grdto.getHttp_url_to_repo());
                         break;
                     default:
@@ -398,12 +435,11 @@ public class ProjectServiceImpl implements ProjectService {
         }
         for (JenkinsInputParam jenkins : list) {
             Server server = serverRepository.findById(jenkins.getServerId()).get(); // 查询出对应的Server
-            jenkinsService.setServer(server); // 设置server，非常重要！
 
             RESULT checkRes = jenkins.getInputActionType().checkWithMainId(jenkins.getJenkinsProjectId());
             if (checkRes.equals(RESULT.VALID_REMOTE_CREATE)) { // 远程创建
                 LOGGER.info("创建");
-                jenkinsService.createJenkinsUsingCopy(jenkins.getJenkinsProjKey(), jenkins.getReferProj());
+                jenkinsService.createJenkinsUsingCopy(jenkins.getJenkinsProjKey(), jenkins.getReferProj(), server);
                 JenkinsProject jenk = prepareJenkins(jenkins);
                 persistJenkins(proj, jenk, server);
             } else if (checkRes.equals(RESULT.VALID_ATTACH_OLD)) { // 添加已有
@@ -444,7 +480,6 @@ public class ProjectServiceImpl implements ProjectService {
         }
         for (ConfluenceSpaceInputParam conf : list) {
             Server server = serverRepository.findById(conf.getServerId()).get(); // 查询出对应的Server
-            confluenceService.setServer(server); // 设置server，非常重要！            
             RESULT checkRes = conf.getInputActionType().checkWithMainId(conf.getSpaceId());
 
             if (checkRes.equals(RESULT.VALID_REMOTE_CREATE)) { // 远程创建
@@ -454,7 +489,7 @@ public class ProjectServiceImpl implements ProjectService {
                 param.setName(conf.getSpaceName());
                 param.setRepresentation(conf.getSpaceDescription());
                 param.setDescription(conf.getSpaceDescription());
-                String wb = confluenceService.createSpace(param);
+                String wb = confluenceService.createSpace(param, server);
                 ConfluenceSpace confluenceSpace = prepareConfluence(conf);
                 confluenceSpace.setWebui(wb);
                 persistConfluenceOnly(proj, confluenceSpace, server);
@@ -463,7 +498,7 @@ public class ProjectServiceImpl implements ProjectService {
                 CreateConfluenceSpaceParamDTO param = new CreateConfluenceSpaceParamDTO();
                 param.setKey(conf.getSpaceKey());
                 ConfluenceSpace confluenceSpace = prepareConfluence(conf);
-                String wb = confluenceService.findSpace(param);
+                String wb = confluenceService.findSpace(param, server);
                 confluenceSpace.setWebui(wb);
                 persistConfluenceOnly(proj, confluenceSpace, server);
             } else if (checkRes.equals(RESULT.VALID_UPDATE_OR_NOTHING)) { // 更新已有         
@@ -491,7 +526,6 @@ public class ProjectServiceImpl implements ProjectService {
         confluenceSpace.setSpaceDescription(conf.getSpaceDescription());
         confluenceSpace.setSpaceKey(conf.getSpaceKey());
         confluenceSpace.setSpaceName(conf.getSpaceName());
-        //confluenceSpace.setWebui("");
         return confluenceSpace;
     }
 
@@ -501,13 +535,12 @@ public class ProjectServiceImpl implements ProjectService {
         }
         for (JiraProjectInputParam jira : list) {
             Server server = serverRepository.findById(jira.getServerId()).get(); // 查询出对应的Server
-            jiraService.setServer(server); // 设置server，非常重要！
             RESULT checkRes = jira.getInputActionType().checkWithMainId(jira.getJiraProjectId());
 
             if (checkRes.equals(RESULT.VALID_REMOTE_CREATE)) { // 远程创建
                 LOGGER.info("创建jira");
                 jiraService.createJiraProjectUsingExistingProject(jira.getReferJiraId(), jira.getJiraProjectKey(),
-                        jira.getTeamleader(), jira.getJiraProjectName(), true);
+                        jira.getTeamleader(), jira.getJiraProjectName(), true, server);
                 JiraProject jiraProject = prepareJira(jira);
                 persistJiraOnly(proj, jiraProject, server);
             } else if (checkRes.equals(RESULT.VALID_ATTACH_OLD)) { // 添加已有

@@ -8,7 +8,13 @@ $(function () {
             "operatePos": -1,
             "handleFirst": false,
             "add": "添加",
-            "del": "删除"
+            "del": "删除",
+            "copyBefore": function(data) {
+
+            },
+            "copyAfter": function (data) {
+
+            }
         }, options);
         let colsNum = $(this).find('tr').last().children().length;
         if (c.operatePos === -1) {
@@ -51,12 +57,14 @@ $(function () {
 
         function createAdd(operateCol) {
             $(addLink).appendTo(operateCol).on("click", function () {
-                let p = $(this).parents('table').find('tr:last');
-                let copyRow = p.clone();
+                let lastRow = $(this).parents('table').find('tr:last');
+                c.copyBefore(lastRow);
+                let copyRow = lastRow.clone();
                 let ltd = copyRow.find('td:last');
                 ltd.html("");
                 copyRow.find("input,select").val("");
-                p.after(copyRow);
+                lastRow.after(copyRow);
+                c.copyAfter(copyRow);
                 createDel(ltd);
             });
         }

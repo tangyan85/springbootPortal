@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "jira_project")
+@Table(name = "t_jira_project")
 public class JiraProject implements Serializable {
 
     private static final long serialVersionUID = 1L;

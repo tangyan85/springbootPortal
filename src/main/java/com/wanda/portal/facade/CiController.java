@@ -12,17 +12,14 @@ import com.wanda.portal.entity.Project;
 import com.wanda.portal.entity.Server;
 import com.wanda.portal.facade.model.input.JenkinsInputParam;
 import com.wanda.portal.facade.model.input.ProjectInputParam;
-import com.wanda.portal.security.SecurityConfigCrowd;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpSession;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -74,10 +71,9 @@ public class CiController {
     }
 
     @RequestMapping(value = "/toAdd")
-    public String toAdd(Model model, String projectId, String backPath, HttpSession session) {
-        UserDetails user = (UserDetails) session.getAttribute(SecurityConfigCrowd.SESSION_KEY);
+    public String toAdd(Model model, String projectId, String backPath) {
         setModelCommon(model);
-        setCommonServerInfoAsync(model, user);
+        setCommonServerInfoAsync(model);
         Project project = new Project();
         try {
             if (StringUtils.isNotEmpty(projectId)) {
@@ -97,12 +93,12 @@ public class CiController {
         model.addAttribute("serverIPs", serverRepository.findAll());
     }
 
-    private void setCommonServerInfoAsync(Model model, UserDetails user) {
+    private void setCommonServerInfoAsync(Model model) {
         try {
             // 先从db中获取jenkins的所有Server
             List<Server> jenkinsServers = serverRepository.findByServerType(ServerType.JENKINS);
             // 再轮询外部jenkins，过滤
-            Future<List<JenkinsInputParam>> existJenkinses = asyncTaskService.fetchAllJenkinses(jenkinsServers, user);
+            Future<List<JenkinsInputParam>> existJenkinses = asyncTaskService.fetchAllJenkinses(jenkinsServers);
 
             model.addAttribute("existJenkins", existJenkinses.get());
         } catch (InterruptedException | ExecutionException e) {

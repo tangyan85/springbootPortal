@@ -1,16 +1,15 @@
 package com.wanda.portal.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import javax.persistence.*;
-
 import com.alibaba.fastjson.annotation.JSONField;
 import com.wanda.portal.constants.Constants;
 import com.wanda.portal.constants.InputActionType;
 
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
+
 @Entity
-@Table(name = "confluence_space")
+@Table(name = "t_confluence_space")
 public class ConfluenceSpace implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -68,6 +67,24 @@ public class ConfluenceSpace implements Serializable {
     
     @Column(name = "web_ui")
     private String webui;
+
+    @Transient
+    private Integer allPages;
+
+    @Transient
+    private String allPagesLink;
+
+    @Transient
+    private Integer createPages;
+
+    @Transient
+    private String modifyPagesLink;
+
+    @Transient
+    private Integer modifyPages;
+
+    @Transient
+    private String createPagesLink;
 
     public String getWebui() {
         return webui;
@@ -168,4 +185,77 @@ public class ConfluenceSpace implements Serializable {
 	public void setInputActionType(InputActionType inputActionType) {
 		this.inputActionType = inputActionType;
 	}
+
+    public Integer getAllPages() {
+        return allPages;
+    }
+
+    public void setAllPages(Integer allPages) {
+        this.allPages = allPages;
+    }
+
+    public String getAllPagesLink() {
+        return allPagesLink;
+    }
+
+    public void setAllPagesLink(String allPagesLink) {
+        this.allPagesLink = allPagesLink;
+    }
+
+    public Integer getCreatePages() {
+        return createPages;
+    }
+
+    public void setCreatePages(Integer createPages) {
+        this.createPages = createPages;
+    }
+
+    public String getCreatePagesLink() {
+        return createPagesLink;
+    }
+
+    public void setCreatePagesLink(String createPagesLink) {
+        this.createPagesLink = createPagesLink;
+    }
+
+    public Integer getModifyPages() {
+        return modifyPages;
+    }
+
+    public void setModifyPages(Integer modifyPages) {
+        this.modifyPages = modifyPages;
+    }
+
+    public String getModifyPagesLink() {
+        return modifyPagesLink;
+    }
+
+    public void setModifyPagesLink(String modifyPagesLink) {
+        this.modifyPagesLink = modifyPagesLink;
+    }
+
+    @Override
+    public String toString() {
+        return "ConfluenceSpace{" +
+                "spaceId=" + spaceId +
+                ", spaceKey='" + spaceKey + '\'' +
+                ", spaceName='" + spaceName + '\'' +
+                ", spaceDescription='" + spaceDescription + '\'' +
+                ", pageId='" + pageId + '\'' +
+                ", serverIP='" + serverIP + '\'' +
+                ", createTime=" + createTime +
+                ", remark='" + remark + '\'' +
+                ", inputActionType=" + inputActionType +
+                ", project=" + project +
+                ", server=" + server +
+                ", url='" + url + '\'' +
+                ", webui='" + webui + '\'' +
+                ", allPages=" + allPages +
+                ", allPagesLink='" + allPagesLink + '\'' +
+                ", createPages=" + createPages +
+                ", modifyPagesLink='" + modifyPagesLink + '\'' +
+                ", modifyPages=" + modifyPages +
+                ", createPagesLink='" + createPagesLink + '\'' +
+                '}';
+    }
 }

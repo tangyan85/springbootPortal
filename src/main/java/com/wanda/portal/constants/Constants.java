@@ -42,4 +42,6 @@ public class Constants {
     public static final String URL_PATH_SPEATOR="/";
 
     public static final String URL_PROTOCOL_SPEATOR=":";
+
+    public static final String IS_ADMIN = "1";
 }
