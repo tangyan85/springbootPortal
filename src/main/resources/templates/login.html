@@ -10,6 +10,42 @@
     body {
         background: #F5F5F5;
     }
+
+    .row {
+        margin-left: -0.5px;
+        margin-right: -0.5px;
+    }
+
+    .col-md-4 {
+        padding-left: 0.5px;
+        padding-right: 0.5px;
+    }
+
+    .info-box {
+        margin-bottom: 1px;
+        min-height: 110px;
+    }
+
+    .info-box-icon {
+        height: 110px;
+        width: 110px;
+        font-size: 55px;
+        line-height: 110px;
+    }
+
+    .info-box-content {
+        margin-left: 110px;
+    }
+
+    .info-box-number {
+        font-weight: normal;
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+
+    .info-box-text {
+        margin-bottom: 5px;
+    }
 </style>
 <body>
 
@@ -52,7 +88,7 @@
                         <ul class="nav navbar-nav">
                             <li role="presentation" th:if="${#lists.size(servers['JIRA']) == 1}">
                                 <a th:each="server : ${servers['JIRA']}" th:object="${server}"
-                                   th:href="|*{protocol}://*{domain}|"
+                                   th:onclick="|window.open('*{protocol}://*{domain}')|"
                                    style="padding-left: 10px;padding-right: 10px">任务跟踪</a>
                             </li>
                             <li role="presentation" class="dropdown" th:if="${#lists.size(servers['JIRA']) > 1}">
@@ -61,7 +97,7 @@
                                         class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu">
                                     <li th:each="server : ${servers['JIRA']}" th:object="${server}">
-                                        <a th:href="|*{protocol}://*{domain}|" th:text="*{domain}"></a>
+                                        <a th:onclick="|window.open('*{protocol}://*{domain}')|" th:text="*{domain}"></a>
                                     </li>
                                 </ul>
                             </li>
@@ -88,7 +124,7 @@
                         <ul class="nav navbar-nav">
                             <li role="presentation" th:if="${#lists.size(servers['CONFLUENCE']) == 1}">
                                 <a th:each="server : ${servers['CONFLUENCE']}" th:object="${server}"
-                                   th:href="|*{protocol}://*{domain}|"
+                                   th:onclick="|window.open('*{protocol}://*{domain}')|"
                                    style="padding-left: 10px;padding-right: 10px">文档协同</a>
                             </li>
                             <li role="presentation" class="dropdown" th:if="${#lists.size(servers['CONFLUENCE']) > 1}">
@@ -97,7 +133,7 @@
                                         class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu">
                                     <li th:each="server : ${servers['CONFLUENCE']}" th:object="${server}">
-                                        <a th:href="|*{protocol}://*{domain}|" th:text="*{domain}"></a>
+                                        <a th:onclick="|window.open('*{protocol}://*{domain}')|" th:text="*{domain}"></a>
                                     </li>
                                 </ul>
                             </li>
@@ -148,7 +184,7 @@
                         <ul class="nav navbar-nav">
                             <li role="presentation" th:if="${#lists.size(servers['JENKINS']) == 1}">
                                 <a th:each="server : ${servers['JENKINS']}" th:object="${server}"
-                                   th:href="|*{protocol}://*{domain}|"
+                                   th:onclick="|window.open('*{protocol}://*{domain}')|"
                                    style="padding-left: 10px;padding-right: 10px">持续集成</a>
                             </li>
                             <li role="presentation" class="dropdown" th:if="${#lists.size(servers['JENKINS']) > 1}">
@@ -157,7 +193,7 @@
                                         class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu">
                                     <li th:each="server : ${servers['JENKINS']}" th:object="${server}">
-                                        <a th:href="|*{protocol}://*{domain}|" th:text="*{domain}"></a>
+                                        <a th:onclick="|window.open('*{protocol}://*{domain}')|" th:text="*{domain}"></a>
                                     </li>
                                 </ul>
                             </li>
@@ -222,7 +258,7 @@
                             <li role="presentation"
                                 th:if="${(#lists.size(servers['SVN']) + #lists.size(servers['GIT'])) == 1}">
                                 <a th:each="server : ${servers['SVN']}" th:object="${server}"
-                                   th:href="|*{protocol}://*{domain}|"
+                                   th:onclick="|window.open('*{protocol}://*{domain}|')"
                                    style="padding-left: 10px;padding-right: 10px"
                                    th:if="${#lists.size(servers['SVN']) > 0}">代码管理</a>
                                 <a th:each="server : ${servers['GIT']}" th:object="${server}"
@@ -237,7 +273,7 @@
                                         class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu">
                                     <li th:each="server : ${servers['SVN']}" th:object="${server}">
-                                        <a th:href="|*{protocol}://*{domain}|" th:text="*{domain}"></a>
+                                        <a th:onclick="|window.open('*{protocol}://*{domain}')|" th:text="*{domain}"></a>
                                     </li>
                                     <li th:each="server : ${servers['GIT']}" th:object="${server}">
                                         <a th:onclick="|window.open('*{protocol}://*{domain}')|"
@@ -335,9 +371,11 @@
                         <span class="info-box-icon"><i class="ion ion-ios-pricetag-outline"></i></span>
 
                         <div class="info-box-content">
-                            <span class="info-box-text">在建项目</span>
-                            <span class="info-box-number" th:text="${aggregate['START']}"></span>
-                            <span class="progress-description"></span>
+                            <span class="info-box-text"><h2 style="font-size: 18px;">在建项目</h2></span>
+                            <span class="info-box-number" th:text="|${aggregate['START']}个|"></span>
+                            <!--<span class="progress-description">
+                                查看更多，请登录<i class="fa fa-hand-o-right" style="margin-left: 5px;"></i>
+                            </span>-->
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -346,11 +384,11 @@
                         <span class="info-box-icon"><i class="ion ion-ios-heart-outline"></i></span>
 
                         <div class="info-box-content">
-                            <span class="info-box-text">文档空间</span>
-                            <span class="info-box-number" th:text="${confTotal}"></span>
-                            <span class="progress-description">
-
-                            </span>
+                            <span class="info-box-text"><h2 style="font-size: 18px;">文档空间</h2></span>
+                            <span class="info-box-number" th:text="|${confTotal}个|"></span>
+                            <!--<span class="progress-description">
+                                查看更多，请登录<i class="fa fa-hand-o-right" style="margin-left: 5px;"></i>
+                            </span>-->
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -359,9 +397,11 @@
                         <span class="info-box-icon"><i class="ion ion-ios-cloud-download-outline"></i></span>
 
                         <div class="info-box-content">
-                            <span class="info-box-text">JIRA项目</span>
-                            <span class="info-box-number" th:text="${jiraTotal}"></span>
-                            <span class="progress-description"></span>
+                            <span class="info-box-text"><h2 style="font-size: 18px;">JIRA项目</h2></span>
+                            <span class="info-box-number" th:text="|${jiraTotal}个|"></span>
+                            <!--<span class="progress-description">
+                                查看更多，请登录<i class="fa fa-hand-o-right" style="margin-left: 5px;"></i>
+                            </span>-->
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -372,9 +412,11 @@
                         <span class="info-box-icon"><i class="ion ion-ios-pricetags-outline"></i></span>
 
                         <div class="info-box-content">
-                            <span class="info-box-text">已完成项目</span>
-                            <span class="info-box-number" th:text="${aggregate['END']}"></span>
-                            <span class="progress-description"></span>
+                            <span class="info-box-text"><h2 style="font-size: 18px;">已完成项目</h2></span>
+                            <span class="info-box-number" th:text="|${aggregate['END']}个|"></span>
+                            <!--<span class="progress-description">
+                                查看更多，请登录<i class="fa fa-hand-o-right" style="margin-left: 5px;"></i>
+                            </span>-->
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -383,11 +425,11 @@
                         <span class="info-box-icon"><i class="ion ion-ios-star-outline"></i></span>
 
                         <div class="info-box-content">
-                            <span class="info-box-text">GIT代码库</span>
-                            <span class="info-box-number" th:text="${gitTotal}"></span>
-                            <span class="progress-description">
-
-                            </span>
+                            <span class="info-box-text"><h2 style="font-size: 18px;">GIT代码库</h2></span>
+                            <span class="info-box-number" th:text="|${gitTotal}个|"></span>
+                            <!--<span class="progress-description">
+                                查看更多，请登录<i class="fa fa-hand-o-right" style="margin-left: 5px;"></i>
+                            </span>-->
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -396,9 +438,11 @@
                         <span class="info-box-icon"><i class="ion ion-ios-star-half"></i></span>
 
                         <div class="info-box-content">
-                            <span class="info-box-text">SVN代码库</span>
-                            <span class="info-box-number"  th:text="${svnTotal}"></span>
-                            <span class="progress-description"></span>
+                            <span class="info-box-text"><h2 style="font-size: 18px;">SVN代码库</h2></span>
+                            <span class="info-box-number"  th:text="|${svnTotal}个|"></span>
+                            <!--<span class="progress-description">
+                                查看更多，请登录<i class="fa fa-hand-o-right" style="margin-left: 5px;"></i>
+                            </span>-->
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -420,22 +464,22 @@
                                     <span th:text="${loginMsg}">您已注销成功</span>
                                 </div>
                                 <div class="group">
-                                    <input class="form-control" placeholder="username" name="username" type="text">
+                                    <input class="form-control" placeholder="username" id="username" name="username" type="text">
                                     <i class="fa fa-user"></i>
                                 </div>
                                 <div class="group">
-                                    <input class="form-control" placeholder="password" name="password" type="password">
+                                    <input class="form-control" placeholder="password" id="password" name="password" type="password">
                                     <i class="fa fa-envelope-o"></i>
                                 </div>
-                                <button type="submit" class="btn btn-default btn-block">确定</button>
+                                <div style="font-size:12px;margin-bottom: 2px;">
+                                    <input type="checkbox" id="autoLogin" name="autoLogin"  value="0" onclick="this.value=(this.value==0)?1:0"/>
+                                    <span style="vertical-align: top;margin-left: 5px;">下次自动登录</span>
+                                    <a href="https://ssp.wdjr.local" style="float:right;">
+                                        <i class="fa fa-external-link" style="position:relative;top:1px;left:-5px;"></i>重置密码</a>
+                                </div>
+                                <button type="submit" onclick="login()" class="btn btn-default btn-block">确定</button>
                             </div>
                         </form>
-                        <div class="footer-links row">
-                            <div class="col-xs-offset-6 col-xs-6 text-right">
-                                <a href="http://10.214.170.67/password/">
-                                    <i class="fa fa-external-link"></i>重置密码</a>
-                            </div>
-                        </div>
                     </div>
 
                 </div>
@@ -448,9 +492,16 @@
 <script th:src="@{/js/common/particles.min.js}"></script>
 <script th:src="@{/js/common/particles.js}"></script>
 <script th:src="@{/js/common/objectUtil.js}"></script>
+<script th:src="@{/plugins/cookie/jquery.cookie.js}"></script>
 <script>
     //主列表区域鼠标悬停显示详情
     $(document).ready(function () {
+        if ($.cookie("rmbUser") == "true") {
+            $("#autoLogin").attr("checked", true);
+            $("#autoLogin").val(1);
+            $("#username").val($.cookie("username"));
+            $("#password").val($.cookie("password"));
+        }
         $(".content_li").each(function (index) {
             $(".content_li").eq(index).mouseenter(function () {
                 $(this).find(".content_top").stop().fadeOut(400);
@@ -460,6 +511,20 @@
             });
         });
     });
+
+    function login() {
+        if ($("#autoLogin").val() === '1') {
+            var str_username = $("#username").val();
+            var str_password = $("#password").val();
+            $.cookie("rmbUser", "true", { expires: 7 }); //存储一个带7天期限的cookie
+            $.cookie("username", str_username, { expires: 7 });
+            $.cookie("password", str_password, { expires: 7 });
+        } else {
+            $.cookie("rmbUser", "false", { expire: -1 });
+            $.cookie("username", "", { expires: -1 });
+            $.cookie("password", "", { expires: -1 });
+        }
+    }
 
     function loginload() {
         //logout时存在问题，暂时坐在login页面强制跳转登录

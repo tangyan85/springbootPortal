@@ -82,8 +82,13 @@ public class IndexController {
         List<Object> aggregate = projectService.aggregatePoject();
         for (Object obj : aggregate) {
             Object[] list = (Object[]) obj;
-            int count = Integer.parseInt(list[1].toString());
+            Integer count = Integer.parseInt(list[1].toString());
             aggregateMap.put(list[0].toString(), count);
+        }
+        if (aggregateMap.get("START") == null) {
+            aggregateMap.put("START", 0);
+        }if (aggregateMap.get("END") == null) {
+            aggregateMap.put("END", 0);
         }
         model.addAttribute("aggregate", aggregateMap);
 

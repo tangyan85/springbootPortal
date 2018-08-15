@@ -24,6 +24,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -131,6 +132,9 @@ public class TaskController extends BaseController {
             dto.setUrl(versionLink + dto.getName());
         }
         jiraProject.setProjectVersions(versions);
+
+        JiraProjectVersionDTO nextVersion = versions.stream().filter(t -> !t.getReleased()).min(Comparator.comparing(JiraProjectVersionDTO::getStartDate)).get();
+        jiraProject.setNextVersion(nextVersion);
 
         String allIssuesKey = jiraProject.getJiraProjectKey() + "_allIssues";
         Integer allIssues = getForCache(allIssuesKey, () -> jiraService.fetchProjectAllIssues(jiraProject.getJiraProjectKey(), server));

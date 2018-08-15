@@ -114,5 +114,20 @@
             });
         }
 
+        function get(url, params) {
+            let result = null;
+            jQuery.ajax({
+                type: "POST",
+                data : params,
+                async: false,
+                url: url,
+                success: function (data) {
+                    if (data != null) {
+                        result = data;
+                    }
+                }
+            });
+            return result;
+        }
     </script>
   </head>

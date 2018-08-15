@@ -65,6 +65,9 @@ public class JiraProject implements Serializable {
     private List<JiraProjectVersionDTO> projectVersions;
 
     @Transient
+    private JiraProjectVersionDTO nextVersion;
+
+    @Transient
     private Integer allIssues;
 
     @Transient
@@ -224,5 +227,13 @@ public class JiraProject implements Serializable {
 
     public void setFinishIssues(Integer finishIssues) {
         this.finishIssues = finishIssues;
+    }
+
+    public JiraProjectVersionDTO getNextVersion() {
+        return nextVersion;
+    }
+
+    public void setNextVersion(JiraProjectVersionDTO nextVersion) {
+        this.nextVersion = nextVersion;
     }
 }

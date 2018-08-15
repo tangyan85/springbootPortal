@@ -31,14 +31,7 @@
                     <!-- /.box-header -->
                     <div class="box-body no-padding">
                         <ul class="nav nav-pills nav-stacked" id="project-list-ul">
-                            <li th:each="project ,projectStat : ${projects.content}">
-                                <a href="#" th:style="${projectId} eq ${project.projectId} ? 'background-color: #ebf2f9;' : ''"
-                                   th:onclick="'javascript:showDetail(\''+${project.projectId}+'\');'">
-                                    <i th:class="${project.status != 'START'} ? 'fa fa-fw fa-plus-square text-success' : 'fa fa-fw fa-power-off text-danger'" style="text-align:left;width:100%;">&nbsp;
-                                        <span th:text="${project.projectKey}"></span></i>
-                                    <p th:text="${project.projectName}" class="text-primary list-group-item-text"></p>
-                                </a>
-                            </li>
+
                         </ul>
                     </div>
 
@@ -57,14 +50,18 @@
     let projectId = /*[[${projectId}]]*/ null;
 
     $(function () {
+        let data = get("/project/page/1/10", {});
+        fillPage(data.content);
+
         $("#project-list-paging").Page({
-            totalPages: 7,//分页总数
+            totalPages: data.totalPages,//分页总数
             liNums: 3,//分页的数字按钮数(建议取奇数)
             activeClass: 'activP', //active 类样式定义
             hasFirstPage: false,
             hasLastPage: false,
             callBack: function (page) {
-                showPage("/project/page/" + page + "/10");
+                let pageData = get("/project/page/" + page + "/10", {});
+                fillPage(pageData.content);
             }
         });
 
@@ -81,30 +78,21 @@
 
     });
 
-    function showPage(url) {
-        jQuery.ajax({
-            type: "POST",
-            url: url,
-            success: function (data) {
-                if (data != null) {
-                    jQuery("#project-list-ul li").remove();
-                    var htm = '';
-                    for (let i in data.content) {
-                        htm += '<li><a href="#" ';
-                        if (projectId === data.content[i].projectId) {
-                            htm += 'style="background-color: #ebf2f9;" ';
-                        }
-                        htm += 'onclick="showDetail(' + data.content[i].projectId + ')">';
-                        htm += '<i class="' + (data.content[i].status === 'START' ? 'fa fa-fw fa-plus-square text-success' : 'fa fa-fw fa-power-off text-danger')
-                            + '" style="text-align:left;width:100%;">&nbsp;<span>' + data.content[i].projectKey + '</span></i>';
-                        htm += '<p class="text-primary list-group-item-text">' + data.content[i].projectName + '</p>';
-                        htm += '</a></li>';
-                    }
-                    jQuery("#project-list-ul").append(htm);
-                }
+    function fillPage(data) {
+        jQuery("#project-list-ul li").remove();
+        var htm = '';
+        for (let i in data) {
+            htm += '<li><a href="#" ';
+            if (projectId === data[i].projectId) {
+                htm += 'style="background-color: #ebf2f9;" ';
             }
-        });
-
+            htm += 'onclick="showDetail(' + data[i].projectId + ')">';
+            htm += '<i class="' + (data[i].status === 'START' ? 'fa fa-fw fa-plus-square text-success' : 'fa fa-fw fa-power-off text-danger')
+                + '" style="text-align:left;width:100%;">&nbsp;<span>' + data[i].projectKey + '</span></i>';
+            htm += '<p class="text-primary list-group-item-text">' + data[i].projectName + '</p>';
+            htm += '</a></li>';
+        }
+        jQuery("#project-list-ul").append(htm);
     }
 
     function showDetail(projectId) {

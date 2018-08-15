@@ -41,6 +41,7 @@ public class LoginModeSetter {
                 User user = (User) userObject;
                 Server server = (Server) args[i];
                 setLoginMode(server, user);
+                logger.debug("server info:" + server);
                 args[i] = server;
             }
         }

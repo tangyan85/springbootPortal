@@ -100,12 +100,14 @@
                     <span class="glyphicon glyphicon-tag" style="color:#7c68fd;"></span>&nbsp;下一版本</h3>
             </div>
             <!-- /.box-header -->
-            <div class="box-body table-responsive no-padding">
-                <h4 style="display: inline;vertical-align:middle;">版本 0.3</h4>
-                <small class="label" style="background-color:#f6c342;margin-left: 10px">未发布</small>
-                <p class="text-muted" style="height:30px;line-height:30px;"><i class="fa fa-calendar-check-o"></i>开始：30/四月/18<span
-                        style="margin-left: 20px">发布：25/五月/18</span></p>
-                <p style="height:30px;line-height:30px;">集成版本</p>
+            <div class="box-body table-responsive no-padding" th:each="jira : ${project.jiraProjects}" th:object="${jira.nextVersion}">
+                <h4 style="display: inline;vertical-align:middle;" th:text="|版本 *{name}|">0</h4>
+                <small class="label" style="background-color:#f6c342;margin-left: 10px" th:if="*{archived == true}">归档</small>
+                <small class="label" style="background-color:#f6c342;margin-left: 10px" th:if="*{archived == false} and *{released == false}">未发布</small>
+                <small class="label" style="background-color:#f6c342;margin-left: 10px" th:if="*{archived == false} and *{released == true}">已发布</small>
+                <p class="text-muted" style="height:30px;line-height:30px;"><i class="fa fa-calendar-check-o"></i><label th:text="|开始：*{startDate}|"></label><span
+                        style="margin-left: 20px"><label th:text="|发布：*{releaseDate}|"></label></span></p>
+                <p style="height:30px;line-height:30px;" th:text="*{description}"></p>
             </div>
             <!-- /.box-footer -->
             <div class="box-footer">

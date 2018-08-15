@@ -413,9 +413,9 @@ footer p {
 }
 
 .login-form {
-    width: 360px;
-	height: 400px;
-    padding-right: 6.6px;
+    width: 100%;
+	height: 100%;
+    padding-right: 6px;
     margin: 0px auto;
     text-shadow: none;
 }
@@ -464,7 +464,7 @@ footer p {
 }
 
 .login-form form .form-area {
-	padding: 40px;
+	padding: 28px 40px 28px 40px;
 }
 
 .login-form form .form-area .group {

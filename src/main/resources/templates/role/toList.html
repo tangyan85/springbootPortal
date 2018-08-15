@@ -31,15 +31,7 @@
                     <!-- /.box-header -->
                     <div class="box-body no-padding">
                         <ul class="nav nav-pills nav-stacked" id="project-list-ul">
-                            <li th:each="role ,roleStat : ${roles.content}">
-                                <a href="#" th:style="${roleId} eq ${role.roleId} ? 'background-color: #ebf2f9;' : ''"
-                                   th:onclick="'javascript:showDetail(\''+${role.roleId}+'\');'">
-                                    <i th:class="${role.enable == '1'} ? 'fa fa-fw fa-check-circle-o text-success' : 'fa fa-fw fa-ban text-danger'" style="text-align:left;width:100%;">&nbsp;
-                                        <span th:text="${role.enable == '1'} ? '已启用' : '已禁用'"></span>
-                                    </i>
-                                    <p th:text="${role.roleName}" class="text-primary list-group-item-text"></p>
-                                </a>
-                            </li>
+
                         </ul>
                     </div>
 
@@ -59,14 +51,18 @@
     let roleId = /*[[${roleId}]]*/ null;
 
     $(function () {
+        let data = get("/role/page/1/10", {});
+        fillPage(data.content);
+
         $("#project-list-paging").Page({
-            totalPages: 7,//分页总数
+            totalPages: data.totalPages,//分页总数
             liNums: 3,//分页的数字按钮数(建议取奇数)
             activeClass: 'activP', //active 类样式定义
             hasFirstPage: false,
             hasLastPage: false,
             callBack: function (page) {
-                showPage("/role/page/" + page + "/10");
+                let pageData = get("/role/page/" + page + "/10", {});
+                fillPage(pageData.content);
             }
         });
 
@@ -83,30 +79,21 @@
 
     });
 
-    function showPage(url) {
-        jQuery.ajax({
-            type: "POST",
-            url: url,
-            success: function (data) {
-                if (data != null) {
-                    jQuery("#project-list-ul li").remove();
-                    var htm = '';
-                    for (let i in data.content) {
-                        htm += '<li><a href="#" ';
-                        if (roleId === data.content[i].roleId) {
-                            htm += 'style="background-color: #ebf2f9;" ';
-                        }
-                        htm += 'onclick="showDetail(' + data.content[i].roleId + ')">';
-                        htm += '<i class="' + (data.content[i].enable === '1' ? 'fa fa-fw fa-check-circle-o text-success' : 'fa fa-fw fa-ban text-danger')
-                            + '" style="text-align:left;width:100%;">&nbsp;<span>' + (data.content[i].enable === '1' ? '已启用' : '已禁用') + '</span></i>';
-                        htm += '<p class="text-primary list-group-item-text">' + data.content[i].roleName + '</p>';
-                        htm += '</a></li>';
-                    }
-                    jQuery("#project-list-ul").append(htm);
-                }
+    function fillPage(data) {
+        jQuery("#project-list-ul li").remove();
+        var htm = '';
+        for (let i in data) {
+            htm += '<li><a href="#" ';
+            if (roleId === data[i].roleId) {
+                htm += 'style="background-color: #ebf2f9;" ';
             }
-        });
-
+            htm += 'onclick="showDetail(' + data[i].roleId + ')">';
+            htm += '<i class="' + (data[i].enable === '1' ? 'fa fa-fw fa-check-circle-o text-success' : 'fa fa-fw fa-ban text-danger')
+                + '" style="text-align:left;width:100%;">&nbsp;<span>' + (data[i].enable === '1' ? '已启用' : '已禁用') + '</span></i>';
+            htm += '<p class="text-primary list-group-item-text">' + data[i].roleName + '</p>';
+            htm += '</a></li>';
+        }
+        jQuery("#project-list-ul").append(htm);
     }
 
     function showDetail(roleId) {

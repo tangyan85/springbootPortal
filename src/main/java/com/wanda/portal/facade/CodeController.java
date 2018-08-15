@@ -16,6 +16,8 @@ import com.wanda.portal.entity.Server;
 import com.wanda.portal.facade.model.input.ProjectInputParam;
 import com.wanda.portal.facade.model.input.ScmRepoInputParam;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
@@ -32,6 +34,8 @@ import java.util.concurrent.Future;
 @Controller
 @RequestMapping("/code")
 public class CodeController {
+    private static final Logger logger = LoggerFactory.getLogger(CodeController.class);
+
     @Autowired
     ProjectService projectService;
     @Autowired
@@ -85,7 +89,8 @@ public class CodeController {
         List<Server> gitServer = serverRepository.findByServerType(ServerType.GIT);
         for (SCMRepo repo : project.getScmRepositories()) {
             for (Server server : gitServer) {
-                if (repo.getWebui().contains(server.getInnerServerIpAndPort())) {
+                if (repo.getWebui().contains(server.getOuterServerIpAndPort())) {
+                    logger.info("repoRemoteId: " + repo.getRepoRemoteId());
                     JSONArray result = repoService.fetchAllBranches(server, repo.getRepoRemoteId());
                     repo.setBranches(result);
                 }
