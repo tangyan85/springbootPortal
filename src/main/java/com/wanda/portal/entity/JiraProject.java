@@ -73,6 +73,12 @@ public class JiraProject implements Serializable {
     @Transient
     private Integer finishIssues;
 
+    @Transient
+    private String allIssuesLink;
+
+    @Transient
+    private String finishIssuesLink;
+
 	public Server getServer() {
         return server;
     }
@@ -235,5 +241,21 @@ public class JiraProject implements Serializable {
 
     public void setNextVersion(JiraProjectVersionDTO nextVersion) {
         this.nextVersion = nextVersion;
+    }
+
+    public String getAllIssuesLink() {
+        return allIssuesLink;
+    }
+
+    public void setAllIssuesLink(String allIssuesLink) {
+        this.allIssuesLink = allIssuesLink;
+    }
+
+    public String getFinishIssuesLink() {
+        return finishIssuesLink;
+    }
+
+    public void setFinishIssuesLink(String finishIssuesLink) {
+        this.finishIssuesLink = finishIssuesLink;
     }
 }

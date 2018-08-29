@@ -30,6 +30,7 @@
       var l = opts.totalPages;
       var n = opts.liNums;
       var active = opts.activeClass;
+      var callBack = opts.callBack;
       var str = '';
       var str1 = '<li><a href="javascript:" class="'+ active +'">1</a></li>';
       if (l > 1&&l < n+1) {
@@ -83,7 +84,7 @@
           $('.' + active).removeClass(active).parent().next().find('a').addClass(active);
           fpageShow(pageshow+1);
         }
-        opts.callBack(pageshow+1);
+        callBack(pageshow+1);
       });
       obj.on('click', '.prv', function () {
         var pageshow = parseInt($('.' + active).html());
@@ -97,7 +98,7 @@
           $('.' + active).removeClass(active).parent().prev().find('a').addClass(active);
           fpageShow(pageshow-1);
         }
-        opts.callBack(pageshow-1);
+        callBack(pageshow-1);
       });
 
       obj.on('click', '.first', function(){
@@ -105,7 +106,7 @@
         if (activepage <= 1){
           return
         }//当前第一页
-        opts.callBack(1);
+        callBack(1);
         fpagePrv(0);
       });
       obj.on('click', '.last', function(){
@@ -113,7 +114,7 @@
         if (activepage >= l){
           return;
         }//当前最后一页
-        opts.callBack(l);
+        callBack(l);
         if(l>n){
           fpageNext(n-1);
         }else{
@@ -125,7 +126,7 @@
         var $this = $(this);
         var pageshow = parseInt($this.find('a').html());
         var nums = odevity(n);
-        opts.callBack(pageshow);
+        callBack(pageshow);
         if(l>n){
           if(pageshow > l-nums/2&&pageshow < l+1){
             //最后几项

@@ -34,15 +34,17 @@ public class LoginModeSetter {
 
         for (int i = 0; i < args.length; i++) {
             if (args[i] instanceof Server) {
-                Object userObject = AopServletContext.getRequest().getSession().getAttribute("user");
-                if (userObject == null) {
-                    throw new NullPointerException("Session expired, Please login again!");
-                }
-                User user = (User) userObject;
                 Server server = (Server) args[i];
-                setLoginMode(server, user);
-                logger.debug("server info:" + server);
-                args[i] = server;
+                if (!server.isAuthAdmin()) {
+                    Object userObject = AopServletContext.getRequest().getSession().getAttribute("user");
+                    if (userObject == null) {
+                        throw new NullPointerException("Session expired, Please login again!");
+                    }
+                    User user = (User) userObject;
+                    setLoginMode(server, user);
+                    logger.debug("server info:" + server);
+                    args[i] = server;
+                }
             }
         }
         return pjp.proceed(args);
@@ -56,12 +58,12 @@ public class LoginModeSetter {
      */
     private void setLoginMode(Server server, User user) {
         if (LOGIN_MODE.CURR_USER.getModeCode().equals(server.getLoginMode())) {
-            server.setLoginName(user.getUsername());
+            server.setLoginName(user.getUserKey());
             server.setPasswd(user.getPassword());
         }
     }
 
-    private enum LOGIN_MODE {
+    public enum LOGIN_MODE {
         CURR_USER("1"),
         DB_USER("2");
         private String modeCode;

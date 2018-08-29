@@ -477,7 +477,7 @@ public class RepoServiceImpl extends AbstractRestService implements RepoService 
 
         do {
             next = false;
-            ResponseEntity<String> response = restRequest2(values, "{}", url, HttpMethod.GET, t -> t);
+            ResponseEntity<String> response = restRequest(values, "{}", url, HttpMethod.GET, t -> t);
             JSONArray jsonArray = JSONArray.parseArray(response.getBody());
             result.addAll(jsonArray);
             url = getNextUrl(response.getHeaders());

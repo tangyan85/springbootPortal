@@ -3,7 +3,237 @@
 <head th:replace="section/header :: head"></head>
 <body>
 
-    <!-- /.content -->
+<section class="content">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        <span class="glyphicon glyphicon-bookmark" style="color:#3385ff;"></span>&nbsp;我的待办</h3>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover">
+                        <tr>
+                            <th>任务名</th>
+                            <th>描述</th>
+                            <th>创建人</th>
+                            <th>创建时间</th>
+                        </tr>
+                        <tr th:each="todo: ${todos}">
+                            <td><a href="#"
+                                   th:onclick="'window.open(\''+${#strings.substring(todo.get('self'),0,#strings.indexOf(todo.get('self'),'rest'))}+'browse/'+${todo.get('key')}+'\')'">
+                                <span th:text="${todo.get('key')}"></span></a></td>
+                            <td th:text="${todo.get('fields').get('summary')}"></td>
+                            <td th:text="${todo.get('fields').get('reporter').get('name')}"></td>
+                            <td th:text="|${#strings.substring(todo.get('fields').get('created'),0,10)} ${#strings.substring(todo.get('fields').get('created'),11,19)}|"></td>
+                        </tr>
+                        <tr><td colspan="4" align="center"><a href="#" th:onclick="'window.open(\''+${moreTodos}+'\')'">查看更多</a></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        <span class="glyphicon glyphicon-bookmark" style="color:#00a65a;"></span>&nbsp;我的已办</h3>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover">
+                        <tr>
+                            <th>任务名</th>
+                            <th>描述</th>
+                            <th>创建人</th>
+                            <th>创建时间</th>
+                        </tr>
+                        <tr th:each="done: ${dones}">
+                            <td><a href="#"
+                                   th:onclick="'window.open(\''+${#strings.substring(done.get('self'),0,#strings.indexOf(done.get('self'),'rest'))}+'browse/'+${done.get('key')}+'\')'">
+                                <span th:text="${done.get('key')}"></span></a></td>
+                            <td th:text="${done.get('fields').get('summary')}"></td>
+                            <td th:text="${done.get('fields').get('reporter').get('name')}"></td>
+                            <td th:text="|${#strings.substring(done.get('fields').get('created'),0,10)} ${#strings.substring(done.get('fields').get('created'),11,19)}|"></td>
+                        </tr>
+                        <tr><td colspan="4" align="center"><a href="#" th:onclick="'window.open(\''+${moreDones}+'\')'">查看更多</a></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br/>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="nav-tabs-custom">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#START" data-toggle="tab">在建项目</a></li>
+                    <li><a href="#END" data-toggle="tab">归档项目</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="START">
+                        <div class="box" style="border-top:0;">
+                            <div class="box-body table-responsive no-padding">
+                                <table class="table table-hover">
+                                    <tr>
+                                        <th>项目名称</th>
+                                        <th>项目经理</th>
+                                        <th>任务</th>
+                                        <th>版本</th>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div id="project-list-paging-start"></div>
+                        </div>
+
+                    </div>
+
+                    <div class="tab-pane" id="END">
+                        <div class="box" style="border-top:0;">
+                            <div class="box-body table-responsive no-padding">
+                                <table class="table table-hover">
+                                    <tr>
+                                        <th>项目名称</th>
+                                        <th>项目经理</th>
+                                        <th>任务</th>
+                                        <th>版本</th>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div id="project-list-paging-end"></div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.tab-content -->
+            </div>
+            <!-- /.nav-tabs-custom -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+</section>
+<style type="text/css">
+    .cc {
+        position: absolute;
+        display: none;
+        border: 1px solid silver;
+        border-radius: 5%;
+        background: silver;
+        padding: 10px;
+        width: auto;
+        z-index: 999;
+    }
+</style>
 </body>
 <footer th:include="section/footer :: footer"></footer>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    $(function () {
+        let data1 = get("/project/page/1/10?status=START", {});
+        let data2 = get("/project/page/1/10?status=END", {});
+        fillPage(data1.content, "#START");
+        fillPage(data2.content, "#END");
+
+        $("#project-list-paging-start").Page({
+            totalPages: data1.totalPages,//分页总数
+            liNums: 7,//分页的数字按钮数(建议取奇数)
+            activeClass: 'activP', //active 类样式定义
+            hasFirstPage: true,
+            hasLastPage: true,
+            callBack: function (page) {
+                let pageData = get("/project/page/" + page + "/10?status=START", {});
+                fillPage(pageData.content, "#START");
+            }
+        });
+
+        $("#project-list-paging-end").Page({
+            totalPages: data2.totalPages,//分页总数
+            liNums: 7,//分页的数字按钮数(建议取奇数)
+            activeClass: 'activP', //active 类样式定义
+            hasFirstPage: true,
+            hasLastPage: true,
+            callBack: function (page) {
+                let pageData = get("/project/page/" + page + "/10?status=END", {});
+                fillPage(pageData.content, "#END");
+            }
+        });
+
+    });
+
+    function fillPage(data, id) {
+        jQuery(id).find("table tr").not(":eq(0)").remove();
+        let htm = '';
+        for (let i in data) {
+            htm += '<tr><td style="font-size: 24px;vertical-align: middle;">';
+            htm += '<a href="#" onclick="showPart(\'/project/preview/' + data[i].projectId + '?backPath=/shouye\')">' + data[i].projectName + '</a>（' + data[i].projectKey + '）</td>';
+
+            htm += '<td style="vertical-align: middle;">';
+            for (let j in data[i].projectMembers) {
+                if ('PM' === data[i].projectMembers[j].role)
+                    htm += data[i].projectMembers[j].username;
+            }
+            htm += '</td>';
+
+            htm += '<td style="vertical-align: middle;">';
+            let allIssues = 0;
+            let finishIssues = 0;
+            for (let j in data[i].jiraProjects) {
+                allIssues += parseInt(data[i].jiraProjects[j].allIssues);
+                finishIssues += parseInt(data[i].jiraProjects[j].finishIssues);
+            }
+            htm += '<span class="text-blue">任务总数（' + allIssues + '）</span>';
+            htm += '/<span class="text-green">已完成（' + finishIssues + '）</span>';
+            htm += '</td>';
+
+            let n = 0, l = 3;
+            let div = '<div id="' + data[i].projectId + '" class="cc"><ul class="chart-legend clearfix">'
+            htm += '<td><ul class="chart-legend clearfix">';
+            for (let j in data[i].jiraProjects) {
+                for (let h in data[i].jiraProjects[j].projectVersions) {
+                    let li = '';
+                    let version = data[i].jiraProjects[j].projectVersions[h];
+                    li += '<li><i class="fa fa-arrow-circle-o-up text-green">&nbsp;<a href="#" onclick="window.open(' + version.url + ')">' + version.name + '</a></i>';
+                    if (version.archived) {
+                        li += '<small class="label-primary" style="margin-left: 30px;">归档</small>';
+                    }
+
+                    if (!version.archived && !version.released) {
+                        li += '<small class="label-danger" style="margin-left: 30px;">未发布</small>';
+                    }
+
+                    if (!version.archived && version.released) {
+                        li += '<small class="label-info" style="margin-left: 30px;">已发布</small>';
+                    }
+                    li += '</li>';
+
+                    if (n < l) {
+                        htm += li;
+                    }
+                    if (n === l) {
+                        htm += '<a href="#" onclick="fadeToggle(\'' + data[i].projectId + '\')">查看更多</a>';
+                    }
+                    n ++;
+                    div += li;
+                }
+            }
+            div += '</ul></div>';
+            htm += '</ul>';
+            if (n > l) {
+                htm += div;
+            }
+            htm +='</td></tr>';
+        }
+        jQuery(id).find("table").append(htm);
+    }
+
+    function fadeToggle(id) {
+        $("#"+id).fadeToggle("slow");
+    }
+    /*]]>*/
+</script>
 </html>

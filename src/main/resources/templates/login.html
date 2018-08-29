@@ -39,11 +39,13 @@
 
     .info-box-number {
         font-weight: normal;
-        font-size: 18px;
+        font-size: 36px;
+        text-align: center;
         margin-bottom: 5px;
     }
 
     .info-box-text {
+        text-align: center;
         margin-bottom: 5px;
     }
 </style>
@@ -119,7 +121,7 @@
 
                     <div class="content_bottom">
 
-                        <p>采用Confluence系统，为团队提供一个知识协同、Wiki、文档管理工具</p>
+                        <p>采用Confluence系统，为团队提供一知识协同、Wiki、文档管理工具</p>
 
                         <ul class="nav navbar-nav">
                             <li role="presentation" th:if="${#lists.size(servers['CONFLUENCE']) == 1}">
@@ -371,11 +373,8 @@
                         <span class="info-box-icon"><i class="ion ion-ios-pricetag-outline"></i></span>
 
                         <div class="info-box-content">
+                            <span class="info-box-number" th:text="|${aggregate['START']}|"></span>
                             <span class="info-box-text"><h2 style="font-size: 18px;">在建项目</h2></span>
-                            <span class="info-box-number" th:text="|${aggregate['START']}个|"></span>
-                            <!--<span class="progress-description">
-                                查看更多，请登录<i class="fa fa-hand-o-right" style="margin-left: 5px;"></i>
-                            </span>-->
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -384,11 +383,8 @@
                         <span class="info-box-icon"><i class="ion ion-ios-heart-outline"></i></span>
 
                         <div class="info-box-content">
+                            <span class="info-box-number" th:text="|${confTotal}|"></span>
                             <span class="info-box-text"><h2 style="font-size: 18px;">文档空间</h2></span>
-                            <span class="info-box-number" th:text="|${confTotal}个|"></span>
-                            <!--<span class="progress-description">
-                                查看更多，请登录<i class="fa fa-hand-o-right" style="margin-left: 5px;"></i>
-                            </span>-->
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -397,11 +393,8 @@
                         <span class="info-box-icon"><i class="ion ion-ios-cloud-download-outline"></i></span>
 
                         <div class="info-box-content">
+                            <span class="info-box-number" th:text="|${jiraTotal}|"></span>
                             <span class="info-box-text"><h2 style="font-size: 18px;">JIRA项目</h2></span>
-                            <span class="info-box-number" th:text="|${jiraTotal}个|"></span>
-                            <!--<span class="progress-description">
-                                查看更多，请登录<i class="fa fa-hand-o-right" style="margin-left: 5px;"></i>
-                            </span>-->
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -412,11 +405,8 @@
                         <span class="info-box-icon"><i class="ion ion-ios-pricetags-outline"></i></span>
 
                         <div class="info-box-content">
+                            <span class="info-box-number" th:text="|${aggregate['END']}|"></span>
                             <span class="info-box-text"><h2 style="font-size: 18px;">已完成项目</h2></span>
-                            <span class="info-box-number" th:text="|${aggregate['END']}个|"></span>
-                            <!--<span class="progress-description">
-                                查看更多，请登录<i class="fa fa-hand-o-right" style="margin-left: 5px;"></i>
-                            </span>-->
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -425,11 +415,8 @@
                         <span class="info-box-icon"><i class="ion ion-ios-star-outline"></i></span>
 
                         <div class="info-box-content">
+                            <span class="info-box-number" th:text="|${gitTotal}|"></span>
                             <span class="info-box-text"><h2 style="font-size: 18px;">GIT代码库</h2></span>
-                            <span class="info-box-number" th:text="|${gitTotal}个|"></span>
-                            <!--<span class="progress-description">
-                                查看更多，请登录<i class="fa fa-hand-o-right" style="margin-left: 5px;"></i>
-                            </span>-->
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -438,11 +425,8 @@
                         <span class="info-box-icon"><i class="ion ion-ios-star-half"></i></span>
 
                         <div class="info-box-content">
+                            <span class="info-box-number"  th:text="|${svnTotal}|"></span>
                             <span class="info-box-text"><h2 style="font-size: 18px;">SVN代码库</h2></span>
-                            <span class="info-box-number"  th:text="|${svnTotal}个|"></span>
-                            <!--<span class="progress-description">
-                                查看更多，请登录<i class="fa fa-hand-o-right" style="margin-left: 5px;"></i>
-                            </span>-->
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -516,7 +500,7 @@
         if ($("#autoLogin").val() === '1') {
             var str_username = $("#username").val();
             var str_password = $("#password").val();
-            $.cookie("rmbUser", "true", { expires: 7 }); //存储一个带7天期限的cookie
+            $.cookie("rmbUser", "true", { expires: 7 }); //存储一带7天期限的cookie
             $.cookie("username", str_username, { expires: 7 });
             $.cookie("password", str_password, { expires: 7 });
         } else {

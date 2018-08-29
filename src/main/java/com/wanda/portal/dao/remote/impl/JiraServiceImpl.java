@@ -146,7 +146,7 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
                 + jiraConfig.getGenericApi() + "/search?jql=project=" + projectId;
         return restRequest(values, "{}", url, HttpMethod.GET, (t) ->
         {
-            JSONObject jb = JSONObject.parseObject(t);
+            JSONObject jb = JSONObject.parseObject(t.getBody());
             return (Integer) JSONPath.eval(jb, "$.total");
         });
     }
@@ -155,10 +155,10 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
     public Integer fetchProjectFinishIssues(final String projectId, Server server) {
         Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
         String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
-                + jiraConfig.getGenericApi() + "/search?jql=project=" + projectId +" AND status = 5";
+                + jiraConfig.getGenericApi() + "/search?jql=project=" + projectId + " AND status = 5";
         return restRequest(values, "{}", url, HttpMethod.GET, (t) ->
         {
-            JSONObject jb = JSONObject.parseObject(t);
+            JSONObject jb = JSONObject.parseObject(t.getBody());
             return (Integer) JSONPath.eval(jb, "$.total");
         });
     }
@@ -169,7 +169,34 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
         String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
                 + jiraConfig.getGenericApi() + "/project/" + projectId + "/versions";
         return restRequest(values, "{}", url, HttpMethod.GET, (t) ->
-                JSONObject.parseArray(t, JiraProjectVersionDTO.class));
+                JSONObject.parseArray(t.getBody(), JiraProjectVersionDTO.class));
+    }
+
+    @Override
+    public JSONArray fetchAllToDos(Server server) {
+        Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
+        String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + jiraConfig.getGenericApi() + "search?jql=resolution = Unresolved AND assignee=" + server.getLoginName() + " ORDER BY priority DESC,updated DESC";
+        return restRequest(values, "{}", url, HttpMethod.GET, (t) -> {
+            JSONObject jb = JSONObject.parseObject(t.getBody());
+            return (JSONArray) JSONPath.eval(jb, "$.issues");
+        });
+    }
+
+    @Override
+    public JSONArray fetchAllDones(Server server) {
+        Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
+        String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + jiraConfig.getGenericApi() + "search?jql=resolution != Unresolved AND assignee=" + server.getLoginName() + " AND status in (Closed, Done) ORDER BY priority DESC,updated DESC";
+        return restRequest(values, "{}", url, HttpMethod.GET, (t) -> {
+            JSONObject jb = JSONObject.parseObject(t.getBody());
+            return (JSONArray) JSONPath.eval(jb, "$.issues");
+        });
+    }
+
+    @Override
+    public List<JiraProject> findAll() {
+        return jiraProjectRepository.findAll();
     }
 
     @Override
@@ -180,7 +207,7 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
 
         return restRequest(values, "{}", url, HttpMethod.GET, (t) ->
         {
-            JSONArray ja = JSONObject.parseArray(t);
+            JSONArray ja = JSONObject.parseArray(t.getBody());
             List<JiraProjectComponentDTO> list = new ArrayList<>();
             for (Object o : ja) {
                 JiraProjectComponentDTO dto = new JiraProjectComponentDTO();
@@ -194,7 +221,7 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
                 String reUrl = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
                         + jiraConfig.getGenericApi() + "/component/" + dto.getId() + "/relatedIssueCounts";
                 Integer issueCount = restRequest(values, "{}", reUrl, HttpMethod.GET, (t1) -> {
-                    JSONObject jb = JSONObject.parseObject(t1);
+                    JSONObject jb = JSONObject.parseObject(t1.getBody());
                     return (Integer) JSONPath.eval(jb, "$.issueCount");
                 });
                 dto.setIssues(issueCount);
@@ -205,7 +232,7 @@ public class JiraServiceImpl extends AbstractRestService implements JiraService 
                 dto.setDescription(map.get("description").toString());
                 list.add(dto);
             }
-            return  list;
+            return list;
         });
     }
 

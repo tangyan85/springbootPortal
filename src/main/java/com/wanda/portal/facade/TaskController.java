@@ -17,7 +17,6 @@ import com.wanda.portal.facade.model.input.JiraProjectInputParam;
 import com.wanda.portal.facade.model.input.ProjectInputParam;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,7 +44,6 @@ public class TaskController extends BaseController {
 
     @RequestMapping("/toList")
     public String toList(Model model, String projectId) {
-        model.addAttribute("projects", projectService.findAll(PageRequest.of(0, 10)));
         model.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
         model.addAttribute("projectId", projectId);
         return "task/toList";
@@ -89,7 +87,6 @@ public class TaskController extends BaseController {
     @RequestMapping(value = "/preview/{projectId}")
     public String preview(Model model, @PathVariable("projectId") String projectId, String backPath) {
         Project project = new Project();
-        String allIssuesLink="", finishIssuesLink = "";
         try {
             if (StringUtils.isNotEmpty(projectId)) {
                 project = projectService.getProjectById(Long.valueOf(projectId));
@@ -101,10 +98,6 @@ public class TaskController extends BaseController {
                         for (Server s : jiraServers) {
                             if (jiraProject.getWebui().contains(s.getDomain())) {
                                 server = s;
-                                allIssuesLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
-                                        + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey();
-                                finishIssuesLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
-                                        + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey() + " AND status %3D 5";
                                 break;
                             }
                         }
@@ -117,15 +110,20 @@ public class TaskController extends BaseController {
         }
         model.addAttribute("project", project);
         model.addAttribute("backPath", backPath);
-        model.addAttribute("allIssuesLink", allIssuesLink);
-        model.addAttribute("finishIssuesLink", finishIssuesLink);
 
         return "task/toDetail";
     }
 
     private void setJiraProject(JiraProject jiraProject, Server server) {
+        String allIssuesLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey();
+        String finishIssuesLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey() + " AND status %3D 5";
         String versionLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
                 + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey() + " AND affectedVersion  %3D ";
+
+        jiraProject.setAllIssuesLink(allIssuesLink);
+        jiraProject.setFinishIssuesLink(finishIssuesLink);
         String versionsKey = jiraProject.getJiraProjectKey() + "_versions";
         List<JiraProjectVersionDTO> versions = getForCache(versionsKey, () -> jiraService.fetchProjectVersions(jiraProject.getJiraProjectKey(), server));
         for (JiraProjectVersionDTO dto : versions) {

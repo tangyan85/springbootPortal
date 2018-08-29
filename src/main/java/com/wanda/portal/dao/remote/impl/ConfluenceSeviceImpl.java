@@ -256,6 +256,11 @@ public class ConfluenceSeviceImpl extends AbstractRestService implements Conflue
         return fetchAllPages(projectId, server, " and type=page and lastmodified > endOfDay(\"-1d\")");
     }
 
+    @Override
+    public List<ConfluenceSpace> findAll() {
+        return confluenceSpaceRepository.findAll();
+    }
+
     private Integer fetchAllPages(final String projectId, Server server, String fields) {
         Map<String, String> values = RestUtils.basicAuthHeader(server.getLoginName(), server.getPasswd());
         String url = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
@@ -266,7 +271,7 @@ public class ConfluenceSeviceImpl extends AbstractRestService implements Conflue
         do {
             next = false;
 
-            JSONObject jb = restRequest(values, "{}", url, HttpMethod.GET, JSONObject::parseObject);
+            JSONObject jb = restRequest(values, "{}", url, HttpMethod.GET, (t) -> JSONObject.parseObject(t.getBody()));
             Object sizeObj = JSONPath.eval(jb, "$.size");
             if (sizeObj != null) {
                 total += Integer.parseInt(sizeObj.toString());

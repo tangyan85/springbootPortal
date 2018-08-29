@@ -4,6 +4,21 @@
 <head th:replace="section/header :: head"></head>
 
 <body>
+<style type="text/css" th:if="${backPath != null}">
+    .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+</style>
+<div class="row" th:style="'display:'+ @{${backPath != null} ? 'block' : 'none'}+''">
+    <div class="col-md-2">
+        <p style="margin: 10px 0px 5px 15px;">
+            <button type="button" class="btn btn-block btn-success" th:onclick="'showPart(\''+${backPath}+'\')'">
+                <i class="fa fa-arrow-circle-o-left">返回</i>
+            </button>
+        </p>
+    </div>
+</div>
 
 <div class="row" th:object="${project}">
     <div class="col-md-12">
@@ -91,8 +106,8 @@
                     <tr th:each="jira : ${project.jiraProjects}" th:object="${jira}" th:data="*{jiraProjectId}">
                         <td><a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
                             <span th:text="*{jiraProjectKey}"></span></a></td>
-                        <td>任务总数（<a href="#" th:onclick="'window.open(\''+${allIssuesLink}+'\')'"><span class="text-blue" th:text="*{allIssues}"></span></a>）&nbsp;/&nbsp;
-                            已完成（<a href="#" th:onclick="'window.open(\''+${finishIssuesLink}+'\')'"><span class="text-green" th:text="*{finishIssues}"></span></a>）</td>
+                        <td>任务总数（<a href="#" th:onclick="'window.open(\''+*{allIssuesLink}+'\')'"><span class="text-blue" th:text="*{allIssues}"></span></a>）&nbsp;/&nbsp;
+                            已完成（<a href="#" th:onclick="'window.open(\''+*{finishIssuesLink}+'\')'"><span class="text-green" th:text="*{finishIssues}"></span></a>）</td>
                         <td>
                             <ul class="chart-legend clearfix">
                                 <li th:each="version : *{projectVersions}" th:object="${version}">

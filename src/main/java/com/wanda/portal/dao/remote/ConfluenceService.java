@@ -28,4 +28,6 @@ public interface ConfluenceService {
     Integer fetchAllPagesByCreated(final String projectId, Server server);
 
     Integer fetchAllPagesByModified(final String projectId, Server server);
+
+    List<ConfluenceSpace> findAll();
 }

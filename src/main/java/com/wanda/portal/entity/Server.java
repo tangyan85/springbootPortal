@@ -53,6 +53,9 @@ public class Server implements Serializable {
     @Column(name = "login_mode", length = 1)
     private String loginMode;
 
+    @Transient
+    private boolean authAdmin;
+
     public String getReserved() {
         return reserved;
     }
@@ -174,5 +177,13 @@ public class Server implements Serializable {
 
     public void setLoginMode(String loginMode) {
         this.loginMode = loginMode;
+    }
+
+    public boolean isAuthAdmin() {
+        return authAdmin;
+    }
+
+    public void setAuthAdmin(boolean authAdmin) {
+        this.authAdmin = authAdmin;
     }
 }

@@ -28,7 +28,9 @@ public interface ProjectService {
 
 	String endProject(Long projectId);
 
-    Page<Project> findAll(PageRequest page);
+    Page<Project> findAll(PageRequest page, String status);
+
+    List<Project> findAll();
 
     List<Project> findByProjectNameLike(String projectName);
 

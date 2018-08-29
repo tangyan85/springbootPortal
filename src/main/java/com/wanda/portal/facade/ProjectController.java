@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -123,18 +123,15 @@ public class ProjectController extends BaseController {
     @RequestMapping("/toList")
     public String toList(Model model, String projectId, HttpSession session) {
         logger.info("------Current path:/project/toList");
-        Sort sort = new Sort(Sort.Direction.DESC, "rank", "createTime");
-        model.addAttribute("projects", projectService.findAll(PageRequest.of(0, 10, sort)));
         model.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
         model.addAttribute("projectId", projectId);
         return "project/toList";
     }
 
     @RequestMapping(value = "/preview/{projectId}")
-    public String preview(Model model, @PathVariable("projectId") String projectId) {
+    public String preview(Model model, @PathVariable("projectId") String projectId, String backPath) {
         logger.info("------Current path:/project/preview");
         Project project = new Project();
-        String allIssuesLink = "", finishIssuesLink = "";
 
         try {
             project = projectService.getProjectById(Long.valueOf(projectId));
@@ -146,10 +143,6 @@ public class ProjectController extends BaseController {
                     for (Server s : jiraServers) {
                         if (jiraProject.getWebui().contains(s.getDomain())) {
                             server = s;
-                            allIssuesLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
-                                    + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey();
-                            finishIssuesLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
-                                    + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey() + " AND status %3D 5";
                             break;
                         }
                     }
@@ -174,15 +167,21 @@ public class ProjectController extends BaseController {
             e.printStackTrace();
         }
         model.addAttribute("project", project);
-        model.addAttribute("allIssuesLink", allIssuesLink);
-        model.addAttribute("finishIssuesLink", finishIssuesLink);
+        model.addAttribute("backPath", backPath);
 
         return "project/toDetail";
     }
 
     private void setJiraProject(JiraProject jiraProject, Server server) {
+        String allIssuesLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey();
+        String finishIssuesLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
+                + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey() + " AND status %3D 5";
         String versionLink = server.getProtocol() + "://" + server.getOuterServerIpAndPort()
                 + "/issues/?jql=project %3D" + jiraProject.getJiraProjectKey() + " AND affectedVersion  %3D ";
+
+        jiraProject.setAllIssuesLink(allIssuesLink);
+        jiraProject.setFinishIssuesLink(finishIssuesLink);
         String versionsKey = jiraProject.getJiraProjectKey() + "_versions";
         List<JiraProjectVersionDTO> versions = getForCache(versionsKey, () -> jiraService.fetchProjectVersions(jiraProject.getJiraProjectKey(), server));
         for (JiraProjectVersionDTO dto : versions) {
@@ -232,8 +231,25 @@ public class ProjectController extends BaseController {
 
     @ResponseBody
     @RequestMapping(value = "/page/{page}/{size}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Page<Project> page(@PathVariable("page") Integer page, @PathVariable("size") Integer size) {
-        return projectService.findAll(PageRequest.of(page - 1, size));
+    public Page<Project> page(@PathVariable("page") Integer page, @PathVariable("size") Integer size, String status) {
+        Page<Project> pages = projectService.findAll(PageRequest.of(page - 1, size), status);
+        if (StringUtils.isNotEmpty(status))  {
+            for (Project project : pages) {
+                if (project != null) {
+                    Set<JiraProject> jiraProjects = project.getJiraProjects();
+                    for (JiraProject jiraProject : jiraProjects) {
+                        List<Server> jiraServers = serverRepository.findByServerType(ServerType.JIRA);
+                        for (Server s : jiraServers) {
+                            if (jiraProject.getWebui().contains(s.getDomain())) {
+                                setJiraProject(jiraProject, s);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return pages;
     }
 
     @ResponseBody
@@ -539,4 +555,55 @@ public class ProjectController extends BaseController {
         model.addAttribute("existSvns", existSvns);
         model.addAttribute("svnTemplates", svnTemplates);
     }
+
+    @Scheduled(initialDelay = 5000, fixedRate = 180000)
+    public void jiraCache() {
+        logger.info("jira cache start...");
+        try {
+            List<JiraProject> jiraProjects = jiraService.findAll();
+            for (JiraProject jiraProject : jiraProjects) {
+                Server server = null;
+                List<Server> jiraServers = serverRepository.findByServerType(ServerType.JIRA);
+                for (Server s : jiraServers) {
+                    if (jiraProject.getWebui().contains(s.getDomain())) {
+                        server = s;
+                        server.setAuthAdmin(true);
+                        break;
+                    }
+                }
+                logger.info("cache jira: " + jiraProject.getWebui());
+                setJiraProject(jiraProject, server);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        logger.info("jira cache end...");
+    }
+
+    @Scheduled(initialDelay = 10000, fixedRate = 180000)
+    public void confluenceCache() {
+        logger.info("confluence cache start...");
+        try {
+            List<ConfluenceSpace> confProjects = confluenceService.findAll();
+            for (ConfluenceSpace confProject : confProjects) {
+                Server server = null;
+                List<Server> confServers = serverRepository.findByServerType(ServerType.CONFLUENCE);
+                for (Server s : confServers) {
+                    if (confProject.getWebui().contains(s.getDomain())) {
+                        server = s;
+                        server.setAuthAdmin(true);
+                        break;
+                    }
+                }
+                logger.info("cache confluence: " + confProject.getWebui());
+                setConfProject(confProject, server);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        logger.info("confluence cache end...");
+    }
+
+
 }

@@ -14,7 +14,6 @@ import com.wanda.portal.facade.model.input.ProjectInputParam;
 import com.wanda.portal.utils.ConversionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +37,6 @@ public class ArtifactController {
 
     @RequestMapping("/toList")
     public String toList(Model model, String projectId) {
-        model.addAttribute("projects", projectService.findAll(PageRequest.of(0, 10)));
         model.addAttribute("projectStatus", EnumSet.allOf(ProjectStatus.class));
         model.addAttribute("projectId", projectId);
         return "artifact/toList";

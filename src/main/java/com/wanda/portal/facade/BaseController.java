@@ -1,5 +1,7 @@
 package com.wanda.portal.facade;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -13,6 +15,8 @@ import java.util.function.Supplier;
  * @since 1.0.0 2018/8/7
  */
 public class BaseController {
+    private static final Logger logger = LoggerFactory.getLogger(BaseController.class);
+
     @Autowired
     private RedisTemplate redisTemplate;
 
@@ -29,12 +33,14 @@ public class BaseController {
         long expireTime = redisTemplate.getExpire(key);
 
         if (expireTime <= 0) {
+            logger.info("cache no hit " + key);
             result = func.get();
             if (result != null) {
                 redisTemplate.opsForList().leftPush(key, result);
-                redisTemplate.expire(key, 5, TimeUnit.MINUTES);
+                redisTemplate.expire(key, 10, TimeUnit.MINUTES);
             }
         } else {
+            logger.info("cache hit " + key);
             result = (R) redisTemplate.opsForList().leftPop(key);
         }
 

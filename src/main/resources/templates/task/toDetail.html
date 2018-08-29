@@ -45,8 +45,8 @@
                     <tr th:each="jira : ${project.jiraProjects}" th:object="${jira}" th:data="*{jiraProjectId}">
                         <td><a href="#" th:onclick="'showIframe(\''+*{webui}+'\')'">
                                 <span th:text="*{jiraProjectKey}"></span></a></td>
-                        <td>任务总数（<a href="#" th:onclick="'window.open(\''+${allIssuesLink}+'\')'"><span class="text-blue" th:text="*{allIssues}"></span></a>）&nbsp;/&nbsp;
-                            已完成（<a href="#" th:onclick="'window.open(\''+${finishIssuesLink}+'\')'"><span class="text-green" th:text="*{finishIssues}"></span></a>）</td>
+                        <td>任务总数（<a href="#" th:onclick="'window.open(\''+*{allIssuesLink}+'\')'"><span class="text-blue" th:text="*{allIssues}"></span></a>）&nbsp;/&nbsp;
+                            已完成（<a href="#" th:onclick="'window.open(\''+*{finishIssuesLink}+'\')'"><span class="text-green" th:text="*{finishIssues}"></span></a>）</td>
                         <td>
                             <ul class="chart-legend clearfix">
                                 <li th:each="version : *{projectVersions}" th:object="${version}">

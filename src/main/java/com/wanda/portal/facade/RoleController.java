@@ -48,7 +48,6 @@ public class RoleController {
     @RequestMapping("/toList")
     public String toList(Model model, String roleId) {
         logger.info("------Current path:/role/toList");
-        model.addAttribute("roles", roleService.findAll(PageRequest.of(0, 10)));
         model.addAttribute("roleId", roleId);
         return "role/toList";
     }

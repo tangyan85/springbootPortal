@@ -33,7 +33,8 @@ public abstract class AbstractRestService {
      * @param <R>      映射函数输出类型
      * @return response.getBody映射到自定义类的对象
      */
-    protected <R> R restRequest(Map<String, String> values, String body, String url, HttpMethod method, Function<String, R> function) {
+    protected <R> R restRequest(Map<String, String> values, String body, String url, HttpMethod method, Function<ResponseEntity<String>, R> function) {
+        logger.info("restRequest -> " + url);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
@@ -47,48 +48,11 @@ public abstract class AbstractRestService {
 
         try {
             response = restTemplate.exchange(url, method, requestEntity, String.class);
-            logger.debug(response.getBody());
-            if (response.getStatusCode().is2xxSuccessful()) {
-                return function.apply(response.getBody());
-            }
-        } catch (Exception e) {
-            logger.info(e.getLocalizedMessage());
-        }
-
-        return null;
-    }
-
-    /**
-     * rest请求2
-     *
-     * @param values   http head参数{@link HttpHeaders}
-     * @param body     json格式的输入参数
-     * @param url      rest api url
-     * @param method   http method
-     * @param function 映射处理函数
-     * @param <R>      映射函数输出类型
-     * @return response.getBody映射到自定义类的对象
-     */
-    protected <R> R restRequest2(Map<String, String> values, String body, String url, HttpMethod method, Function<ResponseEntity<String>, R> function) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
-
-        for (String key : values.keySet()) {
-            headers.add(key, values.get(key));
-        }
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(body, headers);
-        ResponseEntity<String> response;
-
-        try {
-            response = restTemplate.exchange(url, method, requestEntity, String.class);
-            logger.debug(response.getBody());
             if (response.getStatusCode().is2xxSuccessful()) {
                 return function.apply(response);
             }
         } catch (Exception e) {
-            logger.info(e.getLocalizedMessage());
+            logger.error(e.getMessage());
         }
 
         return null;

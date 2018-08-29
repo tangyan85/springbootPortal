@@ -18,6 +18,7 @@ import com.wanda.portal.dto.svn.SvnTemplateWrapperDTO;
 import com.wanda.portal.entity.*;
 import com.wanda.portal.facade.model.input.*;
 import com.wanda.portal.utils.ValidationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Primary
 @Service("ProjectServiceImpl")
@@ -224,19 +226,35 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Page<Project> findAll(PageRequest page) {
+    public Page<Project> findAll(PageRequest page, String status) {
         Object userObject = AopServletContext.getRequest().getSession().getAttribute("user");
         User user = (User) userObject;
         for (Role role : user.getRoles()) {
             boolean isAdmin = Constants.IS_ADMIN.equals(role.getIsAdmin());
             if (isAdmin) {
+                if (StringUtils.isNotEmpty(status)) {
+                    List<Project> result = projectRepository.findByStatus(ProjectStatus.valueOf(status));
+                    List<Project> result2 =  result.stream().skip(page.getPageNumber() * page.getPageSize()).limit(page.getPageSize()).collect(Collectors.toList());
+                    return new PageImpl<>(result2, page, result.size());
+                }
                 return projectRepository.findAll(page);
             }
         }
 
-        List<Project> result = projectRepository.findByUsername(user.getUsername());
-        long total = projectRepository.findCount();
-        return new PageImpl<>(result, page, total);
+        List<Project> result;
+
+        if (StringUtils.isNotEmpty(status)) {
+            result = projectRepository.findByUsername(user.getUsername(), ProjectStatus.valueOf(status));
+        } else {
+            result = projectRepository.findByUsername(user.getUsername());
+        }
+
+        return new PageImpl<>(result.stream().limit(page.getPageSize()).skip(page.getPageNumber() * page.getPageSize()).collect(Collectors.toList()), page, result.size());
+    }
+
+    @Override
+    public List<Project> findAll() {
+        return projectRepository.findAll();
     }
 
     @Override
@@ -362,7 +380,7 @@ public class ProjectServiceImpl implements ProjectService {
                     case SVN:
                         SubversionRepoDTO srdto = repoService.createSvnRepo(repo.getRepoName(), repo.getTemplateId(), true, server);
                         scmRepo.setWebui(srdto.getViewvcUrl());
-                        scmRepo.setCheckout("svn co " + srdto.getSvnUrl() + " " + srdto.getName() +" --username=***");
+                        scmRepo.setCheckout("svn co " + srdto.getSvnUrl() + " " + srdto.getName() + " --username=***");
                         Long tmpId = repo.getTemplateId();
                         String repoStyle = tmpId == null ? "Empty repository"
                                 : (tmpMap.get(tmpId) == null ? "Empty repository" : tmpMap.get(tmpId));
@@ -385,7 +403,7 @@ public class ProjectServiceImpl implements ProjectService {
                     case SVN:
                         SubversionRepoDTO srdto = repoService.findSvnRepo(repo.getRepoName(), server);
                         scmRepo.setWebui(srdto.getViewvcUrl());
-                        scmRepo.setCheckout("svn co " + srdto.getSvnUrl() + " " + srdto.getName() +" --username=***");
+                        scmRepo.setCheckout("svn co " + srdto.getSvnUrl() + " " + srdto.getName() + " --username=***");
                         break;
                     case GIT:
                         GitRepoDTO grdto = repoService.findGitRepo(repo.getRepoName(), server);

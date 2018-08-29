@@ -51,7 +51,7 @@ public class JenkinsServiceImpl extends AbstractRestService implements JenkinsSe
 
     private void getJob(Map<String, String> values, String url, List<JenkinsJobDTO> result, final String pathName) {
         List<JenkinsJobDTO> list = restRequest(values,JenkinsConstants.EMPTY_JSON_PARAM, url, HttpMethod.POST, (t) -> {
-            JSONObject jb = JSONObject.parseObject(t);
+            JSONObject jb = JSONObject.parseObject(t.getBody());
             JSONArray ja = jb.getJSONArray("jobs");
             if (ja == null) {
                 return null;

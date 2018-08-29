@@ -36,7 +36,6 @@ public class UserController {
     @RequestMapping("/toList")
     public String toList(Model model, String userId) {
         logger.info("------Current path:/user/toList");
-        model.addAttribute("users", userService.findAll(PageRequest.of(0, 10)));
         model.addAttribute("userId", userId);
         return "user/toList";
     }

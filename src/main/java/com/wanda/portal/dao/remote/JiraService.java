@@ -1,5 +1,6 @@
 package com.wanda.portal.dao.remote;
 
+import com.alibaba.fastjson.JSONArray;
 import com.wanda.portal.dto.jira.*;
 import com.wanda.portal.entity.JiraProject;
 import com.wanda.portal.entity.Server;
@@ -44,4 +45,10 @@ public interface JiraService {
     Integer fetchProjectAllIssues(final String projectId, Server server);
 
     Integer fetchProjectFinishIssues(final String projectId, Server server);
+
+    JSONArray fetchAllToDos(Server s);
+
+    JSONArray fetchAllDones(Server server);
+
+    List<JiraProject> findAll();
 }

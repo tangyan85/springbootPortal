@@ -1,5 +1,9 @@
 package com.wanda.portal.facade;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.wanda.portal.component.LoginModeSetter;
 import com.wanda.portal.config.biz.LdapConfig;
 import com.wanda.portal.constants.RepoType;
 import com.wanda.portal.constants.ServerType;
@@ -31,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class IndexController {
@@ -52,11 +57,6 @@ public class IndexController {
 
     @Autowired
     private StringRedisTemplate template;
-
-    /*@RequestMapping(value = "/")
-    public String home(Model model) {
-        return "login";
-    }*/
 
     @RequestMapping(value = {"/login", "/"})
     public String loginPage(Model model) {
@@ -87,7 +87,8 @@ public class IndexController {
         }
         if (aggregateMap.get("START") == null) {
             aggregateMap.put("START", 0);
-        }if (aggregateMap.get("END") == null) {
+        }
+        if (aggregateMap.get("END") == null) {
             aggregateMap.put("END", 0);
         }
         model.addAttribute("aggregate", aggregateMap);
@@ -95,7 +96,7 @@ public class IndexController {
         Integer confTotal = 0;
         List<Server> confServer = serverRepository.findByServerType(ServerType.CONFLUENCE);
         for (Server server : confServer) {
-            List<GenericConfluenceSpaceDTO> allConfs =confluenceService.fetchAllConfluenceSpaces(server);
+            List<GenericConfluenceSpaceDTO> allConfs = confluenceService.fetchAllConfluenceSpaces(server);
             confTotal += allConfs.size();
         }
         model.addAttribute("confTotal", confTotal);
@@ -153,6 +154,35 @@ public class IndexController {
         }
 
         return "index";
+    }
+
+    @RequestMapping("/shouye")
+    public String shouye(Model model, HttpSession session) {
+        JSONArray todos = new JSONArray();
+        JSONArray dones = new JSONArray();
+        List<Server> jiraServers = serverRepository.findByServerType(ServerType.JIRA);
+        for (Server s : jiraServers) {
+            s.setLoginMode(LoginModeSetter.LOGIN_MODE.CURR_USER.getModeCode());
+            JSONArray todo = jiraService.fetchAllToDos(s);
+            JSONArray done = jiraService.fetchAllDones(s);
+            todos.addAll(todo);
+            dones.addAll(done);
+        }
+        model.addAttribute("todos", limit(todos, 5));
+        model.addAttribute("dones", limit(dones, 5));
+        Server firstServer = jiraServers.get(0);
+        User user = (User) session.getAttribute("user");
+        String moreTodos = firstServer.getProtocol() + "://" + firstServer.getDomain()
+                + "/issues/?jql=resolution %3D Unresolved AND assignee in (\\'"
+                + user.getUserKey()
+                + "\\') ORDER BY priority DESC,updated DESC";
+        String moreDones = firstServer.getProtocol() + "://" + firstServer.getDomain()
+                + "/issues/?jql=resolution !%3D Unresolved AND assignee in (\\'"
+                + user.getUserKey()
+                + "\\') AND status in (Closed, Done, 遗留, 已拒绝) ORDER BY priority DESC,updated DESC";
+        model.addAttribute("moreTodos", moreTodos);
+        model.addAttribute("moreDones", moreDones);
+        return "pages/shouye";
     }
 
     @RequestMapping("pages/{url}")
@@ -220,5 +250,10 @@ public class IndexController {
             ud = (User) principal;
         }
         return ud;
+    }
+
+    private JSONArray limit(JSONArray jsonArray, int size) {
+        List<JSONObject> list = jsonArray.toJavaList(JSONObject.class).stream().limit(size).collect(Collectors.toList());
+        return JSONArray.parseArray(JSON.toJSONString(list));
     }
 }

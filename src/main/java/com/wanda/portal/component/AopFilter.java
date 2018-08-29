@@ -23,12 +23,6 @@ public class AopFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         AopServletContext.setRequest(request);
         AopServletContext.setResponse(response);
-//        Object userObject = AopServletContext.getRequest().getSession().getAttribute("user");
-//        if (userObject == null) {
-//            request.getRequestDispatcher("/index").forward(request, response);
-//        } else {
-//            filterChain.doFilter(servletRequest, servletResponse);
-//        }
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
